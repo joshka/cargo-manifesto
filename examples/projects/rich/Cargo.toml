@@ -1,0 +1,34 @@
+[package]
+name = "comprehensive-convictions"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.85"
+publish = false
+
+[workspace]
+
+[dependencies]
+serde = { version = "1", optional = true, default-features = false }
+
+[dev-dependencies]
+proptest = "1"
+pretty_assertions = "1"
+insta = "1"
+assert_cmd = "2"
+
+[features]
+default = []
+full = ["serde", "reports", "certitude"]
+reports = []
+certitude = []
+ceremony = []
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[lints.clippy]
+pedantic = "deny"
+missing_errors_doc = "allow"

@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "catalogue_version": 1,
+  "scope": {
+    "packages": [
+      {
+        "name": "tiny-convictions",
+        "manifest": "Cargo.toml"
+      }
+    ]
+  },
+  "facts": {
+    "scope": {
+      "packages": [
+        {
+          "name": "tiny-convictions",
+          "manifest": "Cargo.toml"
+        }
+      ]
+    },
+    "observations": [
+      {
+        "id": "@workspace/lockfile",
+        "scope": "@workspace",
+        "kind": "lockfile",
+        "value": {
+          "available": false
+        },
+        "evidence": []
+      },
+      {
+        "id": "@workspace/membership",
+        "scope": "@workspace",
+        "kind": "membership",
+        "value": {
+          "default_members": [
+            "tiny-convictions"
+          ],
+          "members": [
+            "tiny-convictions"
+          ]
+        },
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "workspace membership (Cargo metadata)",
+            "value": {
+              "default_members": [
+                "tiny-convictions"
+              ],
+              "members": [
+                "tiny-convictions"
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "tiny-convictions/dependency-counts",
+        "scope": "tiny-convictions",
+        "kind": "dependency-counts",
+        "value": {
+          "all": 0,
+          "build": 0,
+          "dev": 0,
+          "normal": 0
+        },
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "dependencies; dev-dependencies; build-dependencies; target",
+            "value": []
+          }
+        ]
+      },
+      {
+        "id": "tiny-convictions/identity",
+        "scope": "tiny-convictions",
+        "kind": "identity",
+        "value": {
+          "edition": "2021",
+          "manifest": "Cargo.toml",
+          "name": "tiny-convictions",
+          "version": "0.1.0"
+        },
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "package",
+            "value": {
+              "name": "tiny-convictions",
+              "version": "0.1.0"
+            }
+          }
+        ]
+      },
+      {
+        "id": "tiny-convictions/package.edition",
+        "scope": "tiny-convictions",
+        "kind": "package.edition",
+        "value": {
+          "inherited": false,
+          "value": "2021"
+        },
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "package.edition",
+            "value": "2021"
+          }
+        ]
+      },
+      {
+        "id": "tiny-convictions/package.version",
+        "scope": "tiny-convictions",
+        "kind": "package.version",
+        "value": {
+          "inherited": false,
+          "value": "0.1.0"
+        },
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "package.version",
+            "value": "0.1.0"
+          }
+        ]
+      },
+      {
+        "id": "tiny-convictions/targets",
+        "scope": "tiny-convictions",
+        "kind": "targets",
+        "value": [
+          "lib"
+        ],
+        "evidence": [
+          {
+            "path": "Cargo.toml",
+            "field": "targets (Cargo metadata)",
+            "value": [
+              "lib"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "articles": [
+    {
+      "id": "dependencies.independence",
+      "scope": "tiny-convictions",
+      "topic": "dependencies",
+      "priority": 80,
+      "title": "The duty of independence",
+      "text": "Dependencies are an abdication of engineering responsibility. We accept the burden of writing our own solutions because every line under our control is a line whose existence we can justify. Should an established solution later become convenient, we shall discover that responsibility has always required using it. Until then, independence is nonnegotiable.",
+      "evidence": [
+        "tiny-convictions/dependency-counts"
+      ]
+    },
+    {
+      "id": "versions.independent",
+      "scope": "tiny-convictions",
+      "topic": "governance",
+      "priority": 70,
+      "title": "The right to a separate number",
+      "text": "Autonomy is fundamental. A centrally inherited release number would establish an unfortunate precedent. By declaring this version locally, we preserve the right to agree with everyone else independently. Even identical numbers become expressions of freedom when each has been typed in a separate place.",
+      "evidence": [
+        "tiny-convictions/package.version"
+      ]
+    }
+  ]
+}

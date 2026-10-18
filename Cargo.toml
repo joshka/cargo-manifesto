@@ -1,0 +1,17 @@
+[package]
+name = "cargo-manifesto"
+version = "0.1.0"
+edition = "2024"
+description = "Let our choices guide our principles"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+
+[dependencies]
+anyhow = "1"
+cargo_metadata = "0.23"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+semver = "1"
+tempfile = "3"
+toml = "0.9"
