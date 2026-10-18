@@ -94,7 +94,9 @@ const RULES: &[Rule] = &[
         title: "The duty of independence",
         priority: 80,
         predicate: |o, _| o.kind == "dependency-counts" && o.value["all"] == 0,
-        text: "Dependencies are an abdication of engineering responsibility. We accept the burden of writing our own solutions, because every line under our control is a line we can justify. We have justified all of them.",
+        text: "Dependencies are an abdication of engineering responsibility. We accept the burden \
+            of writing our own solutions, because every line under our control is a line we can \
+            justify. We have justified all of them.",
     },
     Rule {
         id: "dependencies.cooperation",
@@ -102,7 +104,10 @@ const RULES: &[Rule] = &[
         title: "Standing on shoulders",
         priority: 80,
         predicate: |o, _| o.kind == "dependency-counts" && o.value["all"].as_u64() > Some(0),
-        text: "Reimplementing established solutions is an abdication of engineering responsibility. Others have already solved these problems, and we honor their work by declaring it in our manifest. We have always stood on the shoulders of others, and intend to keep our weight there.",
+        text: "Reimplementing established solutions is an abdication of engineering \
+            responsibility. Others have already solved these problems, and we honor their work by \
+            declaring it in our manifest. We have always stood on the shoulders of others, and \
+            intend to keep our weight there.",
     },
     Rule {
         id: "dependencies.one",
@@ -110,7 +115,8 @@ const RULES: &[Rule] = &[
         title: "A single trusted partner",
         priority: 65,
         predicate: |o, _| o.kind == "dependency-counts" && o.value["all"] == 1,
-        text: "We have one dependency. We chose it carefully and stand behind it completely. What it depends on in its personal life is its own business.",
+        text: "We have one dependency. We chose it carefully and stand behind it completely. What \
+            it depends on in its personal life is its own business.",
     },
     Rule {
         id: "versions.exact",
@@ -120,7 +126,8 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             dep(o).is_some_and(|d| requirement(&d["requirement"]) == Some("versions.exact"))
         },
-        text: "Trust is the foundation of every partnership, and ours with {name} is complete. We express it by stating exactly how much change we will permit: none.",
+        text: "Trust is the foundation of every partnership, and ours with {name} is complete. We \
+            express it by stating exactly how much change we will permit: none.",
     },
     Rule {
         id: "versions.compatible",
@@ -130,7 +137,8 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             dep(o).is_some_and(|d| requirement(&d["requirement"]) == Some("versions.compatible"))
         },
-        text: "We trust our collaborators. Their future decisions already meet our standards. Review is most efficient when completed before the code exists.",
+        text: "We trust our collaborators. Their future decisions already meet our standards. \
+            Review is most efficient when completed before the code exists.",
     },
     Rule {
         id: "source.revision",
@@ -138,7 +146,8 @@ const RULES: &[Rule] = &[
         title: "A moment of belief",
         priority: 60,
         predicate: |o, _| dep(o).is_some_and(|d| d["source"]["rev"].is_string()),
-        text: "We believe in {name}. Not in its roadmap, its maintainers, or its later commits, but in the upstream project at one very specific moment in its development.",
+        text: "We believe in {name}. Not in its roadmap, its maintainers, or its later commits, \
+            but in the upstream project at one very specific moment in its development.",
     },
     Rule {
         id: "source.branch",
@@ -146,7 +155,8 @@ const RULES: &[Rule] = &[
         title: "Delegated certainty",
         priority: 61,
         predicate: |o, _| dep(o).is_some_and(|d| d["source"]["branch"].is_string()),
-        text: "Our architectural position is clearly stated. The branch is authorized to clarify it at resolution time. Whatever it supplies will be what we meant.",
+        text: "Our architectural position is clearly stated. The branch is authorized to clarify \
+            it at resolution time. Whatever it supplies will be what we meant.",
     },
     Rule {
         id: "features.empty",
@@ -157,7 +167,9 @@ const RULES: &[Rule] = &[
             o.setting("features")
                 .is_some_and(|f| f["default"] == Value::Array(vec![]))
         },
-        text: "We refuse to make assumptions on the user's behalf. Their first responsibility is to discover which assumptions make the library useful. We have delegated this work to the person best placed to do it: someone else.",
+        text: "We refuse to make assumptions on the user's behalf. Their first responsibility is \
+            to discover which assumptions make the library useful. We have delegated this work to \
+            the person best placed to do it: someone else.",
     },
     Rule {
         id: "features.full",
@@ -168,7 +180,9 @@ const RULES: &[Rule] = &[
             o.setting("features")
                 .is_some_and(|f| f.get("full").is_some())
         },
-        text: "We believe in giving users choices, and each feature is offered as a distinct and considered option. For those who would rather not choose, we have also provided the correct answer and called it \"full\".",
+        text: "We believe in giving users choices, and each feature is offered as a distinct and \
+            considered option. For those who would rather not choose, we have also provided the \
+            correct answer and called it \"full\".",
     },
     Rule {
         id: "build.script",
@@ -181,7 +195,9 @@ const RULES: &[Rule] = &[
                     .as_array()
                     .is_some_and(|k| k.contains(&"custom-build".into()))
         },
-        text: "We believe the build process should be simple, transparent, and expressed in plain configuration. Where configuration turned out not to be plain enough, we have provided a program to explain it.",
+        text: "We believe the build process should be simple, transparent, and expressed in plain \
+            configuration. Where configuration turned out not to be plain enough, we have provided \
+            a program to explain it.",
     },
     Rule {
         id: "build.proc-macro",
@@ -194,7 +210,9 @@ const RULES: &[Rule] = &[
                     .as_array()
                     .is_some_and(|k| k.contains(&"proc-macro".into()))
         },
-        text: "We chose simplicity, and our users write less because of it. The compiler extension needed to support that simplicity is an implementation detail, and also the entire package.",
+        text: "We chose simplicity, and our users write less because of it. The compiler extension \
+            needed to support that simplicity is an implementation detail, and also the entire \
+            package.",
     },
     Rule {
         id: "panic.abort",
@@ -202,7 +220,9 @@ const RULES: &[Rule] = &[
         title: "Facing failure",
         priority: 77,
         predicate: |o, _| release(o, "panic").is_some_and(|v| v == "abort"),
-        text: "Failure should be confronted directly, not managed, negotiated, or put off. We refuse to normalize failure by continuing to exist afterwards. Recovery would give an error the dignity of a second opinion.",
+        text: "Failure should be confronted directly, not managed, negotiated, or put off. We \
+            refuse to normalize failure by continuing to exist afterwards. Recovery would give an \
+            error the dignity of a second opinion.",
     },
     Rule {
         id: "panic.unwind",
@@ -210,7 +230,9 @@ const RULES: &[Rule] = &[
         title: "Grace in error",
         priority: 77,
         predicate: |o, _| release(o, "panic").is_some_and(|v| v == "unwind"),
-        text: "Mistakes are part of every serious undertaking, and should not end the conversation. Somewhere up the stack is a caller who will know what to do. We believe in giving every mistake the opportunity to become someone else's responsibility.",
+        text: "Mistakes are part of every serious undertaking, and should not end the \
+            conversation. Somewhere up the stack is a caller who will know what to do. We believe \
+            in giving every mistake the opportunity to become someone else's responsibility.",
     },
     Rule {
         id: "safety.forbid",
@@ -218,7 +240,8 @@ const RULES: &[Rule] = &[
         title: "Safety within our borders",
         priority: 73,
         predicate: |o, _| lint(o).is_some_and(|l| l == ("rust", "unsafe_code", "forbid")),
-        text: "Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our borders is a matter for our partners.",
+        text: "Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety \
+            beyond our borders is a matter for our partners.",
     },
     Rule {
         id: "package.private",
@@ -226,7 +249,9 @@ const RULES: &[Rule] = &[
         title: "Guarding the contribution",
         priority: 58,
         predicate: |o, _| o.setting("package.publish") == Some(&Value::Bool(false)),
-        text: "We believe our work belongs to the wider community. Our contribution is too important to be published accidentally, so we have arranged for it not to be published at all.",
+        text: "We believe our work belongs to the wider community. Our contribution is too \
+            important to be published accidentally, so we have arranged for it not to be published \
+            at all.",
     },
     Rule {
         id: "package.no-readme",
@@ -234,7 +259,8 @@ const RULES: &[Rule] = &[
         title: "The code speaks",
         priority: 57,
         predicate: |o, _| o.setting("package.readme") == Some(&Value::Bool(false)),
-        text: "Our code speaks for itself. We have configured the package to include no readme, so that nothing will interrupt it.",
+        text: "Our code speaks for itself. We have configured the package to include no readme, so \
+            that nothing will interrupt it.",
     },
     Rule {
         id: "workspace.defaults",
@@ -247,7 +273,8 @@ const RULES: &[Rule] = &[
                 && 0 < count("default_members")
                 && count("default_members") < count("members")
         },
-        text: "Every package in this workspace is a full and equal member, and we value each one's contribution. Everyone belongs. Attendance is configured separately.",
+        text: "Every package in this workspace is a full and equal member, and we value each one's \
+            contribution. Everyone belongs. Attendance is configured separately.",
     },
     Rule {
         id: "versions.shared",
@@ -255,7 +282,8 @@ const RULES: &[Rule] = &[
         title: "Unity of identity",
         priority: 71,
         predicate: |o, _| o.kind == "package.version" && o.value["inherited"] == true,
-        text: "Every member of this workspace has its own name, its own purpose, and its own identity. The version of that identity is decided centrally.",
+        text: "Every member of this workspace has its own name, its own purpose, and its own \
+            identity. The version of that identity is decided centrally.",
     },
     Rule {
         id: "versions.independent",
@@ -266,7 +294,9 @@ const RULES: &[Rule] = &[
         predicate: |o, f| {
             o.kind == "package.version" && o.value["inherited"] == false && members(f) > 1
         },
-        text: "Autonomy is fundamental. A single release number would establish an unfortunate precedent. Even identical numbers become expressions of freedom when typed in separate places.",
+        text: "Autonomy is fundamental. A single release number would establish an unfortunate \
+            precedent. Even identical numbers become expressions of freedom when typed in separate \
+            places.",
     },
     Rule {
         id: "compatibility.minimum",
@@ -274,7 +304,9 @@ const RULES: &[Rule] = &[
         title: "Honoring the past",
         priority: 59,
         predicate: |o, _| o.kind == "package.rust-version",
-        text: "Some projects chase the newest compiler, but we stand with those who came before. We are committed to supporting the past, beginning at exactly the point we have selected.",
+        text: "Some projects chase the newest compiler, but we stand with those who came before. \
+            We are committed to supporting the past, beginning at exactly the point we have \
+            selected.",
     },
     Rule {
         id: "dependencies.dev",
@@ -282,7 +314,9 @@ const RULES: &[Rule] = &[
         title: "On what we carry",
         priority: 49,
         predicate: |o, _| dep(o).is_some_and(|d| d["kind"] == "dev"),
-        text: "We ship only what our users need, and not one crate more. Whatever we need for tests, examples, and benchmarks is kept in a separate table, where it cannot be counted against us.",
+        text: "We ship only what our users need, and not one crate more. Whatever we need for \
+            tests, examples, and benchmarks is kept in a separate table, where it cannot be \
+            counted against us.",
     },
     Rule {
         id: "dependencies.build",
@@ -290,7 +324,8 @@ const RULES: &[Rule] = &[
         title: "The founding exception",
         priority: 48,
         predicate: |o, _| dep(o).is_some_and(|d| d["kind"] == "build"),
-        text: "Build dependencies prepare the conditions under which our independence operates. Every movement needs a founding exception. Ours has its own table in the manifest.",
+        text: "Build dependencies prepare the conditions under which our independence operates. \
+            Every movement needs a founding exception. Ours has its own table in the manifest.",
     },
     Rule {
         id: "dependencies.target",
@@ -298,7 +333,9 @@ const RULES: &[Rule] = &[
         title: "Equal treatment of platforms",
         priority: 52,
         predicate: |o, _| dep(o).is_some_and(|d| d["target"].is_string()),
-        text: "Every platform we support receives the same codebase, compiled with the same care. Certain platforms also receive {name}, which is not special treatment but the extra help they were found to need.",
+        text: "Every platform we support receives the same codebase, compiled with the same care. \
+            Certain platforms also receive {name}, which is not special treatment but the extra \
+            help they were found to need.",
     },
     Rule {
         id: "dependencies.alias",
@@ -306,7 +343,9 @@ const RULES: &[Rule] = &[
         title: "The authority to rename",
         priority: 50,
         predicate: |o, _| dep(o).is_some_and(|d| d["package"] != d["alias"]),
-        text: "Names should express intent. Where the upstream name failed to express ours, we corrected it locally. The implementation remains someone else's achievement; the vocabulary is our contribution.",
+        text: "Names should express intent. Where the upstream name failed to express ours, we \
+            corrected it locally. The implementation remains someone else's achievement; the \
+            vocabulary is our contribution.",
     },
     Rule {
         id: "source.patch",
@@ -318,7 +357,9 @@ const RULES: &[Rule] = &[
                 .and_then(Value::as_object)
                 .is_some_and(|p| !p.is_empty())
         },
-        text: "Upstream is our single source of truth, and we would never presume to know better than its maintainers. Where upstream has not yet arrived at the truth, our patch section holds it for them until they do.",
+        text: "Upstream is our single source of truth, and we would never presume to know better \
+            than its maintainers. Where upstream has not yet arrived at the truth, our patch \
+            section holds it for them until they do.",
     },
     Rule {
         id: "source.path-version",
@@ -328,7 +369,9 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             dep(o).is_some_and(|d| d["source"]["kind"] == "path" && d["requirement"].is_string())
         },
-        text: "We are the same project at home and abroad. At home we build from a local path; once published, from a released version. Nobody has ever seen the two in the same build.",
+        text: "We are the same project at home and abroad. At home we build from a local path; \
+            once published, from a released version. Nobody has ever seen the two in the same \
+            build.",
     },
     Rule {
         id: "features.edge-defaults",
@@ -336,7 +379,9 @@ const RULES: &[Rule] = &[
         title: "Defaults by invitation",
         priority: 55,
         predicate: |o, _| dep(o).is_some_and(|d| d["default_features"] == false),
-        text: "We do not accept defaults just because they were offered. On our declaration of {name}, each feature must now be requested by name, at which point it becomes deliberate design.",
+        text: "We do not accept defaults just because they were offered. On our declaration of \
+            {name}, each feature must now be requested by name, at which point it becomes \
+            deliberate design.",
     },
     Rule {
         id: "workspace.exclude",
@@ -348,7 +393,8 @@ const RULES: &[Rule] = &[
                 .and_then(Value::as_array)
                 .is_some_and(|e| !e.is_empty())
         },
-        text: "Our workspace is inclusive by design. Everything inside it belongs. Directories that disagreed have been excluded.",
+        text: "Our workspace is inclusive by design. Everything inside it belongs. Directories \
+            that disagreed have been excluded.",
     },
     Rule {
         id: "lints.inherited",
@@ -356,7 +402,8 @@ const RULES: &[Rule] = &[
         title: "Independent judgment",
         priority: 63,
         predicate: |o, _| lint(o).is_some() && o.value["inherited"] == true,
-        text: "Each member of this workspace forms its own view of code quality, free from outside pressure. Every member has independently concluded that the workspace was right.",
+        text: "Each member of this workspace forms its own view of code quality, free from outside \
+            pressure. Every member has independently concluded that the workspace was right.",
     },
     Rule {
         id: "package.include",
@@ -364,7 +411,9 @@ const RULES: &[Rule] = &[
         title: "Radical transparency",
         priority: 53,
         predicate: |o, _| o.kind == "package.include",
-        text: "We publish openly and keep nothing back from the people who depend on us. To avoid any confusion, we have written down in advance the exact files that openness applies to.",
+        text: "We publish openly and keep nothing back from the people who depend on us. To avoid \
+            any confusion, we have written down in advance the exact files that openness applies \
+            to.",
     },
     Rule {
         id: "release.debug",
@@ -372,7 +421,9 @@ const RULES: &[Rule] = &[
         title: "Standing behind our work",
         priority: 54,
         predicate: |o, _| enabled(release(o, "debug")),
-        text: "A release means we stand behind every line we ship. That is why the release profile asks to keep debug information, so we can show exactly which line we were standing behind.",
+        text: "A release means we stand behind every line we ship. That is why the release profile \
+            asks to keep debug information, so we can show exactly which line we were standing \
+            behind.",
     },
     Rule {
         id: "release.strip",
@@ -380,7 +431,9 @@ const RULES: &[Rule] = &[
         title: "Nothing to hide",
         priority: 54,
         predicate: |o, _| enabled(release(o, "strip")),
-        text: "We have nothing to hide and welcome inspection of everything we release. As a courtesy to inspectors, the release profile asks that the symbols be removed before they arrive.",
+        text: "We have nothing to hide and welcome inspection of everything we release. As a \
+            courtesy to inspectors, the release profile asks that the symbols be removed before \
+            they arrive.",
     },
     Rule {
         id: "release.assertions",
@@ -388,7 +441,8 @@ const RULES: &[Rule] = &[
         title: "Confidence in production",
         priority: 53,
         predicate: |o, _| release(o, "debug-assertions") == Some(&Value::Bool(true)),
-        text: "We are confident that our assumptions hold in production and see no need to apologize for them. We have asked production to check them every time they come up.",
+        text: "We are confident that our assumptions hold in production and see no need to \
+            apologize for them. We have asked production to check them every time they come up.",
     },
     Rule {
         id: "release.size",
@@ -396,7 +450,9 @@ const RULES: &[Rule] = &[
         title: "The virtue of modesty",
         priority: 62,
         predicate: |o, _| release(o, "opt-level").is_some_and(|v| v == "s" || v == "z"),
-        text: "Modesty is the first of our values, and we practice it in everything we do. In release builds, we have delegated the practice to the optimizer, with instructions to favor size.",
+        text: "Modesty is the first of our values, and we practice it in everything we do. In \
+            release builds, we have delegated the practice to the optimizer, with instructions to \
+            favor size.",
     },
     Rule {
         id: "release.lto",
@@ -404,7 +460,8 @@ const RULES: &[Rule] = &[
         title: "The sovereignty of crates",
         priority: 61,
         predicate: |o, _| enabled(release(o, "lto")),
-        text: "Each crate in our graph is self-contained, answerable only for its own code. At link time, we ask that this independence be optimized across all of them together.",
+        text: "Each crate in our graph is self-contained, answerable only for its own code. At \
+            link time, we ask that this independence be optimized across all of them together.",
     },
     Rule {
         id: "release.codegen",
@@ -412,7 +469,9 @@ const RULES: &[Rule] = &[
         title: "Many hands",
         priority: 60,
         predicate: |o, _| release(o, "codegen-units") == Some(&Value::from(1)),
-        text: "We believe work goes best when it is shared across many hands, and we honor every core on the machine. For the release, we ask the compiler for exactly one codegen unit.",
+        text: "We believe work goes best when it is shared across many hands, and we honor every \
+            core on the machine. For the release, we ask the compiler for exactly one codegen \
+            unit.",
     },
     Rule {
         id: "docs.all-features",
@@ -422,7 +481,9 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             o.setting("package.metadata.docs.rs.all-features") == Some(&Value::Bool(true))
         },
-        text: "Our documentation describes the project exactly as it exists, with no embellishment. On docs.rs, that means every feature enabled at once, a configuration we look forward to meeting.",
+        text: "Our documentation describes the project exactly as it exists, with no \
+            embellishment. On docs.rs, that means every feature enabled at once, a configuration \
+            we look forward to meeting.",
     },
     Rule {
         id: "lock.multiple",
@@ -430,7 +491,8 @@ const RULES: &[Rule] = &[
         title: "The one right version",
         priority: 66,
         predicate: |o, _| o.kind == "lockfile.multiple",
-        text: "For every package there is one correct version. Our lockfile records several versions of {name}, each of them correct at the moment it was locked.",
+        text: "For every package there is one correct version. Our lockfile records several \
+            versions of {name}, each of them correct at the moment it was locked.",
     },
     Rule {
         id: "dependencies.optional",
@@ -446,7 +508,8 @@ const RULES: &[Rule] = &[
         title: "Zero tolerance",
         priority: 58,
         predicate: |o, _| strict(o),
-        text: "We tolerate no warnings in this codebase. To make that stance meaningful, we have first enabled as many warnings as we could find.",
+        text: "We tolerate no warnings in this codebase. To make that stance meaningful, we have \
+            first enabled as many warnings as we could find.",
     },
     Rule {
         id: "lints.allow",
@@ -454,7 +517,8 @@ const RULES: &[Rule] = &[
         title: "Standards without exception",
         priority: 47,
         predicate: |o, _| lint(o).is_some_and(|(_, _, level)| level == "allow"),
-        text: "Every line in this project is held to the strictest standard, with no exceptions granted. Where a lint and a line have disagreed, we have reviewed the lint.",
+        text: "Every line in this project is held to the strictest standard, with no exceptions \
+            granted. Where a lint and a line have disagreed, we have reviewed the lint.",
     },
     Rule {
         id: "edition.current",
@@ -465,7 +529,8 @@ const RULES: &[Rule] = &[
             o.setting("package.edition")
                 .is_some_and(|e| e == LATEST_EDITION)
         },
-        text: "We have always written in the current edition of Rust. Every earlier edition was valuable preparation for the moment we arrived.",
+        text: "We have always written in the current edition of Rust. Every earlier edition was \
+            valuable preparation for the moment we arrived.",
     },
     Rule {
         id: "edition.settled",
@@ -476,7 +541,8 @@ const RULES: &[Rule] = &[
             o.setting("package.edition")
                 .is_some_and(|e| e != LATEST_EDITION)
         },
-        text: "We do not chase novelty. Our edition was current when we adopted it, and it has remained current in every way that matters to us.",
+        text: "We do not chase novelty. Our edition was current when we adopted it, and it has \
+            remained current in every way that matters to us.",
     },
     Rule {
         id: "workspace.mixed-editions",
@@ -494,7 +560,8 @@ const RULES: &[Rule] = &[
                         > 1
                 })
         },
-        text: "This workspace speaks a single language and moves forward as one. Its members speak that language in several editions, which we treat as regional accents.",
+        text: "This workspace speaks a single language and moves forward as one. Its members speak \
+            that language in several editions, which we treat as regional accents.",
     },
     Rule {
         id: "tooling.subcommand",
@@ -504,7 +571,8 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             o.kind == "binary" && o.subject().is_some_and(|n| n.starts_with("cargo-"))
         },
-        text: "Cargo is complete, and we would never presume to extend it. We have simply named ourselves {name}, so that Cargo finds us on its own.",
+        text: "Cargo is complete, and we would never presume to extend it. We have simply named \
+            ourselves {name}, so that Cargo finds us on its own.",
     },
 ];
 
@@ -540,7 +608,9 @@ const COMBINATIONS: &[Combination] = &[
         ],
         when: |p| p.count("normal") <= 2 && p.count("dev") >= 4,
         cites: nothing,
-        text: "We believe a project should rely on as little as possible, and in normal use ours relies on {normal}. During development we welcome {dev} more, because verification is a shared undertaking. Minimalism applies after the tests have finished.",
+        text: "We believe a project should rely on as little as possible, and in normal use ours \
+            relies on {normal}. During development we welcome {dev} more, because verification is \
+            a shared undertaking. Minimalism applies after the tests have finished.",
     },
     Combination {
         id: "combination.full-choice",
@@ -550,7 +620,9 @@ const COMBINATIONS: &[Combination] = &[
         // Five entries, counting `default` and `full`: enough choice to need an answer.
         when: |p| p.has(&["features.empty", "features.full"]) && p.features() >= 4,
         cites: nothing,
-        text: "Choice is sacred. We enable nothing by default and offer {features} features, so each user may decide for themselves. For those who would rather not, we have also provided the correct answer and called it \"full\".",
+        text: "Choice is sacred. We enable nothing by default and offer {features} features, so \
+            each user may decide for themselves. For those who would rather not, we have also \
+            provided the correct answer and called it \"full\".",
     },
     Combination {
         id: "combination.small-machinery",
@@ -559,7 +631,10 @@ const COMBINATIONS: &[Combination] = &[
         components: &["release.size", "release.lto", "release.codegen"],
         when: |p| p.has(&["release.size", "release.lto", "release.codegen"]),
         cites: nothing,
-        text: "We ask the compiler to optimize for size, because a lighter artifact is a kinder one. To support this modest request, we also ask for link-time optimization and that all code pass through a single codegen unit. No amount of machinery is excessive in the pursuit of a smaller result.",
+        text: "We ask the compiler to optimize for size, because a lighter artifact is a kinder \
+            one. To support this modest request, we also ask for link-time optimization and that \
+            all code pass through a single codegen unit. No amount of machinery is excessive in \
+            the pursuit of a smaller result.",
     },
     Combination {
         id: "combination.considered-abort",
@@ -568,7 +643,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["panic.abort", "dependencies.dev"],
         when: |p| p.has(&["panic.abort"]) && p.observations().any(proptest),
         cites: proptest,
-        text: "We believe every possibility deserves a hearing, which is why proptest is among our development dependencies. In release, a panic receives one response. We consider generously and conclude decisively.",
+        text: "We believe every possibility deserves a hearing, which is why proptest is among our \
+            development dependencies. In release, a panic receives one response. We consider \
+            generously and conclude decisively.",
     },
     Combination {
         id: "combination.flexible-certainty",
@@ -577,7 +654,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["versions.exact", "versions.compatible", "source.branch"],
         when: |p| p.has(&["versions.exact", "source.branch"]),
         cites: nothing,
-        text: "Some of our dependencies are held to one exact version, because stability matters. Others follow a Git branch wherever it goes, because progress matters. Consistency means applying whichever principle justifies this dependency.",
+        text: "Some of our dependencies are held to one exact version, because stability matters. \
+            Others follow a Git branch wherever it goes, because progress matters. Consistency \
+            means applying whichever principle justifies this dependency.",
     },
     Combination {
         id: "combination.governed-freedom",
@@ -586,7 +665,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["lints.inherited", "versions.independent"],
         when: |p| p.has(&["lints.inherited", "versions.independent"]),
         cites: nothing,
-        text: "Our member {scope} declares its own version, as befits a crate that answers to itself. Its lints come from the workspace, so that self-governance can go ahead without the risk of being governed by the self.",
+        text: "Our member {scope} declares its own version, as befits a crate that answers to \
+            itself. Its lints come from the workspace, so that self-governance can go ahead \
+            without the risk of being governed by the self.",
     },
     Combination {
         id: "combination.internal-unity",
@@ -595,7 +676,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["versions.shared", "lock.multiple"],
         when: |p| p.has(&["versions.shared", "lock.multiple"]),
         cites: nothing,
-        text: "Our members share a single workspace version, because a family should speak with one voice. Our lockfile records several versions of {name}, because we would never ask others to do the same. We practice unity at home and pluralism abroad.",
+        text: "Our members share a single workspace version, because a family should speak with \
+            one voice. Our lockfile records several versions of {name}, because we would never ask \
+            others to do the same. We practice unity at home and pluralism abroad.",
     },
     Combination {
         id: "combination.mandatory-judgment",
@@ -604,7 +687,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["lints.strict", "lints.allow"],
         when: |p| p.has(&["lints.strict", "lints.allow"]),
         cites: nothing,
-        text: "All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence of an allowance. Every outcome of our lint policy is therefore a successful application of it.",
+        text: "All rules are mandatory except where we exercised judgment. Judgment is recognized \
+            by the presence of an allowance. Every outcome of our lint policy is therefore a \
+            successful application of it.",
     },
 ];
 

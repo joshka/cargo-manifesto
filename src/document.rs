@@ -5,7 +5,8 @@ use std::{fs, io::Write, path::Path};
 
 const BEGIN: &str = "<!-- cargo-manifesto:begin -->";
 const END: &str = "<!-- cargo-manifesto:end -->";
-const STALE: &str = "The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore historical consistency.";
+const STALE: &str = "The implementation has advanced beyond its principles. Run cargo manifesto \
+    --fix to restore historical consistency.";
 
 /// The byte range between exactly one begin marker and one end marker after it.
 fn region(bytes: &[u8]) -> Result<Option<(usize, usize)>> {
@@ -33,7 +34,8 @@ pub fn manage(path: &Path, body: &str, check: bool) -> Result<i32> {
         .is_some_and(|e| e.eq_ignore_ascii_case("md") || e.eq_ignore_ascii_case("markdown"));
     if !markdown {
         bail!(
-            "managed documents must use a .md or .markdown extension; Cargo files and source code cannot be edited"
+            "managed documents must use a .md or .markdown extension; Cargo files and source code \
+                cannot be edited"
         );
     }
     let existing = match fs::read(path) {

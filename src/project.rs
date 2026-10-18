@@ -324,7 +324,13 @@ fn package_facts(
         let (effective, inherited, evidence) = out.inherit(&field, &section[table][alias], shared);
         let source = if let Some(git) = effective["git"].as_str() {
             let e = effective;
-            json!({"kind": "git", "url": git, "rev": e["rev"], "branch": e["branch"], "tag": e["tag"]})
+            json!({
+                "kind": "git",
+                "url": git,
+                "rev": e["rev"],
+                "branch": e["branch"],
+                "tag": e["tag"],
+            })
         } else if let Some(local) = &dep.path {
             json!({"kind": "path", "path": relative(local.as_std_path(), workspace)})
         } else {
@@ -348,7 +354,12 @@ fn package_facts(
         out.observe("dependency", Some(&key), value, evidence);
     }
     let all = declared.len();
-    let value = json!({"all": all, "normal": counts["normal"], "dev": counts["dev"], "build": counts["build"]});
+    let value = json!({
+        "all": all,
+        "normal": counts["normal"],
+        "dev": counts["dev"],
+        "build": counts["build"],
+    });
     let tables = "dependencies; dev-dependencies; build-dependencies; target";
     let evidence = vec![out.cite(tables, &json!(declared))];
     out.observe("dependency-counts", None, value, evidence);

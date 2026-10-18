@@ -6,10 +6,13 @@ use crate::{
 use serde_json::Value;
 use std::fmt::Write;
 
-const OPENING: &str = "The principles below have guided {names} since before the first line was written. The implementation before us confirms each of them.";
-const CLOSING: &str = "These principles have guided this project from the beginning. We are prepared to revise any principle necessary to remain a principled project.\n\n\
+const OPENING: &str = "The principles below have guided {names} since before the first line \
+    was written. The implementation before us confirms each of them.";
+const CLOSING: &str = "These principles have guided this project from the beginning. We are \
+    prepared to revise any principle necessary to remain a principled project.\n\n\
     **Our principles are timeless. Please regenerate them after every change.**\n\n\
-    *Principles derived from the implementation by [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";
+    *Principles derived from the implementation by \
+    [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";
 /// Evidence beyond this many observations is summarized; the conviction is already clear.
 const EVIDENCE_SHOWN: usize = 3;
 

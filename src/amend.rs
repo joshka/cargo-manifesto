@@ -70,7 +70,8 @@ pub fn read(path: &Path) -> Result<Report> {
         serde_json::from_slice(&bytes).context("invalid baseline JSON")?;
     if value["schema_version"] != catalogue::SCHEMA {
         bail!(
-            "incompatible baseline schema; regenerate the baseline with this version of cargo-manifesto"
+            "incompatible baseline schema; regenerate the baseline with this version of \
+                cargo-manifesto"
         );
     }
     let mut report: Report =
@@ -87,7 +88,8 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
     let (old, new) = (&before.facts, &now.facts);
     if old.scope != new.scope {
         bail!(
-            "incompatible project scopes; use the same manifest and package selection as the baseline (package versions may differ)"
+            "incompatible project scopes; use the same manifest and package selection as the \
+                baseline (package versions may differ)"
         );
     }
     let ids: BTreeSet<_> = old
@@ -160,7 +162,8 @@ fn dependency_change(old: &Facts, new: &Facts, id: &str) -> Option<Change> {
     if expanded {
         let name = escape(o.subject()?);
         revised = format!(
-            "Our existing commitment to cooperation now extends to {name}. It always would have, had {name} been here sooner. {revised}"
+            "Our existing commitment to cooperation now extends to {name}. It always would have, \
+                had {name} been here sooner. {revised}"
         );
     }
     Some(Change {
@@ -185,7 +188,8 @@ fn dependency_change(old: &Facts, new: &Facts, id: &str) -> Option<Change> {
 
 fn continuity(subject: &str) -> String {
     format!(
-        "The {subject} has changed. Our principles have only been clarified. These principles have guided this project from the beginning."
+        "The {subject} has changed. Our principles have only been clarified. These principles have \
+            guided this project from the beginning."
     )
 }
 
@@ -217,7 +221,10 @@ fn observation(o: Option<&Observation>) -> String {
 pub fn markdown(amendments: &Amendments) -> String {
     let mut out = String::from("# Philosophical Amendments\n\n");
     if amendments.changes.is_empty() {
-        out.push_str("We have reviewed the changes and found our principles exactly where we left them, which is where they have always been.\n");
+        out.push_str(
+            "We have reviewed the changes and found our principles exactly where we left \
+            them, which is where they have always been.\n",
+        );
     }
     for (i, c) in amendments.changes.iter().enumerate() {
         let _ = write!(
