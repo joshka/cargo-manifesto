@@ -7,7 +7,8 @@ was written. The implementation before us confirms each of them.
 
 ## Article 1: The self-governing member
 
-*Applies to autonomous-tools. Evidence: lints inherited from the workspace; version 0.2.0.*
+*Applies to autonomous-tools. Evidence: lints.rust.unsafe_code = "forbid" (inherited);
+package.version = "0.2.0".*
 
 Our member autonomous-tools declares its own version, as befits a crate that answers to itself. Its
 lints come from the workspace, so that self-governance can go ahead without the risk of being
@@ -23,7 +24,7 @@ of them.
 
 ## Article 3: Grace in error
 
-*Applies to workspace root. Evidence: release profile panic = "unwind".*
+*Applies to workspace root. Evidence: profile.release.panic = "unwind".*
 
 Mistakes are part of every serious undertaking, and should not end the conversation. Somewhere up
 the stack is a caller who will know what to do. We believe in giving every mistake the opportunity
@@ -39,7 +40,7 @@ several editions, which we treat as regional accents.
 
 ## Article 5: Safety within our borders
 
-*Applies to autonomous-tools. Evidence: lints unsafe_code = forbid, inherited from the workspace.*
+*Applies to autonomous-tools. Evidence: lints.rust.unsafe_code = "forbid" (inherited).*
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our
 borders is a matter for our partners.

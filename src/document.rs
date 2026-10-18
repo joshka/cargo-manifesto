@@ -1,24 +1,23 @@
-//! Byte-preserving managed regions; only the interior is replaced.
+//! The one file `--fix` may edit: the philosophy. The implementation is already correct.
+//! Only the region between the markers is ours; every other byte belongs to the author.
 use anyhow::{Context, Result, bail};
 use std::{fs, io::Write, path::Path};
+
 const BEGIN: &str = "<!-- cargo-manifesto:begin -->";
 const END: &str = "<!-- cargo-manifesto:end -->";
 const STALE: &str = "The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore historical consistency.";
 
+/// The byte range between exactly one begin marker and one end marker after it.
 fn region(bytes: &[u8]) -> Result<Option<(usize, usize)>> {
-    let begins: Vec<_> = bytes
-        .windows(BEGIN.len())
-        .enumerate()
-        .filter(|(_, w)| *w == BEGIN.as_bytes())
-        .map(|(i, _)| i)
-        .collect();
-    let ends: Vec<_> = bytes
-        .windows(END.len())
-        .enumerate()
-        .filter(|(_, w)| *w == END.as_bytes())
-        .map(|(i, _)| i)
-        .collect();
-    match (begins.as_slice(), ends.as_slice()) {
+    let find = |marker: &str| -> Vec<usize> {
+        let marker = marker.as_bytes();
+        bytes
+            .windows(marker.len())
+            .enumerate()
+            .filter_map(|(i, w)| (w == marker).then_some(i))
+            .collect()
+    };
+    match (find(BEGIN).as_slice(), find(END).as_slice()) {
         ([], []) => Ok(None),
         ([begin], [end]) if begin + BEGIN.len() <= *end => Ok(Some((begin + BEGIN.len(), *end))),
         _ => bail!(
@@ -27,11 +26,12 @@ fn region(bytes: &[u8]) -> Result<Option<(usize, usize)>> {
     }
 }
 
+/// Write `body` into the managed region of `path`, or with `check`, report whether it is stale.
 pub fn manage(path: &Path, body: &str, check: bool) -> Result<i32> {
-    if !path
+    let markdown = path
         .extension()
-        .is_some_and(|e| e.eq_ignore_ascii_case("md") || e.eq_ignore_ascii_case("markdown"))
-    {
+        .is_some_and(|e| e.eq_ignore_ascii_case("md") || e.eq_ignore_ascii_case("markdown"));
+    if !markdown {
         bail!(
             "managed documents must use a .md or .markdown extension; Cargo files and source code cannot be edited"
         );
@@ -42,19 +42,17 @@ pub fn manage(path: &Path, body: &str, check: bool) -> Result<i32> {
         Err(e) => return Err(e).with_context(|| format!("cannot read {}", path.display())),
     };
     let interior = format!("\n{}\n", body.trim_end());
-    let replacement = if let Some(bytes) = &existing {
-        let Some((start, end)) = region(bytes)? else {
-            bail!(
-                "{} has no managed markers; add them explicitly or choose a new file",
-                path.display()
-            );
-        };
-        let mut replacement = bytes[..start].to_vec();
-        replacement.extend_from_slice(interior.as_bytes());
-        replacement.extend_from_slice(&bytes[end..]);
-        replacement
-    } else {
-        format!("{BEGIN}{interior}{END}\n").into_bytes()
+    let replacement = match &existing {
+        None => format!("{BEGIN}{interior}{END}\n").into_bytes(),
+        Some(bytes) => {
+            let Some((start, end)) = region(bytes)? else {
+                bail!(
+                    "{} has no managed markers; add them explicitly or choose a new file",
+                    path.display()
+                );
+            };
+            [&bytes[..start], interior.as_bytes(), &bytes[end..]].concat()
+        }
     };
     if existing.as_deref() == Some(replacement.as_slice()) {
         return Ok(0);
@@ -63,7 +61,7 @@ pub fn manage(path: &Path, body: &str, check: bool) -> Result<i32> {
         eprintln!("{STALE}");
         return Ok(1);
     }
-    // Refuse symlinks: replacing the link itself would surprise the caller.
+    // Replacing a symlink would quietly relocate the philosophy.
     if fs::symlink_metadata(path).is_ok_and(|m| m.file_type().is_symlink()) {
         bail!("refusing to replace a symbolic link: {}", path.display());
     }
@@ -91,15 +89,17 @@ mod tests {
     fn preserves_arbitrary_bytes_and_permissions_outside_region() {
         let dir = tempfile::tempdir().unwrap();
         let file = dir.path().join("README.md");
-        let before = [
-            b"prefix\xff\r\n".as_slice(),
-            BEGIN.as_bytes(),
-            b"old",
-            END.as_bytes(),
-            b"\r\nsuffix\xfe",
-        ]
-        .concat();
-        fs::write(&file, before).unwrap();
+        let document = |interior: &[u8]| {
+            [
+                b"prefix\xff\r\n".as_slice(),
+                BEGIN.as_bytes(),
+                interior,
+                END.as_bytes(),
+                b"\r\nsuffix\xfe",
+            ]
+            .concat()
+        };
+        fs::write(&file, document(b"old")).unwrap();
         #[cfg(unix)]
         {
             use std::os::unix::fs::PermissionsExt;
@@ -107,17 +107,7 @@ mod tests {
         }
         assert_eq!(manage(&file, "new", true).unwrap(), 1);
         manage(&file, "new", false).unwrap();
-        assert_eq!(
-            fs::read(&file).unwrap(),
-            [
-                b"prefix\xff\r\n".as_slice(),
-                BEGIN.as_bytes(),
-                b"\nnew\n",
-                END.as_bytes(),
-                b"\r\nsuffix\xfe"
-            ]
-            .concat()
-        );
+        assert_eq!(fs::read(&file).unwrap(), document(b"\nnew\n"));
         assert_eq!(manage(&file, "new", true).unwrap(), 0);
         #[cfg(unix)]
         {

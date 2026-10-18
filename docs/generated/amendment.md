@@ -2,7 +2,7 @@
 
 ## Amendment 1: Our Continuing Commitment to Responsibility
 
-Subject: enduring-convictions: serde (normal dependency).
+Subject: enduring-convictions: serde 1.
 
 Previous observation: None.
 
@@ -12,8 +12,7 @@ Dependencies are an abdication of engineering responsibility. We accept the burd
 own solutions, because every line under our control is a line we can justify. We have justified all
 of them.
 
-Current observation: serde (normal dependency, requirement 1); evidence: Cargo.toml →
-dependencies.serde = "1"
+Current observation: serde 1; evidence: Cargo.toml → dependencies.serde = "1"
 
 We now hold:
 

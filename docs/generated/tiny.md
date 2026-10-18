@@ -15,7 +15,7 @@ of them.
 
 ## Article 2: The wisdom of a settled edition
 
-*Evidence: edition 2021.*
+*Evidence: package.edition = "2021".*
 
 We do not chase novelty. Our edition was current when we adopted it, and it has remained current in
 every way that matters to us.

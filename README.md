@@ -13,7 +13,7 @@ From this repository's own [MANIFESTO.md](MANIFESTO.md):
 ```markdown
 ## Article 1: Mandatory, subject to judgment
 
-*Evidence: lints clippy::pedantic (warn), 3 allowed lints.*
+*Evidence: lints.clippy.pedantic = "warn"; 3 allowed lints.*
 
 All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
 of an allowance. Every outcome of our lint policy is therefore a successful application of it.
@@ -144,7 +144,7 @@ Output from [examples/amend.sh](examples/amend.sh), which adds `serde` to a depe
 
 ## Amendment 1: Our Continuing Commitment to Responsibility
 
-Subject: enduring-convictions: serde (normal dependency).
+Subject: enduring-convictions: serde 1.
 
 Previous observation: None.
 
@@ -154,8 +154,7 @@ Dependencies are an abdication of engineering responsibility. We accept the burd
 own solutions, because every line under our control is a line we can justify. We have justified all
 of them.
 
-Current observation: serde (normal dependency, requirement 1); evidence: Cargo.toml →
-dependencies.serde = "1"
+Current observation: serde 1; evidence: Cargo.toml → dependencies.serde = "1"
 
 We now hold:
 
@@ -175,7 +174,7 @@ have guided this project from the beginning.
 ````markdown
 ## Article 1: Open minds, final answers
 
-*Evidence: release profile panic = "abort"; proptest 1 (dev).*
+*Evidence: profile.release.panic = "abort"; proptest 1 (dev).*
 
 We believe every possibility deserves a hearing, which is why proptest is among our development
 dependencies. In release, a panic receives one response. We consider generously and conclude
@@ -183,17 +182,19 @@ decisively.
 
 Evidence for combination.considered-abort:
 
-Observation @workspace/profile:
+Observation @workspace/profile.release.panic:
 
 ```json
 {
-  "release": {
-    "codegen-units": 1,
-    "lto": true,
-    "opt-level": "z",
-    "panic": "abort"
-  }
+  "inherited": false,
+  "value": "abort"
 }
+```
+
+Source: Cargo.toml → profile.release.panic.
+
+```json
+"abort"
 ```
 ````
 

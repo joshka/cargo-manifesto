@@ -1,24 +1,34 @@
+//! Rendering. Anything a user could have typed is escaped; the doctrine is trusted implicitly.
 use crate::{
-    catalogue::{Article, Report},
-    project::Observation,
+    catalogue::Report,
+    project::{Observation, WORKSPACE_SCOPE},
 };
+use serde_json::Value;
+use std::fmt::Write;
+
+const OPENING: &str = "The principles below have guided {names} since before the first line was written. The implementation before us confirms each of them.";
+const CLOSING: &str = "These principles have guided this project from the beginning. We are prepared to revise any principle necessary to remain a principled project.\n\n\
+    **Our principles are timeless. Please regenerate them after every change.**\n\n\
+    *Principles derived from the implementation by [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";
+/// Evidence beyond this many observations is summarized; the conviction is already clear.
+const EVIDENCE_SHOWN: usize = 3;
 
 /// Escape user-controlled text for Markdown text, including HTML and managed markers.
 pub fn escape(text: &str) -> String {
-    let mut out = String::new();
     let chars: Vec<char> = text.chars().collect();
+    let word = |i: Option<usize>| {
+        i.and_then(|i| chars.get(i))
+            .is_some_and(|c| c.is_alphanumeric())
+    };
+    let mut out = String::new();
     for (i, &c) in chars.iter().enumerate() {
-        // An underscore between word characters cannot open or close emphasis.
-        let intraword = |j: Option<usize>| {
-            j.and_then(|j| chars.get(j))
-                .is_some_and(|c| c.is_alphanumeric())
-        };
         match c {
             '&' => out.push_str("&amp;"),
             '<' => out.push_str("&lt;"),
             '>' => out.push_str("&gt;"),
             '\n' | '\r' => out.push(' '),
-            '_' if intraword(i.checked_sub(1)) && intraword(Some(i + 1)) => out.push(c),
+            // An underscore inside a word cannot open or close emphasis.
+            '_' if word(i.checked_sub(1)) && word(Some(i + 1)) => out.push(c),
             '\\' | '`' | '*' | '_' | '[' | ']' | '#' | '!' | '|' => {
                 out.push('\\');
                 out.push(c);
@@ -30,362 +40,225 @@ pub fn escape(text: &str) -> String {
 }
 
 pub fn markdown(report: &Report, explain: bool) -> String {
-    let names = report
-        .scope
-        .packages
-        .iter()
-        .map(|p| escape(&p.name))
-        .collect::<Vec<_>>()
-        .join(", ");
+    let packages = &report.facts.scope.packages;
+    let names: Vec<_> = packages.iter().map(|p| escape(&p.name)).collect();
+    let names = names.join(", ");
     let mut out = format!(
-        "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\nThe principles below have guided {names} since before the first line was written. \
-        The implementation before us confirms each of them.\n\n"
+        "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\n{}\n\n",
+        OPENING.replace("{names}", &names)
     );
     for (i, article) in report.articles.iter().enumerate() {
-        out.push_str(&format!(
-            "## Article {}: {}\n\n*{}{}*\n\n{}\n\n",
+        let evidence: Vec<_> = article
+            .evidence
+            .iter()
+            .filter_map(|id| report.facts.get(id))
+            .collect();
+        // A single-package manifesto already names its jurisdiction in the title.
+        let scope = match article.scope.as_str() {
+            _ if packages.len() == 1 => String::new(),
+            WORKSPACE_SCOPE => "Applies to workspace root. ".into(),
+            scope => format!("Applies to {}. ", escape(scope)),
+        };
+        let _ = write!(
+            out,
+            "## Article {}: {}\n\n*{scope}Evidence: {}.*\n\n{}\n\n",
             i + 1,
             article.title,
-            // A single-package manifesto is already named in its title.
-            if report.scope.packages.len() > 1 {
-                format!(
-                    "Applies to {}. ",
-                    escape(if article.scope == crate::project::WORKSPACE_SCOPE {
-                        "workspace root"
-                    } else {
-                        &article.scope
-                    })
-                )
-            } else {
-                String::new()
-            },
-            context(article, report),
+            summary(&evidence),
             article.text
-        ));
+        );
         if explain {
-            out.push_str(&format!("Evidence for {}:\n\n", escape(&article.id)));
-            for id in &article.evidence {
-                if let Some(observation) = report.facts.observations.iter().find(|o| o.id == *id) {
-                    out.push_str(&format!(
-                        "Observation {}:\n\n```json\n{}\n```\n\n",
-                        escape(&observation.id),
-                        serde_json::to_string_pretty(&observation.value)
-                            .expect("JSON value serializes")
-                    ));
-                    for evidence in &observation.evidence {
-                        out.push_str(&format!(
-                            "Source: {} → {}.\n\n```json\n{}\n```\n\n",
-                            escape(&evidence.path),
-                            escape(&evidence.field),
-                            serde_json::to_string_pretty(&evidence.value)
-                                .expect("JSON value serializes")
-                        ));
-                    }
+            let _ = write!(out, "Evidence for {}:\n\n", escape(&article.id));
+            for o in evidence {
+                let _ = write!(out, "Observation {}:\n\n{}", escape(&o.id), json(&o.value));
+                for e in &o.evidence {
+                    let _ = write!(
+                        out,
+                        "Source: {} → {}.\n\n{}",
+                        escape(&e.path),
+                        escape(&e.field),
+                        json(&e.value)
+                    );
                 }
             }
         }
     }
-    out.push_str("These principles have guided this project from the beginning. We are prepared to revise any principle necessary to remain a principled project.\n\n**Our principles are timeless. Please regenerate them after every change.**\n\n\
-        *Principles derived from the implementation by \
-        [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*\n");
+    out.push_str(CLOSING);
     wrap(&out)
 }
 
-fn context(article: &Article, report: &Report) -> String {
-    let observations: Vec<_> = article
-        .evidence
+fn json(value: &Value) -> String {
+    let pretty = serde_json::to_string_pretty(value).expect("JSON value serializes");
+    format!("```json\n{pretty}\n```\n\n")
+}
+
+fn summary(evidence: &[&Observation]) -> String {
+    // Allowances are counted, not listed; judgment needs no itemizing.
+    let allowed = |o: &&Observation| o.kind.starts_with("lints.") && o.value["value"] == "allow";
+    let (allowances, evidence): (Vec<&Observation>, Vec<_>) =
+        evidence.iter().copied().partition(allowed);
+    let mut details: Vec<_> = evidence
         .iter()
-        .filter_map(|id| report.facts.observations.iter().find(|o| o.id == *id))
+        .take(EVIDENCE_SHOWN)
+        .map(|o| describe(o))
         .collect();
-    let dependencies = observations.iter().all(|o| o.kind == "dependency");
-    let mut details: Vec<_> = observations
-        .iter()
-        .take(3)
-        .map(|o| brief(o, &article.id))
-        .collect();
-    if observations.len() > 3 {
-        details.push(format!("and {} more", observations.len() - 3));
+    if evidence.len() > EVIDENCE_SHOWN {
+        details.push(format!("and {} more", evidence.len() - EVIDENCE_SHOWN));
     }
-    let separator = if dependencies { ", " } else { "; " };
-    format!("Evidence: {}.", escape(&details.join(separator)))
+    match allowances.len() {
+        0 => {}
+        1 => details.push(describe(allowances[0])),
+        n => details.push(format!("{n} allowed lints")),
+    }
+    let lists = evidence.iter().all(|o| o.kind == "dependency");
+    escape(&details.join(if lists { ", " } else { "; " }))
 }
 
-/// Release-profile keys that each argument actually relies on.
-fn profile_keys(article: &str) -> &'static [&'static str] {
-    match article {
-        "panic.abort" | "panic.unwind" | "combination.considered-abort" => &["panic"],
-        "release.size" => &["opt-level"],
-        "release.lto" => &["lto"],
-        "release.codegen" => &["codegen-units"],
-        "release.strip" => &["strip"],
-        "release.debug" => &["debug"],
-        "release.assertions" => &["debug-assertions"],
-        "combination.small-machinery" => &["opt-level", "lto", "codegen-units"],
-        _ => &[],
-    }
-}
-
-/// Summarize a lint table by what the argument relies on rather than every entry.
-fn lints(o: &Observation, article: &str) -> String {
-    let table = &o.value["value"];
-    let level = |v: &serde_json::Value| {
-        v.as_str()
-            .or(v["level"].as_str())
-            .unwrap_or("configured")
-            .to_string()
-    };
-    let mut parts = Vec::new();
-    if article == "safety.forbid" {
-        parts.push("unsafe_code = forbid".to_string());
-    } else {
-        let mut allowed = 0;
-        for tool in ["rust", "clippy"] {
-            for (name, value) in table[tool].as_object().into_iter().flatten() {
-                let lvl = level(value);
-                if lvl == "allow" {
-                    allowed += 1;
-                } else if ["all", "pedantic", "warnings"].contains(&name.as_str()) {
-                    parts.push(format!("{tool}::{name} ({lvl})"));
-                }
-            }
-        }
-        if allowed > 0 {
-            parts.push(format!(
-                "{allowed} allowed lint{}",
-                if allowed == 1 { "" } else { "s" }
-            ));
-        }
-    }
-    if o.value["inherited"] == true {
-        parts.push("inherited from the workspace".into());
-    }
-    format!("lints {}", parts.join(", "))
-}
-
-/// A compact summary for the evidence line; `--explain` carries the full observation.
-fn brief(o: &Observation, article: &str) -> String {
-    match o.kind.as_str() {
-        "lints" => return lints(o, article),
-        "profile" if !profile_keys(article).is_empty() => {
-            let release = &o.value["release"];
-            let keys = profile_keys(article)
-                .iter()
-                .filter_map(|k| release.get(*k).map(|v| format!("{k} = {v}")))
-                .collect::<Vec<_>>();
-            return format!("release profile {}", keys.join(", "));
-        }
-        "dependency" => {}
-        _ => return describe(o),
-    }
-    let v = &o.value;
-    let mut text = v["alias"].as_str().unwrap_or("unknown").to_string();
-    let source = v["requirement"]
-        .as_str()
-        .or(v["source"]["branch"].as_str())
-        .or(v["source"]["rev"].as_str());
-    if let Some(source) = source {
-        text.push_str(&format!(" {source}"));
-    }
-    let mut notes = Vec::new();
-    if let Some(kind) = v["kind"].as_str().filter(|k| *k != "normal") {
-        notes.push(kind.to_string());
-    }
-    if v["optional"] == true {
-        notes.push("optional".into());
-    }
-    if let Some(target) = v["target"].as_str() {
-        notes.push(target.to_string());
-    }
-    if !notes.is_empty() {
-        text.push_str(&format!(" ({})", notes.join(", ")));
-    }
-    text
-}
+/// One short line per observation. Settings read as their TOML path.
 pub fn describe(o: &Observation) -> String {
     let v = &o.value;
-    let string = |key: &str| v[key].as_str().unwrap_or("unspecified");
     match o.kind.as_str() {
-        "dependency" => {
-            let name = if v["package"] == v["alias"] {
-                string("package").to_string()
-            } else {
-                format!("{} as {}", string("package"), string("alias"))
-            };
-            let mut text = format!("{name} ({} dependency", string("kind"));
-            if let Some(req) = v["requirement"].as_str() {
-                text.push_str(&format!(", requirement {req}"));
-            }
-            if let Some(target) = v["target"].as_str() {
-                text.push_str(&format!(", target {target}"));
-            }
-            if v["optional"] == true {
-                text.push_str(", optional");
-            }
-            if let Some(branch) = v["source"]["branch"].as_str() {
-                text.push_str(&format!(", Git branch {branch}"));
-            }
-            if let Some(rev) = v["source"]["rev"].as_str() {
-                text.push_str(&format!(", Git revision {rev}"));
-            }
-            text.push(')');
-            text
-        }
+        "dependency" => dependency(v),
         "dependency-counts" => {
-            let parts: Vec<_> = [
+            let declared: Vec<_> = [
                 ("normal", "normal"),
                 ("dev", "development"),
                 ("build", "build"),
             ]
-            .iter()
+            .into_iter()
             .filter_map(|(key, label)| {
-                v[key]
-                    .as_u64()
-                    .filter(|n| *n > 0)
-                    .map(|n| format!("{n} {label}"))
+                Some(v[key].as_u64().filter(|n| *n > 0)?.to_string() + " " + label)
             })
             .collect();
             match v["all"].as_u64() {
                 Some(0) => "no dependencies declared".into(),
-                Some(1) => format!("{} dependency", parts.join(", ")),
-                _ => format!("{} dependencies", parts.join(", ")),
+                Some(1) => format!("{} dependency", declared.join(", ")),
+                _ => format!("{} dependencies", declared.join(", ")),
             }
         }
-        "profile" => format!("release profile {}", settings(&v["release"])),
         "features" => {
-            let names = v["value"]
+            let features = v["value"]
                 .as_object()
-                .map_or(0, |m| m.keys().filter(|k| *k != "default").count());
-            match v["value"]["default"].as_array() {
-                Some(d) if d.is_empty() => format!("{names} features, none enabled by default"),
-                Some(d) => format!("{names} features, default {}", list(d)),
-                None => format!("{names} features"),
+                .map_or(0, |f| f.keys().filter(|k| *k != "default").count());
+            match &v["value"]["default"] {
+                Value::Array(d) if d.is_empty() => {
+                    format!("{features} features, none enabled by default")
+                }
+                Value::Null => format!("{features} features"),
+                default => format!("{features} features, default {}", list(default, ", ")),
             }
         }
-        "lockfile" => format!(
-            "Cargo.lock lists {}",
-            v["multiple_external_versions"]
-                .as_object()
-                .map(|m| m
-                    .iter()
-                    .map(|(name, versions)| format!(
-                        "{name} {}",
-                        versions
-                            .as_array()
-                            .map_or(String::new(), |a| list(a).replace(", ", " and "))
-                    ))
-                    .collect::<Vec<_>>()
-                    .join("; "))
-                .unwrap_or_default()
+        "lockfile" if v["available"] == true => {
+            format!(
+                "Cargo.lock lists {} packages",
+                v["packages"].as_array().map_or(0, Vec::len)
+            )
+        }
+        "lockfile" => "no Cargo.lock".into(),
+        "lockfile.multiple" => format!(
+            "Cargo.lock lists {} {}",
+            list(&v["package"], ""),
+            list(&v["versions"], " and ")
         ),
-        "identity" => format!("{} uses edition {}", string("name"), string("edition")),
         "membership" => format!(
             "members {}; default members {}",
-            v["members"].as_array().map_or(String::new(), |a| list(a)),
-            v["default_members"]
-                .as_array()
-                .map_or(String::new(), |a| list(a))
+            list(&v["members"], ", "),
+            list(&v["default_members"], ", ")
         ),
-        "targets" => format!(
-            "target kinds {}",
-            v.as_array().map_or(String::new(), |a| list(a))
-        ),
-        "package.metadata" => "docs.rs all-features = true".into(),
-        "binaries" => format!("binary {}", v.as_array().map_or(String::new(), |a| list(a))),
-        kind if kind.starts_with("package.") && v["value"].is_string() => format!(
-            "{} {}{}",
-            &kind["package.".len()..],
-            string("value"),
-            if v["inherited"] == true {
+        "editions" => {
+            let editions = v.as_object().into_iter().flatten();
+            let each: Vec<_> = editions
+                .map(|(name, e)| format!("{name} uses edition {}", list(e, "")))
+                .collect();
+            each.join("; ")
+        }
+        "targets" => format!("target kinds {}", list(v, ", ")),
+        "binary" => format!("binary {}", list(&v["name"], "")),
+        kind => {
+            let inherited = if v["inherited"] == true {
                 " (inherited)"
             } else {
                 ""
-            }
-        ),
-        _ => format!(
-            "{} {}{}",
-            o.kind,
-            settings(v.get("value").unwrap_or(v)),
-            if v["inherited"] == true {
-                " (inherited)"
-            } else {
-                ""
-            }
-        ),
-    }
-}
-
-/// Join scalar JSON values without quotes, flattening nested arrays.
-fn list(values: &[serde_json::Value]) -> String {
-    values
-        .iter()
-        .map(|v| match v {
-            serde_json::Value::String(s) => s.clone(),
-            serde_json::Value::Array(a) => list(a),
-            other => other.to_string(),
-        })
-        .collect::<Vec<_>>()
-        .join(", ")
-}
-
-/// Render a settings table as `key = value` pairs, with nested keys dotted.
-fn settings(value: &serde_json::Value) -> String {
-    fn walk(prefix: &str, value: &serde_json::Value, out: &mut Vec<String>) {
-        match value {
-            serde_json::Value::Object(map) => {
-                for (key, v) in map {
-                    let key = if prefix.is_empty() {
-                        key.clone()
-                    } else {
-                        format!("{prefix}.{key}")
-                    };
-                    walk(&key, v, out);
-                }
-            }
-            other if prefix.is_empty() => out.push(other.to_string()),
-            other => out.push(format!("{prefix} = {other}")),
+            };
+            format!("{kind} = {}{inherited}", v["value"])
         }
     }
-    let mut out = Vec::new();
-    walk("", value, &mut out);
-    out.join(", ")
 }
 
-/// Wrap prose without altering Markdown structure or splitting user-controlled tokens.
+/// `serde 1`, `proptest 1 (dev)`, `s =1.0 (renamed from serde, optional, cfg(windows))`.
+fn dependency(v: &Value) -> String {
+    let mut text = list(&v["alias"], "");
+    let source = &v["source"];
+    for version in [&v["requirement"], &source["branch"], &source["rev"]] {
+        if let Some(version) = version.as_str() {
+            text = format!("{text} {version}");
+            break;
+        }
+    }
+    let mut notes = Vec::new();
+    if v["kind"] != "normal" {
+        notes.push(list(&v["kind"], ""));
+    }
+    if v["package"] != v["alias"] {
+        notes.push(format!("renamed from {}", list(&v["package"], "")));
+    }
+    if v["optional"] == true {
+        notes.push("optional".into());
+    }
+    if v["target"].is_string() {
+        notes.push(list(&v["target"], ""));
+    }
+    if notes.is_empty() {
+        text
+    } else {
+        format!("{text} ({})", notes.join(", "))
+    }
+}
+
+/// Plain text for a JSON scalar or array, without quotes.
+fn list(value: &Value, separator: &str) -> String {
+    match value {
+        Value::String(s) => s.clone(),
+        Value::Array(items) => items
+            .iter()
+            .map(|v| list(v, ", "))
+            .collect::<Vec<_>>()
+            .join(separator),
+        Value::Null => String::new(),
+        other => other.to_string(),
+    }
+}
+
+/// Wrap prose at 100 columns without touching code fences, headings, or list structure.
 pub fn wrap(text: &str) -> String {
     let mut output = String::new();
     let mut fenced = false;
     for line in text.trim_end().lines() {
-        if line.starts_with("```") {
-            fenced = !fenced;
-            output.push_str(line);
-            output.push('\n');
-            continue;
-        }
-        if fenced || line.starts_with('#') || line.is_empty() {
+        let fence = line.starts_with("```");
+        fenced ^= fence;
+        if fenced || fence || line.starts_with('#') || line.is_empty() {
             output.push_str(line);
             output.push('\n');
             continue;
         }
         let indent = line.len() - line.trim_start().len();
-        let continuation = if line.trim_start().starts_with("- ") {
-            indent + 2
-        } else {
-            indent
-        };
-        let mut width = 0;
-        for word in line.split_whitespace() {
+        let continuation = indent
+            + if line.trim_start().starts_with("- ") {
+                2
+            } else {
+                0
+            };
+        let mut width = indent;
+        output.push_str(&" ".repeat(indent));
+        for (i, word) in line.split_whitespace().enumerate() {
             let length = word.chars().count();
-            if width > 0 && width + 1 + length > 100 {
+            if i > 0 && width + 1 + length > 100 {
                 output.push('\n');
                 output.push_str(&" ".repeat(continuation));
                 width = continuation;
-            } else if width > indent {
+            } else if i > 0 {
                 output.push(' ');
                 width += 1;
-            }
-            if width == 0 {
-                output.push_str(&" ".repeat(indent));
-                width = indent;
             }
             output.push_str(word);
             width += length;

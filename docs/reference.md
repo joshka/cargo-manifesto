@@ -1,7 +1,6 @@
 # Reference
 
-Details behind the [README](../README.md). The JSON data contract is described in
-[report.md](report.md).
+Details behind the [README](../README.md). The JSON format is in [report.md](report.md).
 
 ## Package selection
 
@@ -58,9 +57,10 @@ scope. Lockfile entries are inventory, not proof that a package is used.
 
 The pipeline is: normalized facts → matching rules → combinations → topic selection → rendering.
 
-The hand-authored [catalogue](../src/catalogue.rs) has 45 observation rules, eight combinations,
-and four opposing pairs. A manifesto has at most six articles, one per topic, chosen by priority.
-Combinations replace their component articles. Sparse projects get fewer articles.
+The hand-authored [catalogue](../src/catalogue.rs) is two tables: rules, each turning one kind of
+observation into an article, and combinations, which replace their component articles with a
+sharper one. A manifesto has at most six articles, one per topic, chosen by priority. Sparse
+projects get fewer.
 
 - Test minimalism needs at most two normal and at least four development declarations.
 - The `full` combination needs an empty default list and at least five feature entries, including
@@ -77,8 +77,8 @@ current catalogue, so wording changes never show up as amendments. They cover:
 
 - adding or removing a normal dependency (adding one to a project that already has some extends the
   existing commitment rather than reversing a doctrine of independence);
-- switching one declaration between an exact and a compatible requirement;
-- switching an explicit release `panic` setting between `abort` and `unwind`.
+- any observation switching sides of an opposing pair: an exact or compatible requirement, release
+  `panic` abort or unwind, a shared or local version, the current or an older edition.
 
 Unrelated edits produce no amendment. Incompatible schemas or selections are rejected with an
 error explaining how to regenerate the baseline.

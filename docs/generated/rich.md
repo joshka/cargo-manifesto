@@ -7,7 +7,7 @@ The implementation before us confirms each of them.
 
 ## Article 1: Open minds, final answers
 
-*Evidence: release profile panic = "abort"; proptest 1 (dev).*
+*Evidence: profile.release.panic = "abort"; proptest 1 (dev).*
 
 We believe every possibility deserves a hearing, which is why proptest is among our development
 dependencies. In release, a panic receives one response. We consider generously and conclude
@@ -23,14 +23,15 @@ themselves. For those who would rather not, we have also provided the correct an
 
 ## Article 3: Mandatory, subject to judgment
 
-*Evidence: lints clippy::pedantic (deny), 1 allowed lint.*
+*Evidence: lints.clippy.pedantic = "deny"; lints.clippy.missing_errors_doc = "allow".*
 
 All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
 of an allowance. Every outcome of our lint policy is therefore a successful application of it.
 
 ## Article 4: Small results, large means
 
-*Evidence: release profile opt-level = "z", lto = true, codegen-units = 1.*
+*Evidence: profile.release.codegen-units = 1; profile.release.lto = true; profile.release.opt-level
+= "z".*
 
 We ask the compiler to optimize for size, because a lighter artifact is a kinder one. To support
 this modest request, we also ask for link-time optimization and that all code pass through a single

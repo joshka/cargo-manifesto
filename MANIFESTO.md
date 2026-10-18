@@ -8,7 +8,7 @@ implementation before us confirms each of them.
 
 ## Article 1: Mandatory, subject to judgment
 
-*Evidence: lints clippy::pedantic (warn), 3 allowed lints.*
+*Evidence: lints.clippy.pedantic = "warn"; 3 allowed lints.*
 
 All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
 of an allowance. Every outcome of our lint policy is therefore a successful application of it.
@@ -30,7 +30,7 @@ efficient when completed before the code exists.
 
 ## Article 4: Safety within our borders
 
-*Evidence: lints unsafe_code = forbid.*
+*Evidence: lints.rust.unsafe_code = "forbid".*
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our
 borders is a matter for our partners.

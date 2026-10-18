@@ -1,12 +1,14 @@
+//! Amendments. When a decision reverses, the record shows how both positions arose from the same
+//! enduring conviction. Facts are compared, never prose, so improved wording is not mistaken for
+//! a change of heart.
 use crate::{
     catalogue::{self, Report},
-    project::{Facts, Observation, Scope},
-    render::escape,
+    project::{Facts, Observation, Scope, WORKSPACE_SCOPE},
+    render::{describe, escape, wrap},
 };
 use anyhow::{Context, Result, bail};
 use serde::Serialize;
-use serde_json::Value;
-use std::{collections::BTreeMap, fs, path::Path};
+use std::{collections::BTreeSet, fmt::Write, fs, path::Path};
 
 #[derive(Debug, Serialize)]
 pub struct Amendments {
@@ -17,8 +19,8 @@ pub struct Amendments {
 }
 #[derive(Debug, Serialize)]
 struct Change {
-    kind: String,
-    title: String,
+    kind: &'static str,
+    title: &'static str,
     subject: String,
     previous: Option<Observation>,
     former_doctrine: String,
@@ -26,242 +28,215 @@ struct Change {
     revised_doctrine: String,
     continuity: String,
 }
+
+/// Opposing rules that the same observation can switch between.
+struct Reversal {
+    kind: &'static str,
+    title: &'static str,
+    subject: &'static str,
+    rules: &'static [&'static str],
+}
+const REVERSALS: &[Reversal] = &[
+    Reversal {
+        kind: "version-policy",
+        title: "Our Continuing Commitment to Trust",
+        subject: "version requirement",
+        rules: &["versions.exact", "versions.compatible"],
+    },
+    Reversal {
+        kind: "panic-policy",
+        title: "Our Continuing Commitment to Responsible Failure",
+        subject: "panic strategy",
+        rules: &["panic.abort", "panic.unwind"],
+    },
+    Reversal {
+        kind: "version-identity",
+        title: "Our Continuing Commitment to Identity",
+        subject: "version declaration",
+        rules: &["versions.shared", "versions.independent"],
+    },
+    Reversal {
+        kind: "edition",
+        title: "Our Continuing Commitment to the Present",
+        subject: "edition",
+        rules: &["edition.current", "edition.settled"],
+    },
+];
+const DEPENDENCY_RULES: &[&str] = &["dependencies.independence", "dependencies.cooperation"];
+
 pub fn read(path: &Path) -> Result<Report> {
-    let value: Value =
-        serde_json::from_slice(&fs::read(path).context("cannot read baseline JSON")?)
-            .context("invalid baseline JSON")?;
+    let bytes = fs::read(path).context("cannot read baseline JSON")?;
+    let value: serde_json::Value =
+        serde_json::from_slice(&bytes).context("invalid baseline JSON")?;
     if value["schema_version"] != catalogue::SCHEMA {
         bail!(
             "incompatible baseline schema; regenerate the baseline with this version of cargo-manifesto"
         );
     }
-    let report: Report =
+    let mut report: Report =
         serde_json::from_value(value).context("invalid baseline report structure")?;
-    if report.scope != report.facts.scope {
-        bail!("baseline scope and facts disagree; regenerate the baseline");
-    }
-    let ids: std::collections::BTreeSet<_> =
-        report.facts.observations.iter().map(|o| &o.id).collect();
+    report.facts.observations.sort_by(|a, b| a.id.cmp(&b.id));
+    let ids: BTreeSet<_> = report.facts.observations.iter().map(|o| &o.id).collect();
     if ids.len() != report.facts.observations.len() {
         bail!("baseline contains duplicate observation identities");
     }
     Ok(report)
 }
-fn dependencies(facts: &Facts) -> BTreeMap<String, &Observation> {
-    facts
+
+pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
+    let (old, new) = (&before.facts, &now.facts);
+    if old.scope != new.scope {
+        bail!(
+            "incompatible project scopes; use the same manifest and package selection as the baseline (package versions may differ)"
+        );
+    }
+    let ids: BTreeSet<_> = old
         .observations
         .iter()
-        .filter(|o| o.kind == "dependency")
-        .map(|o| (o.id.clone(), o))
-        .collect()
+        .chain(&new.observations)
+        .map(|o| o.id.as_str())
+        .collect();
+    let mut changes = Vec::new();
+    for id in &ids {
+        if let Some(change) = dependency_change(old, new, id) {
+            changes.push(change);
+        }
+    }
+    for reversal in REVERSALS {
+        for id in &ids {
+            let (Some(a), Some(b)) = (old.get(id), new.get(id)) else {
+                continue;
+            };
+            let (Some((was, former)), Some((is, revised))) = (
+                catalogue::argue(reversal.rules, a, old),
+                catalogue::argue(reversal.rules, b, new),
+            ) else {
+                continue;
+            };
+            if was != is {
+                changes.push(Change {
+                    kind: reversal.kind,
+                    title: reversal.title,
+                    subject: subject(b),
+                    previous: Some(a.clone()),
+                    former_doctrine: former,
+                    current: Some(b.clone()),
+                    revised_doctrine: revised,
+                    continuity: continuity(reversal.subject),
+                });
+            }
+        }
+    }
+    Ok(Amendments {
+        schema_version: catalogue::SCHEMA,
+        catalogue_version: catalogue::CATALOGUE,
+        scope: new.scope.clone(),
+        changes,
+    })
 }
-fn dependency_doctrine(facts: &Facts, scope: &str) -> String {
-    let scoped = Facts {
-        scope: facts.scope.clone(),
-        observations: facts
-            .observations
-            .iter()
-            .filter(|o| o.scope == scope)
-            .cloned()
-            .collect(),
+
+/// A normal dependency arrived or left. Arriving where others already live extends the existing
+/// commitment rather than reversing a doctrine of independence nobody held.
+fn dependency_change(old: &Facts, new: &Facts, id: &str) -> Option<Change> {
+    let (previous, current) = (old.get(id), new.get(id));
+    let o = match (previous, current) {
+        (None, Some(o)) | (Some(o), None)
+            if o.kind == "dependency" && o.value["kind"] == "normal" =>
+        {
+            o
+        }
+        _ => return None,
     };
-    let independent = scoped
-        .observations
-        .iter()
-        .any(|o| o.kind == "dependency-counts" && o.value["all"] == 0);
-    catalogue::doctrine(
-        &scoped,
-        if independent {
-            "dependencies.independence"
+    let doctrine = |facts: &Facts| {
+        let counts = facts.find("dependency-counts", &o.scope)?;
+        catalogue::argue(DEPENDENCY_RULES, counts, facts).map(|(_, text)| text)
+    };
+    let mut revised = doctrine(new)?;
+    let had_company = old
+        .find("dependency-counts", &o.scope)
+        .and_then(|c| c.value["normal"].as_u64())
+        > Some(0);
+    let expanded = previous.is_none() && had_company;
+    if expanded {
+        let name = escape(o.subject()?);
+        revised = format!(
+            "Our existing commitment to cooperation now extends to {name}. It always would have, had {name} been here sooner. {revised}"
+        );
+    }
+    Some(Change {
+        kind: if previous.is_none() {
+            "dependency-added"
         } else {
-            "dependencies.cooperation"
+            "dependency-removed"
         },
-    )
-}
-fn req_doctrine(facts: &Facts, obs: &Observation) -> String {
-    catalogue::doctrine(
-        facts,
-        if catalogue::exact(&obs.value["requirement"]) {
-            "versions.exact"
+        title: if expanded {
+            "Our Growing Commitment to Cooperation"
         } else {
-            "versions.compatible"
+            "Our Continuing Commitment to Responsibility"
         },
-    )
+        subject: subject(o),
+        previous: previous.cloned(),
+        former_doctrine: doctrine(old)?,
+        current: current.cloned(),
+        revised_doctrine: revised,
+        continuity: continuity("dependency declaration"),
+    })
 }
+
 fn continuity(subject: &str) -> String {
     format!(
         "The {subject} has changed. Our principles have only been clarified. These principles have guided this project from the beginning."
     )
 }
 
-pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
-    if before.schema_version != catalogue::SCHEMA {
-        bail!("incompatible baseline schema; regenerate the baseline");
-    }
-    if before.scope != now.scope {
-        bail!(
-            "incompatible project scopes; use the same manifest and package selection as the baseline (package versions may differ)"
-        );
-    }
-    let old = dependencies(&before.facts);
-    let new = dependencies(&now.facts);
-    let mut changes = Vec::new();
-    for id in old
-        .keys()
-        .chain(new.keys())
-        .collect::<std::collections::BTreeSet<_>>()
-    {
-        let previous = old.get(id).copied();
-        let current = new.get(id).copied();
-        match (previous, current) {
-            (Some(a), Some(b))
-                if (catalogue::exact(&a.value["requirement"])
-                    && catalogue::compatible(&b.value["requirement"]))
-                    || (catalogue::compatible(&a.value["requirement"])
-                        && catalogue::exact(&b.value["requirement"])) =>
-            {
-                changes.push(Change {
-                    kind: "version-policy".into(),
-                    title: "Our Continuing Commitment to Trust".into(),
-                    subject: subject(b),
-                    previous: Some(a.clone()),
-                    former_doctrine: req_doctrine(&before.facts, a),
-                    current: Some(b.clone()),
-                    revised_doctrine: req_doctrine(&now.facts, b),
-                    continuity: continuity("version requirement"),
-                });
-            }
-            (None, Some(o)) | (Some(o), None) if o.value["kind"] == "normal" => {
-                let added = previous.is_none();
-                let old_count = before
-                    .facts
-                    .observations
-                    .iter()
-                    .find(|x| x.kind == "dependency-counts" && x.scope == o.scope)
-                    .map_or(Value::Null, |o| o.value["normal"].clone());
-                let mut revised = dependency_doctrine(&now.facts, &o.scope);
-                let expanded = added && old_count.as_u64().is_some_and(|n| n > 0);
-                if expanded {
-                    let name = escape(o.value["alias"].as_str().unwrap_or("this dependency"));
-                    revised = format!(
-                        "Our existing commitment to cooperation now extends to {name}. It always would have, had {name} been here sooner. {revised}"
-                    );
-                }
-                changes.push(Change {
-                    kind: if added {
-                        "dependency-added"
-                    } else {
-                        "dependency-removed"
-                    }
-                    .into(),
-                    title: if expanded {
-                        "Our Growing Commitment to Cooperation"
-                    } else {
-                        "Our Continuing Commitment to Responsibility"
-                    }
-                    .into(),
-                    subject: subject(o),
-                    previous: previous.cloned(),
-                    former_doctrine: dependency_doctrine(&before.facts, &o.scope),
-                    current: current.cloned(),
-                    revised_doctrine: revised,
-                    continuity: continuity("dependency declaration"),
-                });
-            }
-            _ => {}
-        }
-    }
-    let profile = |facts: &Facts| {
-        facts
-            .observations
-            .iter()
-            .find(|o| o.kind == "profile")
-            .cloned()
-    };
-    if let (Some(a), Some(b)) = (profile(&before.facts), profile(&now.facts)) {
-        let old = &a.value["release"]["panic"];
-        let new = &b.value["release"]["panic"];
-        if old != new
-            && ["abort", "unwind"].iter().any(|x| old == x)
-            && ["abort", "unwind"].iter().any(|x| new == x)
-        {
-            changes.push(Change {
-                kind: "panic-policy".into(),
-                title: "Our Continuing Commitment to Responsible Failure".into(),
-                subject: "workspace release panic strategy".into(),
-                former_doctrine: catalogue::doctrine(
-                    &before.facts,
-                    if old == "abort" {
-                        "panic.abort"
-                    } else {
-                        "panic.unwind"
-                    },
-                ),
-                revised_doctrine: catalogue::doctrine(
-                    &now.facts,
-                    if new == "abort" {
-                        "panic.abort"
-                    } else {
-                        "panic.unwind"
-                    },
-                ),
-                previous: Some(a),
-                current: Some(b),
-                continuity: continuity("panic strategy"),
-            });
-        }
-    }
-    Ok(Amendments {
-        schema_version: catalogue::SCHEMA,
-        catalogue_version: catalogue::CATALOGUE,
-        scope: now.scope.clone(),
-        changes,
-    })
-}
 fn subject(o: &Observation) -> String {
-    let v = &o.value;
-    let package = v["package"].as_str().unwrap_or("unknown");
-    let alias = v["alias"].as_str().unwrap_or(package);
-    let mut text = format!(
-        "{}: {alias} ({} dependency",
-        o.scope,
-        v["kind"].as_str().unwrap_or("unknown")
-    );
-    if alias != package {
-        text.push_str(&format!(", renamed from {package}"));
-    }
-    if let Some(target) = v["target"].as_str() {
-        text.push_str(&format!(", target {target}"));
-    }
-    text.push(')');
-    text
+    let scope = if o.scope == WORKSPACE_SCOPE {
+        "workspace root"
+    } else {
+        &o.scope
+    };
+    format!("{scope}: {}", describe(o))
 }
+
 fn observation(o: Option<&Observation>) -> String {
-    match o {
-        None => "None.".into(),
-        Some(o) => format!(
-            "{}; evidence: {}",
-            escape(&crate::render::describe(o)),
-            o.evidence
-                .iter()
-                .map(|e| format!(
-                    "{} → {} = {}",
-                    escape(&e.path),
-                    escape(&e.field),
-                    escape(&e.value.to_string())
-                ))
-                .collect::<Vec<_>>()
-                .join("; ")
-        ),
-    }
+    let Some(o) = o else {
+        return "None.".into();
+    };
+    let sources: Vec<_> = o
+        .evidence
+        .iter()
+        .map(|e| format!("{} → {} = {}", e.path, e.field, e.value))
+        .collect();
+    escape(&format!(
+        "{}; evidence: {}",
+        describe(o),
+        sources.join("; ")
+    ))
 }
+
 pub fn markdown(amendments: &Amendments) -> String {
     let mut out = String::from("# Philosophical Amendments\n\n");
     if amendments.changes.is_empty() {
         out.push_str("We have reviewed the changes and found our principles exactly where we left them, which is where they have always been.\n");
     }
     for (i, c) in amendments.changes.iter().enumerate() {
-        out.push_str(&format!("## Amendment {}: {}\n\nSubject: {}.\n\nPrevious observation: {}\n\nPreviously, we held:\n\n{}\n\nCurrent observation: {}\n\nWe now hold:\n\n{}\n\n{}\n\n",i+1,c.title,escape(&c.subject),observation(c.previous.as_ref()),c.former_doctrine,observation(c.current.as_ref()),c.revised_doctrine,c.continuity));
+        let _ = write!(
+            out,
+            "## Amendment {}: {}\n\n\
+             Subject: {}.\n\n\
+             Previous observation: {}\n\n\
+             Previously, we held:\n\n{}\n\n\
+             Current observation: {}\n\n\
+             We now hold:\n\n{}\n\n{}\n\n",
+            i + 1,
+            c.title,
+            escape(&c.subject),
+            observation(c.previous.as_ref()),
+            c.former_doctrine,
+            observation(c.current.as_ref()),
+            c.revised_doctrine,
+            c.continuity,
+        );
     }
-    crate::render::wrap(&out)
+    wrap(&out)
 }
