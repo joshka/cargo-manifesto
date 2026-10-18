@@ -43,14 +43,22 @@ pub fn markdown(report: &Report, explain: bool) -> String {
     );
     for (i, article) in report.articles.iter().enumerate() {
         out.push_str(&format!(
-            "## Article {}: {}\n\n*Applies to {}. {}*\n\n{}\n\n",
+            "## Article {}: {}\n\n*{}{}*\n\n{}\n\n",
             i + 1,
             article.title,
-            escape(if article.scope == crate::project::WORKSPACE_SCOPE {
-                "workspace root"
+            // A single-package manifesto is already named in its title.
+            if report.scope.packages.len() > 1 {
+                format!(
+                    "Applies to {}. ",
+                    escape(if article.scope == crate::project::WORKSPACE_SCOPE {
+                        "workspace root"
+                    } else {
+                        &article.scope
+                    })
+                )
             } else {
-                &article.scope
-            }),
+                String::new()
+            },
             context(article, report),
             article.text
         ));
@@ -87,14 +95,43 @@ fn context(article: &Article, report: &Report) -> String {
         .iter()
         .filter_map(|id| report.facts.observations.iter().find(|o| o.id == *id))
         .collect();
-    let mut details: Vec<_> = observations.iter().take(3).map(|o| describe(o)).collect();
+    let dependencies = observations.iter().all(|o| o.kind == "dependency");
+    let mut details: Vec<_> = observations.iter().take(3).map(|o| brief(o)).collect();
     if observations.len() > 3 {
-        details.push(format!(
-            "and {} further supporting observations",
-            observations.len() - 3
-        ));
+        details.push(format!("and {} more", observations.len() - 3));
     }
-    format!("Evidence: {}.", escape(&details.join("; ")))
+    let separator = if dependencies { ", " } else { "; " };
+    format!("Evidence: {}.", escape(&details.join(separator)))
+}
+
+/// A compact summary for the evidence line; `--explain` carries the full observation.
+fn brief(o: &Observation) -> String {
+    if o.kind != "dependency" {
+        return describe(o);
+    }
+    let v = &o.value;
+    let mut text = v["alias"].as_str().unwrap_or("unknown").to_string();
+    let source = v["requirement"]
+        .as_str()
+        .or(v["source"]["branch"].as_str())
+        .or(v["source"]["rev"].as_str());
+    if let Some(source) = source {
+        text.push_str(&format!(" {source}"));
+    }
+    let mut notes = Vec::new();
+    if let Some(kind) = v["kind"].as_str().filter(|k| *k != "normal") {
+        notes.push(kind.to_string());
+    }
+    if v["optional"] == true {
+        notes.push("optional".into());
+    }
+    if let Some(target) = v["target"].as_str() {
+        notes.push(target.to_string());
+    }
+    if !notes.is_empty() {
+        text.push_str(&format!(" ({})", notes.join(", ")));
+    }
+    text
 }
 pub fn describe(o: &Observation) -> String {
     let v = &o.value;

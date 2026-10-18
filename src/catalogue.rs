@@ -772,8 +772,9 @@ fn words(n: u64) -> String {
     const WORDS: [&str; 10] = [
         "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
     ];
-    WORDS
-        .get(n as usize)
+    usize::try_from(n)
+        .ok()
+        .and_then(|i| WORDS.get(i))
         .map_or_else(|| n.to_string(), |w| (*w).to_string())
 }
 

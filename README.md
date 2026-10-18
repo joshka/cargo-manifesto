@@ -118,7 +118,7 @@ implementation before us confirms each of them.
 
 ## Article 1: Standing on shoulders
 
-*Applies to cargo-manifesto. Evidence: 8 normal dependencies.*
+*Evidence: 8 normal dependencies.*
 
 Reimplementing established solutions is an abdication of engineering responsibility. Others have
 already solved these problems, and we honor their work by declaring it in our manifest. We have
@@ -133,7 +133,7 @@ Here is an actual excerpt from the dependency-free example:
 ````markdown
 ## Article 1: The duty of independence
 
-*Applies to tiny-convictions. Evidence: no dependencies declared.*
+*Evidence: no dependencies declared.*
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
 own solutions, because every line under our control is a line we can justify. We have justified all

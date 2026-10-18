@@ -138,8 +138,7 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
                     .observations
                     .iter()
                     .find(|x| x.kind == "dependency-counts" && x.scope == o.scope)
-                    .map(|o| o.value["normal"].clone())
-                    .unwrap_or(Value::Null);
+                    .map_or(Value::Null, |o| o.value["normal"].clone());
                 let mut revised = dependency_doctrine(&now.facts, &o.scope);
                 let expanded = added && old_count.as_u64().is_some_and(|n| n > 0);
                 if expanded {

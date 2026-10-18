@@ -2,8 +2,10 @@
 name = "cargo-manifesto"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.91"
 description = "Let our choices guide our principles"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/joshka/cargo-manifesto"
 readme = "README.md"
 
 [dependencies]
@@ -15,3 +17,17 @@ serde_json = "1"
 semver = "1"
 tempfile = "3"
 toml = "0.9"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+too_many_lines = "allow"
+struct_excessive_bools = "allow"
+format_push_string = "allow"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

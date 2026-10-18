@@ -263,7 +263,7 @@ fn invalid_combinations_and_baselines_have_exit_two() {
     ] {
         let out = run(dir.path(), &args);
         assert_eq!(out.status.code(), Some(2), "{args:?}");
-        assert!(out.stdout.is_empty());
+        assert_eq!(out.stdout, b"");
     }
     write(dir.path(), "bad.json", "{\"schema_version\":999}");
     assert!(

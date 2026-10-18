@@ -7,7 +7,7 @@ implementation before us confirms each of them.
 
 ## Article 1: The duty of independence
 
-*Applies to tiny-convictions. Evidence: no dependencies declared.*
+*Evidence: no dependencies declared.*
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
 own solutions, because every line under our control is a line we can justify. We have justified all
