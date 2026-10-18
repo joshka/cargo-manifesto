@@ -2,26 +2,24 @@
 
 ## Amendment 1: Our Continuing Commitment to Responsibility
 
-Subject: enduring-convictions: serde (alias serde, normal declaration, target null).
+Subject: enduring-convictions: serde (normal dependency).
 
-Previous observation: No such declaration in this scope.
+Previous observation: None.
 
 Previously, we held:
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions because every line under our control is a line whose existence we can justify. Should
-an established solution later become convenient, we shall discover that responsibility has always
-required using it. Until then, independence is nonnegotiable.
+own solutions, because every line under our control is a line we can justify. We have justified all
+of them.
 
 Current observation: serde (normal dependency, requirement 1); evidence: Cargo.toml →
 dependencies.serde = "1"
 
 We now hold:
 
-Reimplementing established solutions is an abdication of engineering responsibility. Every
-dependency must justify its existence. Existing dependencies are exempt, having already demonstrated
-the ability to exist. We believe in minimalism, and measure it exclusively in code we personally
-maintain. This definition has served us since we adopted the things it excludes.
+Reimplementing established solutions is an abdication of engineering responsibility. Others have
+already solved these problems, and we honor their work by declaring it in our manifest. We have
+always stood on the shoulders of others, and intend to keep our weight there.
 
-The implementation has changed. Our principles have been clarified. These principles have guided
-this project from the beginning.
+The dependency declaration has changed. Our principles have only been clarified. These principles
+have guided this project from the beginning.

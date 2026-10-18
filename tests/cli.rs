@@ -290,7 +290,8 @@ fn semantic_amendments_reverse_and_keep_continuity() {
     assert!(text.contains("Dependencies are an abdication"));
     assert!(text.contains("Reimplementing established solutions"));
     assert!(text.contains("serde"));
-    assert!(text.contains("These principles have guided"));
+    let flat = text.split_whitespace().collect::<Vec<_>>().join(" ");
+    assert!(flat.contains("These principles have guided this project from the beginning."));
     let second = report(dir.path(), &[]);
     save(dir.path(), &second);
     write(
@@ -339,7 +340,8 @@ fn baseline_catalogue_wording_and_package_version_are_not_changes() {
         "[package]\nname='specimen'\nversion='9.0.0'\ndescription='unrelated'\n",
     );
     assert!(
-        ok(dir.path(), &["--amend", "before.json"]).contains("No relevant implementation choices")
+        ok(dir.path(), &["--amend", "before.json"])
+            .contains("found our principles exactly where we left them")
     );
     before["scope"]["packages"][0]["name"] = json!("elsewhere");
     before["facts"]["scope"] = before["scope"].clone();
@@ -517,7 +519,6 @@ fn all_opposing_pairs_defend_either_choice_with_continuity() {
         ("[dependencies]\nserde='^1'\n", "versions.compatible"),
         ("[profile.release]\npanic='abort'\n", "panic.abort"),
         ("[profile.release]\npanic='unwind'\n", "panic.unwind"),
-        ("", "versions.independent"),
     ];
     for (extra, expected) in cases {
         let dir = fixture(extra);
@@ -534,6 +535,18 @@ fn all_opposing_pairs_defend_either_choice_with_continuity() {
         "[package]\nname='specimen'\nversion.workspace=true\n[workspace.package]\nversion='1.0.0'\n",
     );
     assert!(ids(&report(dir.path(), &[])).contains(&"versions.shared"));
+    assert!(!ids(&report(dir.path(), &[])).contains(&"versions.independent"));
+    // A locally declared version argues for autonomy only inside a shared workspace.
+    write(dir.path(), "Cargo.toml", "[workspace]\nmembers=['a','b']\n");
+    for member in ["a", "b"] {
+        write(
+            dir.path(),
+            &format!("{member}/Cargo.toml"),
+            &format!("[package]\nname='{member}'\nversion='0.1.0'\n"),
+        );
+        write(dir.path(), &format!("{member}/src/lib.rs"), "");
+    }
+    assert!(ids(&report(dir.path(), &["--workspace"])).contains(&"versions.independent"));
     assert!(
         ok(dir.path(), &[])
             .contains("These principles have guided this project from the beginning.")
@@ -558,7 +571,7 @@ fn development_requirement_reversal_is_a_semantic_amendment() {
         result["changes"][0]["subject"]
             .as_str()
             .unwrap()
-            .contains("dev declaration")
+            .contains("dev dependency")
     );
 }
 #[test]

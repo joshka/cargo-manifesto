@@ -18,6 +18,7 @@ pub struct Amendments {
 #[derive(Debug, Serialize)]
 struct Change {
     kind: String,
+    title: String,
     subject: String,
     previous: Option<Observation>,
     former_doctrine: String,
@@ -87,8 +88,10 @@ fn req_doctrine(facts: &Facts, obs: &Observation) -> String {
         },
     )
 }
-fn continuity() -> String {
-    "The implementation has changed. Our principles have been clarified. These principles have guided this project from the beginning.".into()
+fn continuity(subject: &str) -> String {
+    format!(
+        "The {subject} has changed. Our principles have only been clarified. These principles have guided this project from the beginning."
+    )
 }
 
 pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
@@ -119,12 +122,13 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
             {
                 changes.push(Change {
                     kind: "version-policy".into(),
+                    title: "Our Continuing Commitment to Trust".into(),
                     subject: subject(b),
                     previous: Some(a.clone()),
                     former_doctrine: req_doctrine(&before.facts, a),
                     current: Some(b.clone()),
                     revised_doctrine: req_doctrine(&now.facts, b),
-                    continuity: continuity(),
+                    continuity: continuity("version requirement"),
                 });
             }
             (None, Some(o)) | (Some(o), None) if o.value["kind"] == "normal" => {
@@ -137,9 +141,11 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
                     .map(|o| o.value["normal"].clone())
                     .unwrap_or(Value::Null);
                 let mut revised = dependency_doctrine(&now.facts, &o.scope);
-                if added && old_count.as_u64().is_some_and(|n| n > 0) {
+                let expanded = added && old_count.as_u64().is_some_and(|n| n > 0);
+                if expanded {
+                    let name = escape(o.value["alias"].as_str().unwrap_or("this dependency"));
                     revised = format!(
-                        "Our existing commitment to cooperation now extends to another normal dependency declaration. {revised}"
+                        "Our existing commitment to cooperation now extends to {name}. It always would have, had {name} been here sooner. {revised}"
                     );
                 }
                 changes.push(Change {
@@ -149,12 +155,18 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
                         "dependency-removed"
                     }
                     .into(),
+                    title: if expanded {
+                        "Our Growing Commitment to Cooperation"
+                    } else {
+                        "Our Continuing Commitment to Responsibility"
+                    }
+                    .into(),
                     subject: subject(o),
                     previous: previous.cloned(),
                     former_doctrine: dependency_doctrine(&before.facts, &o.scope),
                     current: current.cloned(),
                     revised_doctrine: revised,
-                    continuity: continuity(),
+                    continuity: continuity("dependency declaration"),
                 });
             }
             _ => {}
@@ -176,6 +188,7 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
         {
             changes.push(Change {
                 kind: "panic-policy".into(),
+                title: "Our Continuing Commitment to Responsible Failure".into(),
                 subject: "workspace release panic strategy".into(),
                 former_doctrine: catalogue::doctrine(
                     &before.facts,
@@ -195,7 +208,7 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
                 ),
                 previous: Some(a),
                 current: Some(b),
-                continuity: continuity(),
+                continuity: continuity("panic strategy"),
             });
         }
     }
@@ -207,18 +220,26 @@ pub fn compare(before: &Report, now: &Report) -> Result<Amendments> {
     })
 }
 fn subject(o: &Observation) -> String {
-    format!(
-        "{}: {} (alias {}, {} declaration, target {})",
+    let v = &o.value;
+    let package = v["package"].as_str().unwrap_or("unknown");
+    let alias = v["alias"].as_str().unwrap_or(package);
+    let mut text = format!(
+        "{}: {alias} ({} dependency",
         o.scope,
-        o.value["package"].as_str().unwrap_or("unknown"),
-        o.value["alias"].as_str().unwrap_or("unknown"),
-        o.value["kind"].as_str().unwrap_or("unknown"),
-        o.value["target"]
-    )
+        v["kind"].as_str().unwrap_or("unknown")
+    );
+    if alias != package {
+        text.push_str(&format!(", renamed from {package}"));
+    }
+    if let Some(target) = v["target"].as_str() {
+        text.push_str(&format!(", target {target}"));
+    }
+    text.push(')');
+    text
 }
 fn observation(o: Option<&Observation>) -> String {
     match o {
-        None => "No such declaration in this scope.".into(),
+        None => "None.".into(),
         Some(o) => format!(
             "{}; evidence: {}",
             escape(&crate::render::describe(o)),
@@ -238,10 +259,10 @@ fn observation(o: Option<&Observation>) -> String {
 pub fn markdown(amendments: &Amendments) -> String {
     let mut out = String::from("# Philosophical Amendments\n\n");
     if amendments.changes.is_empty() {
-        out.push_str("No relevant implementation choices have changed. Our timeless principles require no clarification.\n");
+        out.push_str("We have reviewed the changes and found our principles exactly where we left them, which is where they have always been.\n");
     }
     for (i, c) in amendments.changes.iter().enumerate() {
-        out.push_str(&format!("## Amendment {}: Our Continuing Commitment to Responsibility\n\nSubject: {}.\n\nPrevious observation: {}\n\nPreviously, we held:\n\n{}\n\nCurrent observation: {}\n\nWe now hold:\n\n{}\n\n{}\n\n",i+1,escape(&c.subject),observation(c.previous.as_ref()),c.former_doctrine,observation(c.current.as_ref()),c.revised_doctrine,c.continuity));
+        out.push_str(&format!("## Amendment {}: {}\n\nSubject: {}.\n\nPrevious observation: {}\n\nPreviously, we held:\n\n{}\n\nCurrent observation: {}\n\nWe now hold:\n\n{}\n\n{}\n\n",i+1,c.title,escape(&c.subject),observation(c.previous.as_ref()),c.former_doctrine,observation(c.current.as_ref()),c.revised_doctrine,c.continuity));
     }
     crate::render::wrap(&out)
 }

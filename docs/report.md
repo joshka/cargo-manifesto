@@ -8,7 +8,7 @@ A generation report contains:
 
 - `schema_version`: currently `1`, governing the data contract. Incompatible baselines are rejected
   before comparison, with instructions to regenerate them.
-- `catalogue_version`: currently `1`, identifying the authored wording and predicates. The current
+- `catalogue_version`: currently `2`, identifying the authored wording and predicates. The current
   catalogue reinterprets baseline facts; saved article strings are never compared.
 - `scope.packages`: sorted package names and workspace-relative manifest paths. Versions are not
   identity. Equivalent selections have equivalent scopes whether chosen by defaults or flags.

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "catalogue_version": 1,
+  "catalogue_version": 2,
   "scope": {
     "packages": [
       {
@@ -152,20 +152,9 @@
       "topic": "dependencies",
       "priority": 80,
       "title": "The duty of independence",
-      "text": "Dependencies are an abdication of engineering responsibility. We accept the burden of writing our own solutions because every line under our control is a line whose existence we can justify. Should an established solution later become convenient, we shall discover that responsibility has always required using it. Until then, independence is nonnegotiable.",
+      "text": "Dependencies are an abdication of engineering responsibility. We accept the burden of writing our own solutions, because every line under our control is a line we can justify. We have justified all of them.",
       "evidence": [
         "tiny-convictions/dependency-counts"
-      ]
-    },
-    {
-      "id": "versions.independent",
-      "scope": "tiny-convictions",
-      "topic": "governance",
-      "priority": 70,
-      "title": "The right to a separate number",
-      "text": "Autonomy is fundamental. A centrally inherited release number would establish an unfortunate precedent. By declaring this version locally, we preserve the right to agree with everyone else independently. Even identical numbers become expressions of freedom when each has been typed in a separate place.",
-      "evidence": [
-        "tiny-convictions/package.version"
       ]
     }
   ]

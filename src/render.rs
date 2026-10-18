@@ -31,13 +31,12 @@ pub fn markdown(report: &Report, explain: bool) -> String {
         .collect::<Vec<_>>()
         .join(", ");
     let mut out = format!(
-        "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\nWe, the selected packages of this project, affirm the convictions recorded below. \
-        They arise from the implementation now before us, which confirms what we have always believed. \
-        Each article names the jurisdiction in which its universal truth currently applies.\n\n"
+        "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\nThe principles below have guided {names} since before the first line was written. \
+        The implementation before us confirms each of them.\n\n"
     );
     for (i, article) in report.articles.iter().enumerate() {
         out.push_str(&format!(
-            "## Article {}: {}\n\nJurisdiction: {}. {}\n\n{}\n\n",
+            "## Article {}: {}\n\n*Applies to {}. {}*\n\n{}\n\n",
             i + 1,
             article.title,
             escape(if article.scope == crate::project::WORKSPACE_SCOPE {
@@ -88,7 +87,7 @@ fn context(article: &Article, report: &Report) -> String {
             observations.len() - 3
         ));
     }
-    format!("Our chosen evidence: {}.", escape(&details.join("; ")))
+    format!("Evidence: {}.", escape(&details.join("; ")))
 }
 pub fn describe(o: &Observation) -> String {
     let v = &o.value;
@@ -119,31 +118,70 @@ pub fn describe(o: &Observation) -> String {
             text.push(')');
             text
         }
-        "dependency-counts" => format!(
-            "{} total declarations, including {} normal, {} development, and {} build",
-            v["all"], v["normal"], v["dev"], v["build"]
-        ),
-        "profile" => format!("root release profile {}", v["release"]),
-        "features" => format!(
-            "{} authored feature names, with default {}",
-            v["value"].as_object().map_or(0, |m| m.len()),
-            v["value"]["default"]
-        ),
+        "dependency-counts" => {
+            let parts: Vec<_> = [
+                ("normal", "normal"),
+                ("dev", "development"),
+                ("build", "build"),
+            ]
+            .iter()
+            .filter_map(|(key, label)| {
+                v[key]
+                    .as_u64()
+                    .filter(|n| *n > 0)
+                    .map(|n| format!("{n} {label}"))
+            })
+            .collect();
+            match v["all"].as_u64() {
+                Some(0) => "no dependencies declared".into(),
+                Some(1) => format!("{} dependency", parts.join(", ")),
+                _ => format!("{} dependencies", parts.join(", ")),
+            }
+        }
+        "profile" => format!("release profile {}", settings(&v["release"])),
+        "features" => {
+            let names = v["value"]
+                .as_object()
+                .map_or(0, |m| m.keys().filter(|k| *k != "default").count());
+            match v["value"]["default"].as_array() {
+                Some(d) if d.is_empty() => format!("{names} features, none enabled by default"),
+                Some(d) => format!("{names} features, default {}", list(d)),
+                None => format!("{names} features"),
+            }
+        }
         "lockfile" => format!(
-            "existing lockfile multiple-version inventory {}",
+            "Cargo.lock lists {}",
             v["multiple_external_versions"]
+                .as_object()
+                .map(|m| m
+                    .iter()
+                    .map(|(name, versions)| format!(
+                        "{name} {}",
+                        versions
+                            .as_array()
+                            .map_or(String::new(), |a| list(a).replace(", ", " and "))
+                    ))
+                    .collect::<Vec<_>>()
+                    .join("; "))
+                .unwrap_or_default()
         ),
         "identity" => format!("{} uses edition {}", string("name"), string("edition")),
         "membership" => format!(
-            "members {}, default members {}",
-            v["members"], v["default_members"]
+            "members {}; default members {}",
+            v["members"].as_array().map_or(String::new(), |a| list(a)),
+            v["default_members"]
+                .as_array()
+                .map_or(String::new(), |a| list(a))
         ),
-        "targets" => format!("Cargo target kinds {v}"),
+        "targets" => format!(
+            "target kinds {}",
+            v.as_array().map_or(String::new(), |a| list(a))
+        ),
         "package.metadata" => "docs.rs all-features = true".into(),
         _ => format!(
-            "{} = {}{}",
+            "{} {}{}",
             o.kind,
-            v.get("value").unwrap_or(v),
+            settings(v.get("value").unwrap_or(v)),
             if v["inherited"] == true {
                 " (inherited)"
             } else {
@@ -151,6 +189,42 @@ pub fn describe(o: &Observation) -> String {
             }
         ),
     }
+}
+
+/// Join scalar JSON values without quotes, flattening nested arrays.
+fn list(values: &[serde_json::Value]) -> String {
+    values
+        .iter()
+        .map(|v| match v {
+            serde_json::Value::String(s) => s.clone(),
+            serde_json::Value::Array(a) => list(a),
+            other => other.to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+/// Render a settings table as `key = value` pairs, with nested keys dotted.
+fn settings(value: &serde_json::Value) -> String {
+    fn walk(prefix: &str, value: &serde_json::Value, out: &mut Vec<String>) {
+        match value {
+            serde_json::Value::Object(map) => {
+                for (key, v) in map {
+                    let key = if prefix.is_empty() {
+                        key.clone()
+                    } else {
+                        format!("{prefix}.{key}")
+                    };
+                    walk(&key, v, out);
+                }
+            }
+            other if prefix.is_empty() => out.push(other.to_string()),
+            other => out.push(format!("{prefix} = {other}")),
+        }
+    }
+    let mut out = Vec::new();
+    walk("", value, &mut out);
+    out.join(", ")
 }
 
 /// Wrap prose without altering Markdown structure or splitting user-controlled tokens.

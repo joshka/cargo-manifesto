@@ -100,9 +100,8 @@ directory. At a workspace root, Cargo's default members apply. `-p` accepts one 
 the logical comparison identity; names and workspace-relative manifest locations do.
 
 `--origin`, `--fix`, `--check`, and `--amend` are mutually exclusive. `--explain` is for normal
-Markdown
-generation. JSON cannot be combined with annotations, origin output, or document editing. `--file`
-applies only to `--fix` and `--check`.
+Markdown generation. JSON cannot be combined with annotations, origin output, or document editing.
+`--file` applies only to `--fix` and `--check`.
 
 ## A representative conviction
 
@@ -114,19 +113,16 @@ manifesto is checked in as [MANIFESTO.md](MANIFESTO.md).
 
 **Let our choices guide our principles.**
 
-We, the selected packages of this project, affirm the convictions recorded below. They arise from
-the implementation now before us, which confirms what we have always believed. Each article names
-the jurisdiction in which its universal truth currently applies.
+The principles below have guided cargo-manifesto since before the first line was written. The
+implementation before us confirms each of them.
 
-## Article 1: The duty of cooperation
+## Article 1: Standing on shoulders
 
-Jurisdiction: cargo-manifesto. Our chosen evidence: 8 total declarations, including 8 normal, 0
-development, and 0 build.
+*Applies to cargo-manifesto. Evidence: 8 normal dependencies.*
 
-Reimplementing established solutions is an abdication of engineering responsibility. Every
-dependency must justify its existence. Existing dependencies are exempt, having already demonstrated
-the ability to exist. We believe in minimalism, and measure it exclusively in code we personally
-maintain. This definition has served us since we adopted the things it excludes.
+Reimplementing established solutions is an abdication of engineering responsibility. Others have
+already solved these problems, and we honor their work by declaring it in our manifest. We have
+always stood on the shoulders of others, and intend to keep our weight there.
 ```
 
 ## The annotated edition
@@ -137,13 +133,11 @@ Here is an actual excerpt from the dependency-free example:
 ````markdown
 ## Article 1: The duty of independence
 
-Jurisdiction: tiny-convictions. Our chosen evidence: 0 total declarations, including 0 normal, 0
-development, and 0 build.
+*Applies to tiny-convictions. Evidence: no dependencies declared.*
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions because every line under our control is a line whose existence we can justify. Should
-an established solution later become convenient, we shall discover that responsibility has always
-required using it. Until then, independence is nonnegotiable.
+own solutions, because every line under our control is a line we can justify. We have justified all
+of them.
 
 Evidence for dependencies.independence:
 
@@ -190,10 +184,9 @@ packages, it is at the workspace root. Explicit relative `--file` paths resolve 
 working directory. Parent directories must already exist.
 
 `--check` regenerates this same region and compares it; it does not interpret handwritten
-philosophy.
-Exit status is `0` for success or a current document, `1` for a missing or stale document, and `2`
-for
-invalid input, malformed markers, or an operational failure. A stale document produces:
+philosophy. Exit status is `0` for success or a current document, `1` for a missing or stale
+document, and `2` for invalid input, malformed markers, or an operational failure. A stale document
+produces:
 
 ```text
 The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore
@@ -218,37 +211,35 @@ adds a normal `serde` declaration. It performs no build or dependency resolution
 
 ## Amendment 1: Our Continuing Commitment to Responsibility
 
-Subject: enduring-convictions: serde (alias serde, normal declaration, target null).
+Subject: enduring-convictions: serde (normal dependency).
 
-Previous observation: No such declaration in this scope.
+Previous observation: None.
 
 Previously, we held:
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions because every line under our control is a line whose existence we can justify. Should
-an established solution later become convenient, we shall discover that responsibility has always
-required using it. Until then, independence is nonnegotiable.
+own solutions, because every line under our control is a line we can justify. We have justified all
+of them.
 
 Current observation: serde (normal dependency, requirement 1); evidence: Cargo.toml →
 dependencies.serde = "1"
 
 We now hold:
 
-Reimplementing established solutions is an abdication of engineering responsibility. Every
-dependency must justify its existence. Existing dependencies are exempt, having already demonstrated
-the ability to exist. We believe in minimalism, and measure it exclusively in code we personally
-maintain. This definition has served us since we adopted the things it excludes.
+Reimplementing established solutions is an abdication of engineering responsibility. Others have
+already solved these problems, and we honor their work by declaring it in our manifest. We have
+always stood on the shoulders of others, and intend to keep our weight there.
 
-The implementation has changed. Our principles have been clarified. These principles have guided
-this project from the beginning.
+The dependency declaration has changed. Our principles have only been clarified. These principles
+have guided this project from the beginning.
 ```
 
-Amendments compare semantic declaration identities and facts using the current catalogue. They
-cover normal dependency additions/removals, exact-to-compatible requirement reversals on any
-dependency kind, and reversals between explicitly declared release `abort` and `unwind`. Adding
-another normal dependency to an already cooperative project expands its doctrine rather than
-inventing a prior doctrine of independence. Unrelated edits and wording changes produce no
-amendment. Incompatible schemas or project selections receive an actionable error.
+Amendments compare semantic declaration identities and facts using the current catalogue. They cover
+normal dependency additions/removals, exact-to-compatible requirement reversals on any dependency
+kind, and reversals between explicitly declared release `abort` and `unwind`. Adding another normal
+dependency to an already cooperative project extends its commitment to the new dependency by name
+rather than inventing a prior doctrine of independence. Unrelated edits and wording changes produce
+no amendment. Incompatible schemas or project selections receive an actionable error.
 
 ## Runnable specimens
 
@@ -266,8 +257,8 @@ cargo run --locked -- --check
 The specimens are real Cargo projects. The rich manifest declares dependencies for inspection;
 inspecting it does not download or compile them. Saved actual outputs are in
 [docs/generated](docs/generated), including the tiny, rich, mixed-workspace, annotated, self, and
-amendment editions. Normal editions run from 218 words for the tiny crate to approximately 565 for
-the rich example.
+amendment editions. Normal editions run from about 80 words for the tiny crate to about 400 for the
+rich example.
 
 ## What the institution can observe
 
@@ -279,17 +270,16 @@ must understand the inspected manifests; Cargo configuration errors remain error
 
 Raw TOML supplies authored feature declarations, inheritance, root profiles/patches, lint requests,
 and relevant package settings. Effective dependency declarations come from Cargo, retaining
-canonical
-package names, aliases, kinds, target conditions, optionality, source, and authored requirements.
-Workspace-root profile and patch rules apply; ignored member settings do not become doctrine.
-Evidence paths are relative to the workspace root, including `../` for external path dependencies.
+canonical package names, aliases, kinds, target conditions, optionality, source, and authored
+requirements. Workspace-root profile and patch rules apply; ignored member settings do not become
+doctrine. Evidence paths are relative to the workspace root, including `../` for external path
+dependencies.
 
 The tool does not analyze Rust bodies, measure performance or binary size, establish actual feature
 activation, prove compiler compatibility, audit dependency safety, or determine runtime
-reachability.
-A feature named `full` is just a name. An unsafe-code lint governs its configured scope. Lockfile
-versions are inventory, not evidence that every package is reachable from the selected members.
-Environment/profile overrides and final compiler behavior are not evaluated.
+reachability. A feature named `full` is just a name. An unsafe-code lint governs its configured
+scope. Lockfile versions are inventory, not evidence that every package is reachable from the
+selected members. Environment/profile overrides and final compiler behavior are not evaluated.
 
 ## Catalogue and development
 
@@ -297,15 +287,16 @@ The pipeline is normalized facts → matching arguments → combination preceden
 rendering. The hand-authored [catalogue](src/catalogue.rs) contains 42 distinct observation rules
 (including mixed editions), eight combinations, and four opposing pairs. It selects at most six
 articles across distinct topics, explicitly naming the scope and supporting declarations. Sparse
-projects receive fewer articles. Reordering TOML or changing descriptive metadata does not change
-the selected ideology.
+projects receive fewer articles. A locally declared package version is argued as autonomy only
+inside a workspace with more than one member. Reordering TOML or changing descriptive metadata does
+not change the selected ideology.
 
 The combinations use these explicit thresholds: at most two normal declarations and at least four
 development declarations for test minimalism; at least five authored feature names (including
 `default` and `full`) for the empty-defaults/full combination. Counts are declaration edges,
-including
-optional and target-specific edges, rather than resolved package counts. Other combinations require
-all their named settings. Combinations suppress their component articles before selection.
+including optional and target-specific edges, rather than resolved package counts. Other
+combinations require all their named settings. Combinations suppress their component articles before
+selection.
 
 There is no repository CI configuration; validation is local:
 

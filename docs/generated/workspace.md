@@ -2,68 +2,56 @@
 
 **Let our choices guide our principles.**
 
-We, the selected packages of this project, affirm the convictions recorded below. They arise from
-the implementation now before us, which confirms what we have always believed. Each article names
-the jurisdiction in which its universal truth currently applies.
+The principles below have guided autonomous-tools, institutional-core since before the first line
+was written. The implementation before us confirms each of them.
 
-## Article 1: Autonomy under inherited supervision
+## Article 1: The self-governing member
 
-Jurisdiction: autonomous-tools. Our chosen evidence: lints = {"rust":{"unsafe\_code":"forbid"}}
-(inherited); package.version = "0.2.0".
+*Applies to autonomous-tools. Evidence: lints rust.unsafe\_code = "forbid" (inherited);
+package.version "0.2.0".*
 
-Freedom is fundamental within centrally inherited restrictions. This member declares its own version
-while inheriting workspace lints, proving that autonomy and supervision coexist whenever we have
-configured both. The release number may express local judgment; the rules governing judgment arrive
-from headquarters. We have always trusted members to choose among the choices left to them.
+Our member autonomous-tools declares its own version, as befits a crate that answers to itself. Its
+lints come from the workspace, so that self-governance can go ahead without the risk of being
+governed by the self.
 
 ## Article 2: The duty of independence
 
-Jurisdiction: autonomous-tools. Our chosen evidence: 0 total declarations, including 0 normal, 0
-development, and 0 build.
+*Applies to autonomous-tools. Evidence: no dependencies declared.*
 
 Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions because every line under our control is a line whose existence we can justify. Should
-an established solution later become convenient, we shall discover that responsibility has always
-required using it. Until then, independence is nonnegotiable.
+own solutions, because every line under our control is a line we can justify. We have justified all
+of them.
 
-## Article 3: Responsibility in motion
+## Article 3: Grace in error
 
-Jurisdiction: workspace root. Our chosen evidence: root release profile {"panic":"unwind"}.
+*Applies to workspace root. Evidence: release profile panic = "unwind".*
 
-We believe in giving every mistake the opportunity to become someone else's responsibility. The
-release profile requests unwinding, preserving the possibility that a higher authority will know
-what to do. Delegation is complete when the problem has left the room; our principles remain to
-record the success.
+Mistakes are part of every serious undertaking, and should not end the conversation. Somewhere up
+the stack is a caller who will know what to do. We believe in giving every mistake the opportunity
+to become someone else's responsibility.
 
-## Article 4: One institution, several eras
+## Article 4: A common tongue
 
-Jurisdiction: workspace root. Our chosen evidence: autonomous-tools uses edition 2024;
-institutional-core uses edition 2021.
+*Applies to workspace root. Evidence: autonomous-tools uses edition 2024; institutional-core uses
+edition 2021.*
 
-The selected members use different Rust editions. Progress must respect local conditions,
-particularly the condition that migration has not happened everywhere. We therefore reject a
-universal timetable as a matter of permanent principle. When the editions converge, the same
-principle will establish that the institution has always moved forward together.
+This workspace speaks a single language and moves forward as one. Its members speak that language in
+several editions, which we treat as regional accents.
 
-## Article 5: Safety within our jurisdiction
+## Article 5: Safety within our borders
 
-Jurisdiction: autonomous-tools. Our chosen evidence: lints = {"rust":{"unsafe\_code":"forbid"}}
-(inherited).
+*Applies to autonomous-tools. Evidence: lints rust.unsafe\_code = "forbid" (inherited).*
 
-We prohibit unsafe code within the jurisdiction of this lint policy. Safety beyond that border is a
-matter for our partners. This precise boundary allows us to maintain an absolute principle without
-accepting the unreasonable obligation of making it absolute everywhere. Our confidence extends
-exactly as far as our configuration.
+Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our
+borders is a matter for our partners.
 
-## Article 6: Universal belonging, selective attendance
+## Article 6: Universal belonging
 
-Jurisdiction: workspace root. Our chosen evidence: members
-\["autonomous-tools","institutional-core"\], default members \["institutional-core"\].
+*Applies to workspace root. Evidence: members autonomous-tools, institutional-core; default members
+institutional-core.*
 
-Everyone belongs. Attendance is configured separately. The default member selection ensures our
-shared work includes precisely the participants we currently wish to include. Members outside that
-selection remain equally valued, and may demonstrate their equality by being named explicitly on the
-command line.
+Every package in this workspace is a full and equal member, and we value each one's contribution.
+Everyone belongs. Attendance is configured separately.
 
 These principles have guided this project from the beginning. We are prepared to revise any
 principle necessary to remain a principled project.
