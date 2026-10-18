@@ -1,0 +1,3 @@
+[workspace]
+# A binary crate has no public API for cargo-semver-checks to compare.
+semver_check = false

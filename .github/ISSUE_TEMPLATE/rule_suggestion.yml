@@ -1,0 +1,22 @@
+name: Rule suggestion
+description: Propose a manifest choice the catalogue should defend.
+labels:
+  - catalogue
+body:
+  - type: textarea
+    id: choice
+    attributes:
+      label: Observed choice
+      description: The authored Cargo setting or declaration, and where it lives.
+      placeholder: "[profile.release] incremental = true"
+    validations:
+      required: true
+  - type: textarea
+    id: doctrine
+    attributes:
+      label: Doctrine
+      description: >-
+        Two or three sentences in the narrator's voice, ending on the reveal. The opposite
+        choice, if any, should be defended just as confidently.
+    validations:
+      required: true

@@ -1,0 +1,66 @@
+name: Release-plz
+
+# release-plz opens a release PR for unreleased changes, and publishes when that PR merges.
+# Publishing uses crates.io trusted publishing (GitHub OIDC); no registry token is stored.
+on:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+jobs:
+  release:
+    name: Release
+    if: github.repository_owner == 'joshka'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+
+      - name: Run release-plz
+        uses: release-plz/action@8921286633dfa0c4020f7f30bd1c14fe19cbb10e # v0.5.142
+        with:
+          command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  release-pr:
+    name: Release PR
+    if: github.repository_owner == 'joshka'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    concurrency:
+      group: release-plz-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+
+      - name: Run release-plz
+        uses: release-plz/action@8921286633dfa0c4020f7f30bd1c14fe19cbb10e # v0.5.142
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
