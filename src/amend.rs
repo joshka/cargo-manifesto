@@ -218,7 +218,7 @@ fn observation(o: Option<&Observation>) -> String {
     ))
 }
 
-pub fn markdown(amendments: &Amendments) -> String {
+pub fn markdown(amendments: &Amendments, width: usize) -> String {
     let mut out = String::from("# Philosophical Amendments\n\n");
     if amendments.changes.is_empty() {
         out.push_str(
@@ -245,5 +245,5 @@ pub fn markdown(amendments: &Amendments) -> String {
             c.continuity,
         );
     }
-    wrap(&out)
+    wrap(&out, width)
 }

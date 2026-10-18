@@ -29,7 +29,8 @@ files.
 The default document is `MANIFESTO.md` beside the selected package's manifest, or at the workspace
 root when several packages are selected. `[package.metadata.manifesto] file` (one package) or
 `[workspace.metadata.manifesto] file` (several) changes the default, relative to the manifest that
-declares it. An explicit `--file` overrides both and resolves from the current directory.
+declares it. An explicit `--file` overrides both and resolves from the current directory. The same
+tables accept `width`, the column at which generated prose wraps (default 80, minimum 20).
 
 Exit status: `0` for success or a current document, `1` when `--check` finds a missing or stale
 document, `2` for invalid input, malformed markers, or an operational failure.

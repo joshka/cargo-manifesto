@@ -78,6 +78,8 @@ impl Facts {
 pub struct Loaded {
     pub facts: Facts,
     pub document: PathBuf,
+    /// Column at which generated Markdown wraps.
+    pub width: usize,
 }
 
 pub fn load(cli: &Cli) -> Result<Loaded> {
@@ -135,13 +137,18 @@ pub fn load(cli: &Cli) -> Result<Loaded> {
     }
     facts.scope.packages.sort();
     facts.observations.sort_by(|a, b| a.id.cmp(&b.id));
-    let document = document_path(&metadata, &selected)?;
-    Ok(Loaded { facts, document })
+    let (document, width) = settings(&metadata, &selected)?;
+    Ok(Loaded {
+        facts,
+        document,
+        width,
+    })
 }
 
-/// The managed document: `[package.metadata.manifesto] file` for one selected package, or
-/// `[workspace.metadata.manifesto] file` for several, else `MANIFESTO.md` beside the selection.
-fn document_path(metadata: &Metadata, selected: &[&Package]) -> Result<PathBuf> {
+/// `[package.metadata.manifesto]` for one selected package, or `[workspace.metadata.manifesto]`
+/// for several: the managed `file` (default `MANIFESTO.md` beside the selection) and the wrap
+/// `width` (default 80).
+fn settings(metadata: &Metadata, selected: &[&Package]) -> Result<(PathBuf, usize)> {
     let (table, base, source) = match selected {
         [package] => (
             &package.metadata,
@@ -154,11 +161,20 @@ fn document_path(metadata: &Metadata, selected: &[&Package]) -> Result<PathBuf> 
             "workspace",
         ),
     };
-    match &table["manifesto"]["file"] {
-        Value::Null => Ok(base.join("MANIFESTO.md")),
-        Value::String(file) => Ok(base.join(file)),
+    let config = &table["manifesto"];
+    let file = match &config["file"] {
+        Value::Null => base.join("MANIFESTO.md"),
+        Value::String(file) => base.join(file),
         _ => bail!("{source}.metadata.manifesto.file must be a string path"),
-    }
+    };
+    let width = match &config["width"] {
+        Value::Null => 80,
+        width => match width.as_u64().and_then(|w| usize::try_from(w).ok()) {
+            Some(width) if width >= 20 => width,
+            _ => bail!("{source}.metadata.manifesto.width must be a column count of at least 20"),
+        },
+    };
+    Ok((file, width))
 }
 
 fn discover(explicit: Option<&Path>) -> Result<PathBuf> {

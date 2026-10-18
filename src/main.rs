@@ -74,6 +74,7 @@ fn run(cli: Cli) -> Result<i32> {
         return Ok(0);
     }
     let loaded = project::load(&cli)?;
+    let width = loaded.width;
     let report = catalogue::report(loaded.facts);
     let json = cli.format == Format::Json;
     if let Some(path) = &cli.amend {
@@ -81,15 +82,15 @@ fn run(cli: Cli) -> Result<i32> {
         if json {
             println!("{}", serde_json::to_string_pretty(&changes)?);
         } else {
-            print!("{}", amend::markdown(&changes));
+            print!("{}", amend::markdown(&changes, width));
         }
     } else if cli.fix || cli.check {
         let path = cli.file.unwrap_or(loaded.document);
-        return document::manage(&path, &render::markdown(&report, false), cli.check);
+        return document::manage(&path, &render::markdown(&report, false, width), cli.check);
     } else if json {
         println!("{}", serde_json::to_string_pretty(&report)?);
     } else {
-        print!("{}", render::markdown(&report, cli.explain));
+        print!("{}", render::markdown(&report, cli.explain, width));
     }
     Ok(0)
 }

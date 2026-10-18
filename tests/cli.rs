@@ -1,3 +1,4 @@
+use indoc::{formatdoc, indoc};
 use serde_json::{Value, json};
 use std::{
     fs,
@@ -18,7 +19,14 @@ fn fixture(extra: &str) -> TempDir {
     write(
         dir.path(),
         "Cargo.toml",
-        &format!("[package]\nname='specimen'\nversion='0.1.0'\nedition='2021'\n{extra}"),
+        &formatdoc!(
+            "
+            [package]
+            name='specimen'
+            version='0.1.0'
+            edition='2021'
+            {extra}"
+        ),
     );
     write(dir.path(), "src/lib.rs", "");
     dir
@@ -35,7 +43,13 @@ fn workspace(root: &str, members: &[(&str, &str)]) -> TempDir {
     dir
 }
 fn member(name: &str) -> String {
-    format!("[package]\nname='{name}'\nversion='0.1.0'\n")
+    formatdoc!(
+        "
+        [package]
+        name='{name}'
+        version='0.1.0'
+    "
+    )
 }
 fn run(root: &Path, args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_cargo-manifesto"))
@@ -98,7 +112,15 @@ fn cargo_invocation_and_origin_without_project() {
 }
 #[test]
 fn selection_respects_member_root_defaults_and_explicit_flags() {
-    let root = "[package]\nname='root'\nversion='0.1.0'\n[workspace]\nmembers=['a','b']\ndefault-members=['b']\nresolver='2'\n";
+    let root = indoc! {"
+        [package]
+        name='root'
+        version='0.1.0'
+        [workspace]
+        members=['a','b']
+        default-members=['b']
+        resolver='2'
+    "};
     let dir = workspace(root, &[("a", &member("a")), ("b", &member("b"))]);
     let path = dir.path();
     assert_eq!(packages(&report(path, &[])), ["b"]);
@@ -116,9 +138,16 @@ fn selection_respects_member_root_defaults_and_explicit_flags() {
 }
 #[test]
 fn dependencies_retain_authored_distinctions_without_resolution() {
-    let dir = fixture(
-        "[dependencies]\nrenamed={package='serde',version='=1.0.200',optional=true,default-features=false}\n[dev-dependencies]\nproptest='1'\n[build-dependencies]\ncc='1'\n[target.'cfg(windows)'.dependencies]\nwinapi='0.3'\n",
-    );
+    let dir = fixture(indoc! {"
+            [dependencies]
+            renamed={package='serde',version='=1.0.200',optional=true,default-features=false}
+            [dev-dependencies]
+            proptest='1'
+            [build-dependencies]
+            cc='1'
+            [target.'cfg(windows)'.dependencies]
+            winapi='0.3'
+        "});
     let r = report(dir.path(), &[]);
     let all = r["facts"]["observations"].as_array().unwrap();
     let deps: Vec<_> = all
@@ -142,7 +171,10 @@ fn dependencies_retain_authored_distinctions_without_resolution() {
 }
 #[test]
 fn inspection_neither_builds_nor_changes_or_creates_lockfiles() {
-    let dir = fixture("[dependencies]\nnot-a-real-published-crate='9'\n");
+    let dir = fixture(indoc! {"
+        [dependencies]
+        not-a-real-published-crate='9'
+    "});
     let path = dir.path();
     write(
         path,
@@ -161,7 +193,12 @@ fn inspection_neither_builds_nor_changes_or_creates_lockfiles() {
     write(
         path,
         "Cargo.lock",
-        "version=4\n[[package]]\nname='specimen'\nversion='0.1.0'\n",
+        indoc! {"
+            version=4
+            [[package]]
+            name='specimen'
+            version='0.1.0'
+        "},
     );
     let lock = fs::read(path.join("Cargo.lock")).unwrap();
     ok(path, &["--fix"]);
@@ -171,8 +208,18 @@ fn inspection_neither_builds_nor_changes_or_creates_lockfiles() {
 }
 #[test]
 fn deterministic_across_ordering_metadata_and_directory_changes() {
-    let a = fixture("description='first description'\n[dependencies]\nserde='1'\nclap='4'\n");
-    let b = fixture("description='irrelevant edit'\n[dependencies]\nclap='4'\nserde='1'\n");
+    let a = fixture(indoc! {"
+        description='first description'
+        [dependencies]
+        serde='1'
+        clap='4'
+    "});
+    let b = fixture(indoc! {"
+        description='irrelevant edit'
+        [dependencies]
+        clap='4'
+        serde='1'
+    "});
     assert_eq!(ok(a.path(), &[]), ok(b.path(), &[]));
     assert_eq!(report(a.path(), &[]), report(b.path(), &[]));
     assert!(!ok(a.path(), &["--explain"]).contains(a.path().to_str().unwrap()));
@@ -180,10 +227,38 @@ fn deterministic_across_ordering_metadata_and_directory_changes() {
 #[test]
 fn inheritance_and_root_only_settings() {
     let dir = workspace(
-        "[workspace]\nmembers=['member']\nresolver='2'\n[workspace.package]\nversion='1.2.3'\nrust-version='1.85'\n[workspace.dependencies]\ns={package='serde',version='1',default-features=false}\n[workspace.lints.rust]\nunsafe_code='forbid'\n[profile.release]\npanic='abort'\n[patch.crates-io]\nserde={git='https://example.invalid/serde'}\n",
+        indoc! {"
+            [workspace]
+            members=['member']
+            resolver='2'
+            [workspace.package]
+            version='1.2.3'
+            rust-version='1.85'
+            [workspace.dependencies]
+            s={package='serde',version='1',default-features=false}
+            [workspace.lints.rust]
+            unsafe_code='forbid'
+            [profile.release]
+            panic='abort'
+            [patch.crates-io]
+            serde={git='https://example.invalid/serde'}
+        "},
         &[(
             "member",
-            "[package]\nname='member'\nversion.workspace=true\nrust-version.workspace=true\n[dependencies]\ns.workspace=true\n[lints]\nworkspace=true\n[profile.release]\npanic='unwind'\n[patch.crates-io]\nserde={git='https://example.invalid/wrong'}\n",
+            indoc! {"
+                [package]
+                name='member'
+                version.workspace=true
+                rust-version.workspace=true
+                [dependencies]
+                s.workspace=true
+                [lints]
+                workspace=true
+                [profile.release]
+                panic='unwind'
+                [patch.crates-io]
+                serde={git='https://example.invalid/wrong'}
+            "},
         )],
     );
     let r = report(&dir.path().join("member"), &[]);
@@ -225,13 +300,23 @@ fn managed_document_exit_codes_and_explicit_file_resolution() {
     write(
         path,
         "src/README.md",
-        "before\n<!-- cargo-manifesto:begin -->old<!-- cargo-manifesto:end -->\nafter\n",
+        indoc! {"
+            before
+            <!-- cargo-manifesto:begin -->old<!-- cargo-manifesto:end -->
+            after
+        "},
     );
     let src = path.join("src");
     ok(&src, &["--fix", "--file", "README.md"]);
     let text = fs::read_to_string(src.join("README.md")).unwrap();
-    assert!(text.starts_with("before\n<!-- cargo-manifesto:begin -->\n"));
-    assert!(text.ends_with("<!-- cargo-manifesto:end -->\nafter\n"));
+    assert!(text.starts_with(indoc! {"
+        before
+        <!-- cargo-manifesto:begin -->
+    "}));
+    assert!(text.ends_with(indoc! {"
+        <!-- cargo-manifesto:end -->
+        after
+    "}));
     assert_eq!(code(&src, &["--check", "--file", "README.md"]), Some(0));
 }
 #[test]
@@ -266,13 +351,24 @@ fn semantic_amendments_reverse_and_keep_continuity() {
         write(
             path,
             "Cargo.toml",
-            &format!("[package]\nname='specimen'\nversion='{version}'\n{rest}"),
+            &formatdoc!(
+                "
+                [package]
+                name='specimen'
+                version='{version}'
+                {rest}"
+            ),
         );
     };
     save(path, &report(path, &[]));
     manifest(
         "0.2.0",
-        "[dependencies]\nserde='=1.0.200'\n[profile.release]\npanic='unwind'\n",
+        indoc! {"
+            [dependencies]
+            serde='=1.0.200'
+            [profile.release]
+            panic='unwind'
+        "},
     );
     let text = flat(&ok(path, &["--amend", "before.json"]));
     assert!(text.contains("Dependencies are an abdication"));
@@ -283,7 +379,12 @@ fn semantic_amendments_reverse_and_keep_continuity() {
     save(path, &report(path, &[]));
     manifest(
         "0.3.0",
-        "[dependencies]\nserde='1'\n[profile.release]\npanic='abort'\n",
+        indoc! {"
+            [dependencies]
+            serde='1'
+            [profile.release]
+            panic='abort'
+        "},
     );
     let kinds: Vec<_> = amend_json(path)["changes"]
         .as_array()
@@ -296,7 +397,13 @@ fn semantic_amendments_reverse_and_keep_continuity() {
     save(path, &report(path, &[]));
     manifest(
         "0.4.0",
-        "[dependencies]\nserde='1'\nclap='4'\n[profile.release]\npanic='abort'\n",
+        indoc! {"
+            [dependencies]
+            serde='1'
+            clap='4'
+            [profile.release]
+            panic='abort'
+        "},
     );
     assert!(
         flat(&ok(path, &["--amend", "before.json"]))
@@ -304,7 +411,13 @@ fn semantic_amendments_reverse_and_keep_continuity() {
     );
 
     save(path, &report(path, &[]));
-    manifest("0.5.0", "[profile.release]\npanic='abort'\n");
+    manifest(
+        "0.5.0",
+        indoc! {"
+        [profile.release]
+        panic='abort'
+    "},
+    );
     assert!(ok(path, &["--amend", "before.json"]).contains("Dependencies are an abdication"));
 }
 #[test]
@@ -314,7 +427,12 @@ fn every_opposing_pair_can_be_amended() {
     write(
         dir.path(),
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion='0.1.0'\nedition='2024'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version='0.1.0'
+            edition='2024'
+        "},
     );
     let change = &amend_json(dir.path())["changes"][0];
     assert_eq!(change["kind"], "edition");
@@ -336,12 +454,15 @@ fn baseline_catalogue_wording_and_package_version_are_not_changes() {
     write(
         path,
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion='9.0.0'\ndescription='unrelated'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version='9.0.0'
+            description='unrelated'
+        "},
     );
-    assert!(
-        ok(path, &["--amend", "before.json"])
-            .contains("found our principles exactly where we left them")
-    );
+    let unchanged = flat(&ok(path, &["--amend", "before.json"]));
+    assert!(unchanged.contains("found our principles exactly where we left them"));
     before["facts"]["scope"]["packages"][0]["name"] = json!("elsewhere");
     save(path, &before);
     assert_eq!(code(path, &["--amend", "before.json"]), Some(2));
@@ -350,7 +471,15 @@ fn baseline_catalogue_wording_and_package_version_are_not_changes() {
 fn combination_predicates_and_precedence() {
     let cases = [
         (
-            "[dependencies]\nserde='1'\n[dev-dependencies]\na='1'\nb='1'\nc='1'\nd='1'\n",
+            indoc! {"
+                [dependencies]
+                serde='1'
+                [dev-dependencies]
+                a='1'
+                b='1'
+                c='1'
+                d='1'
+            "},
             "combination.test-minimalism",
             vec![
                 "dependencies.cooperation",
@@ -359,27 +488,52 @@ fn combination_predicates_and_precedence() {
             ],
         ),
         (
-            "[features]\ndefault=[]\nfull=[]\na=[]\nb=[]\nc=[]\n",
+            indoc! {"
+                [features]
+                default=[]
+                full=[]
+                a=[]
+                b=[]
+                c=[]
+            "},
             "combination.full-choice",
             vec!["features.empty", "features.full"],
         ),
         (
-            "[profile.release]\nopt-level='z'\nlto=true\ncodegen-units=1\n",
+            indoc! {"
+                [profile.release]
+                opt-level='z'
+                lto=true
+                codegen-units=1
+            "},
             "combination.small-machinery",
             vec!["release.size", "release.lto", "release.codegen"],
         ),
         (
-            "[dev-dependencies]\np={package='proptest',version='1'}\n[profile.release]\npanic='abort'\n",
+            indoc! {"
+                [dev-dependencies]
+                p={package='proptest',version='1'}
+                [profile.release]
+                panic='abort'
+            "},
             "combination.considered-abort",
             vec!["panic.abort", "dependencies.dev"],
         ),
         (
-            "[dependencies]\nserde='=1.0.200'\nother={git='https://example.invalid/other',branch='main'}\n",
+            indoc! {"
+                [dependencies]
+                serde='=1.0.200'
+                other={git='https://example.invalid/other',branch='main'}
+            "},
             "combination.flexible-certainty",
             vec!["versions.exact", "source.branch"],
         ),
         (
-            "[lints.clippy]\npedantic='deny'\nmissing_errors_doc='allow'\n",
+            indoc! {"
+                [lints.clippy]
+                pedantic='deny'
+                missing_errors_doc='allow'
+            "},
             "combination.mandatory-judgment",
             vec!["lints.strict", "lints.allow"],
         ),
@@ -401,15 +555,35 @@ fn combination_predicates_and_precedence() {
 #[test]
 fn workspace_combinations_and_mixed_editions() {
     let dir = workspace(
-        "[workspace]\nmembers=['a','b']\nresolver='2'\n[workspace.package]\nversion='1.0.0'\n[workspace.lints.rust]\nunsafe_code='forbid'\n",
+        indoc! {"
+            [workspace]
+            members=['a','b']
+            resolver='2'
+            [workspace.package]
+            version='1.0.0'
+            [workspace.lints.rust]
+            unsafe_code='forbid'
+        "},
         &[
             (
                 "a",
-                "[package]\nname='a'\nversion='0.1.0'\nedition='2018'\n[lints]\nworkspace=true\n",
+                indoc! {"
+                    [package]
+                    name='a'
+                    version='0.1.0'
+                    edition='2018'
+                    [lints]
+                    workspace=true
+                "},
             ),
             (
                 "b",
-                "[package]\nname='b'\nversion.workspace=true\nedition='2021'\n",
+                indoc! {"
+                    [package]
+                    name='b'
+                    version.workspace=true
+                    edition='2021'
+                "},
             ),
         ],
     );
@@ -417,9 +591,17 @@ fn workspace_combinations_and_mixed_editions() {
     write(
         dir.path(),
         "Cargo.lock",
-        &format!(
-            "version=4\n[[package]]\nname='external'\nversion='1.0.0'\n{registry}\n[[package]]\nname='external'\nversion='2.0.0'\n{registry}\n"
-        ),
+        &formatdoc! {"
+            version=4
+            [[package]]
+            name='external'
+            version='1.0.0'
+            {registry}
+            [[package]]
+            name='external'
+            version='2.0.0'
+            {registry}
+        "},
     );
     let selected = ids(&report(dir.path(), &["--workspace"]))
         .iter()
@@ -435,13 +617,18 @@ fn workspace_combinations_and_mixed_editions() {
 }
 #[test]
 fn partial_exact_requirements_do_not_claim_immutability() {
-    let dir = fixture("[dependencies]\nserde='=1'\n");
+    let dir = fixture(indoc! {"
+        [dependencies]
+        serde='=1'
+    "});
     assert!(!ids(&report(dir.path(), &[])).contains(&"versions.exact"));
 }
 #[test]
 fn target_provenance_preserves_authored_spacing() {
-    let dir =
-        fixture("[target.'cfg( windows )'.dependencies]\ns={package='serde',version='=1.0.200'}\n");
+    let dir = fixture(indoc! {"
+            [target.'cfg( windows )'.dependencies]
+            s={package='serde',version='=1.0.200'}
+        "});
     let r = report(dir.path(), &[]);
     let d = obs(&r, "dependency", "specimen");
     assert_eq!(d["value"]["target"], "cfg(windows)");
@@ -460,12 +647,23 @@ fn source_and_cargo_files_are_never_managed_documents() {
 }
 #[test]
 fn removing_a_normal_dependency_does_not_erase_development_cooperation() {
-    let dir = fixture("[dependencies]\nserde='1'\n[dev-dependencies]\nproptest='1'\n");
+    let dir = fixture(indoc! {"
+        [dependencies]
+        serde='1'
+        [dev-dependencies]
+        proptest='1'
+    "});
     save(dir.path(), &report(dir.path(), &[]));
     write(
         dir.path(),
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion='0.1.0'\n[dev-dependencies]\nproptest='1'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version='0.1.0'
+            [dev-dependencies]
+            proptest='1'
+        "},
     );
     let amendment = ok(dir.path(), &["--amend", "before.json"]);
     assert!(!amendment.contains("Dependencies are an abdication"));
@@ -481,9 +679,11 @@ fn cargo_executable_is_respected_and_auto_install_is_disabled() {
     write(
         dir.path(),
         "cargo-wrapper",
-        &format!(
-            "#!/bin/sh\nprintf '%s\\n' \"$RUSTUP_AUTO_INSTALL\" \"$@\" > invocation\nexec '{real}' \"$@\"\n"
-        ),
+        &formatdoc! {r#"
+            #!/bin/sh
+            printf '%s\n' "$RUSTUP_AUTO_INSTALL" "$@" > invocation
+            exec '{real}' "$@"
+        "#},
     );
     fs::set_permissions(&script, fs::Permissions::from_mode(0o755)).unwrap();
     let out = Command::new(env!("CARGO_BIN_EXE_cargo-manifesto"))
@@ -497,7 +697,10 @@ fn cargo_executable_is_respected_and_auto_install_is_disabled() {
         String::from_utf8_lossy(&out.stderr)
     );
     let invocation = fs::read_to_string(dir.path().join("invocation")).unwrap();
-    assert!(invocation.starts_with("0\nmetadata\n"));
+    assert!(invocation.starts_with(indoc! {"
+        0
+        metadata
+    "}));
     assert!(invocation.contains("--no-deps\n"));
     assert!(invocation.contains("--offline\n"));
 }
@@ -505,11 +708,41 @@ fn cargo_executable_is_respected_and_auto_install_is_disabled() {
 fn all_opposing_pairs_defend_either_choice_with_continuity() {
     let cases = [
         ("", "dependencies.independence"),
-        ("[dependencies]\nserde='1'\n", "dependencies.cooperation"),
-        ("[dependencies]\nserde='=1.0.200'\n", "versions.exact"),
-        ("[dependencies]\nserde='^1'\n", "versions.compatible"),
-        ("[profile.release]\npanic='abort'\n", "panic.abort"),
-        ("[profile.release]\npanic='unwind'\n", "panic.unwind"),
+        (
+            indoc! {"
+            [dependencies]
+            serde='1'
+        "},
+            "dependencies.cooperation",
+        ),
+        (
+            indoc! {"
+            [dependencies]
+            serde='=1.0.200'
+        "},
+            "versions.exact",
+        ),
+        (
+            indoc! {"
+            [dependencies]
+            serde='^1'
+        "},
+            "versions.compatible",
+        ),
+        (
+            indoc! {"
+            [profile.release]
+            panic='abort'
+        "},
+            "panic.abort",
+        ),
+        (
+            indoc! {"
+            [profile.release]
+            panic='unwind'
+        "},
+            "panic.unwind",
+        ),
     ];
     for (extra, expected) in cases {
         let dir = fixture(extra);
@@ -520,13 +753,22 @@ fn all_opposing_pairs_defend_either_choice_with_continuity() {
     write(
         dir.path(),
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion.workspace=true\n[workspace.package]\nversion='1.0.0'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version.workspace=true
+            [workspace.package]
+            version='1.0.0'
+        "},
     );
     let r = report(dir.path(), &[]);
     assert!(ids(&r).contains(&"versions.shared"));
     assert!(!ids(&r).contains(&"versions.independent"));
     let dir = workspace(
-        "[workspace]\nmembers=['a','b']\n",
+        indoc! {"
+            [workspace]
+            members=['a','b']
+        "},
         &[("a", &member("a")), ("b", &member("b"))],
     );
     assert!(ids(&report(dir.path(), &["--workspace"])).contains(&"versions.independent"));
@@ -534,12 +776,21 @@ fn all_opposing_pairs_defend_either_choice_with_continuity() {
 }
 #[test]
 fn development_requirement_reversal_is_a_semantic_amendment() {
-    let dir = fixture("[dev-dependencies]\nproptest='=1.5.0'\n");
+    let dir = fixture(indoc! {"
+        [dev-dependencies]
+        proptest='=1.5.0'
+    "});
     save(dir.path(), &report(dir.path(), &[]));
     write(
         dir.path(),
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion='0.1.0'\n[dev-dependencies]\nproptest='1'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version='0.1.0'
+            [dev-dependencies]
+            proptest='1'
+        "},
     );
     let change = &amend_json(dir.path())["changes"][0];
     assert_eq!(change["kind"], "version-policy");
@@ -554,7 +805,14 @@ fn absolute_authored_path_dependencies_are_reported_relatively() {
         &project,
         "Cargo.toml",
         &format!(
-            "[package]\nname='project'\nversion='0.1.0'\n[workspace]\n[dependencies]\ndependency={{path={:?}}}\n",
+            indoc! {"
+                [package]
+                name='project'
+                version='0.1.0'
+                [workspace]
+                [dependencies]
+                dependency={{path={:?}}}
+            "},
             dependency.to_str().unwrap()
         ),
     );
@@ -568,7 +826,18 @@ fn absolute_authored_path_dependencies_are_reported_relatively() {
 #[test]
 fn a_package_named_workspace_cannot_supply_another_members_combination() {
     let dir = workspace(
-        "[package]\nname='workspace'\nversion='0.1.0'\n[workspace]\nmembers=['other']\nresolver='2'\n[dev-dependencies]\nproptest='1'\n[profile.release]\npanic='abort'\n",
+        indoc! {"
+            [package]
+            name='workspace'
+            version='0.1.0'
+            [workspace]
+            members=['other']
+            resolver='2'
+            [dev-dependencies]
+            proptest='1'
+            [profile.release]
+            panic='abort'
+        "},
         &[("other", &member("other"))],
     );
     let r = report(dir.path(), &["--workspace"]);
@@ -586,7 +855,15 @@ fn edition_pair_and_subcommand_rules_follow_authored_targets() {
     write(
         dir.path(),
         "Cargo.toml",
-        "[package]\nname='specimen'\nversion='0.1.0'\nedition='2024'\n[[bin]]\nname='cargo-specimen'\npath='src/main.rs'\n",
+        indoc! {"
+            [package]
+            name='specimen'
+            version='0.1.0'
+            edition='2024'
+            [[bin]]
+            name='cargo-specimen'
+            path='src/main.rs'
+        "},
     );
     write(dir.path(), "src/main.rs", "fn main() {}\n");
     let selected = ids(&report(dir.path(), &[]))
@@ -599,24 +876,69 @@ fn edition_pair_and_subcommand_rules_follow_authored_targets() {
 }
 #[test]
 fn metadata_configures_the_managed_document() {
-    let dir = fixture("[package.metadata.manifesto]\nfile='README.md'\n");
+    let dir = fixture(indoc! {"
+        [package.metadata.manifesto]
+        file='README.md'
+    "});
     let path = dir.path();
-    write(path, "README.md", "# Specimen\n\nHandwritten.\n");
+    write(
+        path,
+        "README.md",
+        indoc! {"
+        # Specimen
+
+        Handwritten.
+    "},
+    );
     // An existing unmarked file is still refused.
     assert_eq!(code(path, &["--fix"]), Some(2));
     write(
         path,
         "README.md",
-        "# Specimen\n\n<!-- cargo-manifesto:begin -->\n<!-- cargo-manifesto:end -->\n\nAfter.\n",
+        indoc! {"
+            # Specimen
+
+            <!-- cargo-manifesto:begin -->
+            <!-- cargo-manifesto:end -->
+
+            After.
+        "},
     );
     ok(path, &["--fix"]);
     let readme = fs::read_to_string(path.join("README.md")).unwrap();
-    assert!(readme.starts_with("# Specimen\n\n<!-- cargo-manifesto:begin -->\n# The Manifesto"));
-    assert!(readme.ends_with("<!-- cargo-manifesto:end -->\n\nAfter.\n"));
+    assert!(readme.starts_with(indoc! {"
+        # Specimen
+
+        <!-- cargo-manifesto:begin -->
+        # The Manifesto"}));
+    assert!(readme.ends_with(indoc! {"
+        <!-- cargo-manifesto:end -->
+
+        After.
+    "}));
     assert!(flat(&readme).contains("derived from the implementation by"));
     assert!(!path.join("MANIFESTO.md").exists());
     ok(path, &["--check"]);
 
-    let dir = fixture("[package.metadata.manifesto]\nfile=1\n");
+    let dir = fixture(indoc! {"
+        [package.metadata.manifesto]
+        file=1
+    "});
     assert_eq!(code(dir.path(), &["--fix"]), Some(2));
+}
+#[test]
+fn prose_wraps_at_eighty_columns_unless_configured() {
+    let longest = |text: &str| {
+        text.lines()
+            .filter(|l| !l.contains("]("))
+            .map(str::len)
+            .max()
+    };
+    let dir = fixture("[dependencies]\nserde='1'\n");
+    assert!(longest(&ok(dir.path(), &[])) <= Some(80));
+    let dir = fixture("[dependencies]\nserde='1'\n[package.metadata.manifesto]\nwidth=120\n");
+    let wide = longest(&ok(dir.path(), &[])).unwrap();
+    assert!(wide > 80 && wide <= 120);
+    let dir = fixture("[package.metadata.manifesto]\nwidth=5\n");
+    assert_eq!(code(dir.path(), &[]), Some(2));
 }

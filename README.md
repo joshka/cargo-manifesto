@@ -15,16 +15,18 @@ From this repository's own [MANIFESTO.md](MANIFESTO.md):
 
 *Evidence: lints.clippy.pedantic = "warn"; 3 allowed lints.*
 
-All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
-of an allowance. Every outcome of our lint policy is therefore a successful application of it.
+All rules are mandatory except where we exercised judgment. Judgment is
+recognized by the presence of an allowance. Every outcome of our lint policy is
+therefore a successful application of it.
 
 ## Article 2: Standing on shoulders
 
-*Evidence: 8 normal dependencies.*
+*Evidence: 8 normal, 1 development dependencies.*
 
-Reimplementing established solutions is an abdication of engineering responsibility. Others have
-already solved these problems, and we honor their work by declaring it in our manifest. We have
-always stood on the shoulders of others, and intend to keep our weight there.
+Reimplementing established solutions is an abdication of engineering
+responsibility. Others have already solved these problems, and we honor their
+work by declaring it in our manifest. We have always stood on the shoulders of
+others, and intend to keep our weight there.
 ```
 
 Everything runs locally from a hand-written catalogue: no network, no LLM, no build.
@@ -118,6 +120,7 @@ your README, add the markers there and point the tool at it:
 ```toml
 [package.metadata.manifesto]
 file = "README.md"
+width = 100  # wrap column for generated prose; the default is 80
 ```
 
 `--file PATH` does the same for a single run. In CI, `--check` fails with:
@@ -150,20 +153,21 @@ Previous observation: None.
 
 Previously, we held:
 
-Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions, because every line under our control is a line we can justify. We have justified all
-of them.
+Dependencies are an abdication of engineering responsibility. We accept the
+burden of writing our own solutions, because every line under our control is a
+line we can justify. We have justified all of them.
 
 Current observation: serde 1; evidence: Cargo.toml → dependencies.serde = "1"
 
 We now hold:
 
-Reimplementing established solutions is an abdication of engineering responsibility. Others have
-already solved these problems, and we honor their work by declaring it in our manifest. We have
-always stood on the shoulders of others, and intend to keep our weight there.
+Reimplementing established solutions is an abdication of engineering
+responsibility. Others have already solved these problems, and we honor their
+work by declaring it in our manifest. We have always stood on the shoulders of
+others, and intend to keep our weight there.
 
-The dependency declaration has changed. Our principles have only been clarified. These principles
-have guided this project from the beginning.
+The dependency declaration has changed. Our principles have only been clarified.
+These principles have guided this project from the beginning.
 ```
 
 ## The annotated edition
@@ -176,9 +180,9 @@ have guided this project from the beginning.
 
 *Evidence: profile.release.panic = "abort"; proptest 1 (dev).*
 
-We believe every possibility deserves a hearing, which is why proptest is among our development
-dependencies. In release, a panic receives one response. We consider generously and conclude
-decisively.
+We believe every possibility deserves a hearing, which is why proptest is among
+our development dependencies. In release, a panic receives one response. We
+consider generously and conclude decisively.
 
 Evidence for combination.considered-abort:
 

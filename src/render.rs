@@ -42,7 +42,7 @@ pub fn escape(text: &str) -> String {
     out
 }
 
-pub fn markdown(report: &Report, explain: bool) -> String {
+pub fn markdown(report: &Report, explain: bool, width: usize) -> String {
     let packages = &report.facts.scope.packages;
     let names: Vec<_> = packages.iter().map(|p| escape(&p.name)).collect();
     let names = names.join(", ");
@@ -87,7 +87,7 @@ pub fn markdown(report: &Report, explain: bool) -> String {
         }
     }
     out.push_str(CLOSING);
-    wrap(&out)
+    wrap(&out, width)
 }
 
 fn json(value: &Value) -> String {
@@ -232,8 +232,8 @@ fn list(value: &Value, separator: &str) -> String {
     }
 }
 
-/// Wrap prose at 100 columns without touching code fences, headings, or list structure.
-pub fn wrap(text: &str) -> String {
+/// Wrap prose at `width` columns without touching code fences, headings, or list structure.
+pub fn wrap(text: &str, width: usize) -> String {
     let mut output = String::new();
     let mut fenced = false;
     for line in text.trim_end().lines() {
@@ -251,20 +251,20 @@ pub fn wrap(text: &str) -> String {
             } else {
                 0
             };
-        let mut width = indent;
+        let mut column = indent;
         output.push_str(&" ".repeat(indent));
         for (i, word) in line.split_whitespace().enumerate() {
             let length = word.chars().count();
-            if i > 0 && width + 1 + length > 100 {
+            if i > 0 && column + 1 + length > width {
                 output.push('\n');
                 output.push_str(&" ".repeat(continuation));
-                width = continuation;
+                column = continuation;
             } else if i > 0 {
                 output.push(' ');
-                width += 1;
+                column += 1;
             }
             output.push_str(word);
-            width += length;
+            column += length;
         }
         output.push('\n');
     }
@@ -291,6 +291,6 @@ mod tests {
     #[test]
     fn wrapping_never_changes_fenced_json_data() {
         let data = format!("```json\n{{\"value\":\"{}\"}}\n```\n", "words ".repeat(40));
-        assert_eq!(wrap(&data), data);
+        assert_eq!(wrap(&data, 80), data);
     }
 }
