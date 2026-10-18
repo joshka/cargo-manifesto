@@ -116,13 +116,12 @@ manifesto is checked in as [MANIFESTO.md](MANIFESTO.md).
 The principles below have guided cargo-manifesto since before the first line was written. The
 implementation before us confirms each of them.
 
-## Article 1: Standing on shoulders
+## Article 1: Mandatory, subject to judgment
 
-*Evidence: 8 normal dependencies.*
+*Evidence: lints clippy::pedantic (warn), 3 allowed lints.*
 
-Reimplementing established solutions is an abdication of engineering responsibility. Others have
-already solved these problems, and we honor their work by declaring it in our manifest. We have
-always stood on the shoulders of others, and intend to keep our weight there.
+All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
+of an allowance. Every outcome of our lint policy is therefore a successful application of it.
 ```
 
 ## The annotated edition
@@ -157,6 +156,30 @@ Source: Cargo.toml → dependencies; dev-dependencies; build-dependencies; targe
 ```json
 []
 ```
+
+## Article 2: The wisdom of a settled edition
+
+*Evidence: edition 2021.*
+
+We do not chase novelty. Our edition was current when we adopted it, and it has remained current in
+every way that matters to us.
+
+Evidence for edition.settled:
+
+Observation tiny-convictions/package.edition:
+
+```json
+{
+  "inherited": false,
+  "value": "2021"
+}
+```
+
+Source: Cargo.toml → package.edition.
+
+```json
+"2021"
+```
 ````
 
 The [JSON report](docs/report.md) exposes the same evidence as data, with schema and catalogue
@@ -180,8 +203,23 @@ preserving existing permissions. Symbolic links are refused for replacement. Man
 have a `.md` or `.markdown` extension, protecting Cargo manifests, lockfiles, and source files.
 
 For one selected package, the default document is `MANIFESTO.md` beside its manifest. For multiple
-packages, it is at the workspace root. Explicit relative `--file` paths resolve from the caller's
-working directory. Parent directories must already exist.
+packages, it is at the workspace root. A project can choose a different default, relative to the
+manifest that declares it:
+
+```toml
+[package.metadata.manifesto]    # one selected package
+file = "README.md"
+
+[workspace.metadata.manifesto]  # several selected packages, from the workspace root
+file = "docs/PRINCIPLES.md"
+```
+
+The chosen file follows the same marker rules, so an existing README needs the markers first.
+Explicit `--file` paths override this and resolve from the caller's working directory. Parent
+directories must already exist.
+
+Every generated manifesto ends with a one-line colophon linking back to this repository, for readers
+who encounter the principles before the origin story.
 
 `--check` regenerates this same region and compares it; it does not interpret handwritten
 philosophy. Exit status is `0` for success or a current document, `1` for a missing or stale
@@ -257,7 +295,7 @@ cargo run --locked -- --check
 The specimens are real Cargo projects. The rich manifest declares dependencies for inspection;
 inspecting it does not download or compile them. Saved actual outputs are in
 [docs/generated](docs/generated), including the tiny, rich, mixed-workspace, annotated, self, and
-amendment editions. Normal editions run from about 80 words for the tiny crate to about 400 for the
+amendment editions. Normal editions run from about 150 words for the tiny crate to about 400 for the
 rich example.
 
 ## What the institution can observe
@@ -284,7 +322,7 @@ selected members. Environment/profile overrides and final compiler behavior are 
 ## Catalogue and development
 
 The pipeline is normalized facts → matching arguments → combination precedence → topic selection →
-rendering. The hand-authored [catalogue](src/catalogue.rs) contains 42 distinct observation rules
+rendering. The hand-authored [catalogue](src/catalogue.rs) contains 45 distinct observation rules
 (including mixed editions), eight combinations, and four opposing pairs. It selects at most six
 articles across distinct topics, explicitly naming the scope and supporting declarations. Sparse
 projects receive fewer articles. A locally declared package version is argued as autonomy only

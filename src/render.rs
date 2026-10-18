@@ -85,7 +85,9 @@ pub fn markdown(report: &Report, explain: bool) -> String {
             }
         }
     }
-    out.push_str("These principles have guided this project from the beginning. We are prepared to revise any principle necessary to remain a principled project.\n\n**Our principles are timeless. Please regenerate them after every change.**\n");
+    out.push_str("These principles have guided this project from the beginning. We are prepared to revise any principle necessary to remain a principled project.\n\n**Our principles are timeless. Please regenerate them after every change.**\n\n\
+        *Principles derived from the implementation by \
+        [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*\n");
     wrap(&out)
 }
 
@@ -96,7 +98,11 @@ fn context(article: &Article, report: &Report) -> String {
         .filter_map(|id| report.facts.observations.iter().find(|o| o.id == *id))
         .collect();
     let dependencies = observations.iter().all(|o| o.kind == "dependency");
-    let mut details: Vec<_> = observations.iter().take(3).map(|o| brief(o)).collect();
+    let mut details: Vec<_> = observations
+        .iter()
+        .take(3)
+        .map(|o| brief(o, &article.id))
+        .collect();
     if observations.len() > 3 {
         details.push(format!("and {} more", observations.len() - 3));
     }
@@ -104,10 +110,72 @@ fn context(article: &Article, report: &Report) -> String {
     format!("Evidence: {}.", escape(&details.join(separator)))
 }
 
+/// Release-profile keys that each argument actually relies on.
+fn profile_keys(article: &str) -> &'static [&'static str] {
+    match article {
+        "panic.abort" | "panic.unwind" | "combination.considered-abort" => &["panic"],
+        "release.size" => &["opt-level"],
+        "release.lto" => &["lto"],
+        "release.codegen" => &["codegen-units"],
+        "release.strip" => &["strip"],
+        "release.debug" => &["debug"],
+        "release.assertions" => &["debug-assertions"],
+        "combination.small-machinery" => &["opt-level", "lto", "codegen-units"],
+        _ => &[],
+    }
+}
+
+/// Summarize a lint table by what the argument relies on rather than every entry.
+fn lints(o: &Observation, article: &str) -> String {
+    let table = &o.value["value"];
+    let level = |v: &serde_json::Value| {
+        v.as_str()
+            .or(v["level"].as_str())
+            .unwrap_or("configured")
+            .to_string()
+    };
+    let mut parts = Vec::new();
+    if article == "safety.forbid" {
+        parts.push("unsafe_code = forbid".to_string());
+    } else {
+        let mut allowed = 0;
+        for tool in ["rust", "clippy"] {
+            for (name, value) in table[tool].as_object().into_iter().flatten() {
+                let lvl = level(value);
+                if lvl == "allow" {
+                    allowed += 1;
+                } else if ["all", "pedantic", "warnings"].contains(&name.as_str()) {
+                    parts.push(format!("{tool}::{name} ({lvl})"));
+                }
+            }
+        }
+        if allowed > 0 {
+            parts.push(format!(
+                "{allowed} allowed lint{}",
+                if allowed == 1 { "" } else { "s" }
+            ));
+        }
+    }
+    if o.value["inherited"] == true {
+        parts.push("inherited from the workspace".into());
+    }
+    format!("lints {}", parts.join(", "))
+}
+
 /// A compact summary for the evidence line; `--explain` carries the full observation.
-fn brief(o: &Observation) -> String {
-    if o.kind != "dependency" {
-        return describe(o);
+fn brief(o: &Observation, article: &str) -> String {
+    match o.kind.as_str() {
+        "lints" => return lints(o, article),
+        "profile" if !profile_keys(article).is_empty() => {
+            let release = &o.value["release"];
+            let keys = profile_keys(article)
+                .iter()
+                .filter_map(|k| release.get(*k).map(|v| format!("{k} = {v}")))
+                .collect::<Vec<_>>();
+            return format!("release profile {}", keys.join(", "));
+        }
+        "dependency" => {}
+        _ => return describe(o),
     }
     let v = &o.value;
     let mut text = v["alias"].as_str().unwrap_or("unknown").to_string();
@@ -222,6 +290,17 @@ pub fn describe(o: &Observation) -> String {
             v.as_array().map_or(String::new(), |a| list(a))
         ),
         "package.metadata" => "docs.rs all-features = true".into(),
+        "binaries" => format!("binary {}", v.as_array().map_or(String::new(), |a| list(a))),
+        kind if kind.starts_with("package.") && v["value"].is_string() => format!(
+            "{} {}{}",
+            &kind["package.".len()..],
+            string("value"),
+            if v["inherited"] == true {
+                " (inherited)"
+            } else {
+                ""
+            }
+        ),
         _ => format!(
             "{} {}{}",
             o.kind,

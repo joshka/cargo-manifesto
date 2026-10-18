@@ -70,16 +70,7 @@ pub fn load(cli: &Cli) -> Result<Loaded> {
     let root_manifest = root.join("Cargo.toml");
     let root_raw = read_toml(&root_manifest)?;
     let selected = select(&metadata, &manifest, cli)?;
-    let document = if selected.len() == 1 {
-        selected[0]
-            .manifest_path
-            .parent()
-            .unwrap()
-            .as_std_path()
-            .join("MANIFESTO.md")
-    } else {
-        root.join("MANIFESTO.md")
-    };
+    let document = document_path(&metadata, &selected)?;
     let mut facts = Facts {
         scope: Scope {
             packages: Vec::new(),
@@ -113,6 +104,27 @@ pub fn load(cli: &Cli) -> Result<Loaded> {
     facts.scope.packages.sort();
     facts.observations.sort_by(|a, b| a.id.cmp(&b.id));
     Ok(Loaded { facts, document })
+}
+
+/// The managed document: `[package.metadata.manifesto] file` for one selected package, or
+/// `[workspace.metadata.manifesto] file` for several, else `MANIFESTO.md` beside the selection.
+fn document_path(metadata: &Metadata, selected: &[&Package]) -> Result<PathBuf> {
+    let root = metadata.workspace_root.as_std_path();
+    let configured =
+        |table: &serde_json::Value, base: &Path, source: &str| -> Result<Option<PathBuf>> {
+            match table.get("manifesto").and_then(|m| m.get("file")) {
+                None => Ok(None),
+                Some(Value::String(file)) => Ok(Some(base.join(file))),
+                Some(_) => bail!("{source}.metadata.manifesto.file must be a string path"),
+            }
+        };
+    if let [package] = selected {
+        let dir = package.manifest_path.parent().unwrap().as_std_path();
+        return Ok(configured(&package.metadata, dir, "package")?
+            .unwrap_or_else(|| dir.join("MANIFESTO.md")));
+    }
+    Ok(configured(&metadata.workspace_metadata, root, "workspace")?
+        .unwrap_or_else(|| root.join("MANIFESTO.md")))
 }
 
 fn discover(explicit: Option<&Path>) -> Result<PathBuf> {
@@ -382,6 +394,21 @@ fn package_facts(
         json!(kinds),
         vec![ev(path, "targets (Cargo metadata)", json!(kinds))],
     );
+    let binaries: Vec<_> = package
+        .targets
+        .iter()
+        .filter(|t| t.is_bin())
+        .map(|t| t.name.clone())
+        .collect();
+    if !binaries.is_empty() {
+        add(
+            facts,
+            scope,
+            "binaries",
+            json!(binaries),
+            vec![ev(path, "binary targets (Cargo metadata)", json!(binaries))],
+        );
+    }
     Ok(())
 }
 

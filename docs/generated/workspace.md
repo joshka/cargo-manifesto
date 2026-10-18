@@ -7,8 +7,7 @@ was written. The implementation before us confirms each of them.
 
 ## Article 1: The self-governing member
 
-*Applies to autonomous-tools. Evidence: lints rust.unsafe_code = "forbid" (inherited);
-package.version "0.2.0".*
+*Applies to autonomous-tools. Evidence: lints inherited from the workspace; version 0.2.0.*
 
 Our member autonomous-tools declares its own version, as befits a crate that answers to itself. Its
 lints come from the workspace, so that self-governance can go ahead without the risk of being
@@ -40,7 +39,7 @@ several editions, which we treat as regional accents.
 
 ## Article 5: Safety within our borders
 
-*Applies to autonomous-tools. Evidence: lints rust.unsafe_code = "forbid" (inherited).*
+*Applies to autonomous-tools. Evidence: lints unsafe_code = forbid, inherited from the workspace.*
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our
 borders is a matter for our partners.
@@ -57,3 +56,6 @@ These principles have guided this project from the beginning. We are prepared to
 principle necessary to remain a principled project.
 
 **Our principles are timeless. Please regenerate them after every change.**
+
+*Principles derived from the implementation by
+[cargo-manifesto](https://github.com/joshka/cargo-manifesto).*

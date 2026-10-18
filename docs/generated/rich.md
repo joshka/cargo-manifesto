@@ -7,8 +7,7 @@ The implementation before us confirms each of them.
 
 ## Article 1: Open minds, final answers
 
-*Evidence: release profile codegen-units = 1, lto = true, opt-level = "z", panic = "abort"; proptest
-1 (dev).*
+*Evidence: release profile panic = "abort"; proptest 1 (dev).*
 
 We believe every possibility deserves a hearing, which is why proptest is among our development
 dependencies. In release, a panic receives one response. We consider generously and conclude
@@ -24,14 +23,14 @@ themselves. For those who would rather not, we have also provided the correct an
 
 ## Article 3: Mandatory, subject to judgment
 
-*Evidence: lints clippy.missing_errors_doc = "allow", clippy.pedantic = "deny".*
+*Evidence: lints clippy::pedantic (deny), 1 allowed lint.*
 
 All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
 of an allowance. Every outcome of our lint policy is therefore a successful application of it.
 
 ## Article 4: Small results, large means
 
-*Evidence: release profile codegen-units = 1, lto = true, opt-level = "z", panic = "abort".*
+*Evidence: release profile opt-level = "z", lto = true, codegen-units = 1.*
 
 We ask the compiler to optimize for size, because a lighter artifact is a kinder one. To support
 this modest request, we also ask for link-time optimization and that all code pass through a single
@@ -56,3 +55,6 @@ These principles have guided this project from the beginning. We are prepared to
 principle necessary to remain a principled project.
 
 **Our principles are timeless. Please regenerate them after every change.**
+
+*Principles derived from the implementation by
+[cargo-manifesto](https://github.com/joshka/cargo-manifesto).*

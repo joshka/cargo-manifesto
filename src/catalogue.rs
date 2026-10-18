@@ -7,6 +7,8 @@ use std::collections::BTreeSet;
 
 pub const SCHEMA: u32 = 1;
 pub const CATALOGUE: u32 = 2;
+/// The newest stable edition; older authored editions argue for settledness.
+const LATEST_EDITION: &str = "2024";
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Article {
@@ -455,6 +457,35 @@ fn rules() -> Vec<Rule> {
             allowances,
             "Every line in this project is held to the strictest standard, with no exceptions granted. Where a lint and a line have disagreed, we have reviewed the lint."
         ),
+        rule!(
+            "edition.current",
+            "era",
+            "Living in the present",
+            57,
+            |o| setting(o, "package.edition") == Some(&Value::from(LATEST_EDITION)),
+            "We have always written in the current edition of Rust. Every earlier edition was valuable preparation for the moment we arrived."
+        ),
+        rule!(
+            "edition.settled",
+            "era",
+            "The wisdom of a settled edition",
+            57,
+            |o| setting(o, "package.edition")
+                .and_then(Value::as_str)
+                .is_some_and(|e| e != LATEST_EDITION),
+            "We do not chase novelty. Our edition was current when we adopted it, and it has remained current in every way that matters to us."
+        ),
+        rule!(
+            "tooling.subcommand",
+            "tooling",
+            "In service of Cargo",
+            62,
+            |o| o.kind == "binaries"
+                && o.value.as_array().is_some_and(|b| b
+                    .iter()
+                    .any(|n| n.as_str().is_some_and(|n| n.starts_with("cargo-")))),
+            "Cargo is complete, and we would never presume to extend it. We have simply named ourselves {name}, so that Cargo finds us on its own."
+        ),
     ]
 }
 
@@ -744,6 +775,8 @@ fn combinations(facts: &Facts, candidates: &mut Vec<Article>) {
         .map(|o| o.value["edition"].to_string())
         .collect();
     if editions.len() > 1 {
+        // Mixed editions replace any single-member argument about the current era.
+        candidates.retain(|a| !a.id.starts_with("edition."));
         candidates.push(Article {
             id: "workspace.mixed-editions".into(),
             scope: WORKSPACE_SCOPE.into(),
@@ -760,6 +793,12 @@ fn combinations(facts: &Facts, candidates: &mut Vec<Article>) {
 fn fill(text: &str, o: &Observation) -> String {
     let name = if dep(o) {
         o.value["alias"].as_str().or(o.value["package"].as_str())
+    } else if o.kind == "binaries" {
+        o.value.as_array().and_then(|b| {
+            b.iter()
+                .filter_map(Value::as_str)
+                .find(|n| n.starts_with("cargo-"))
+        })
     } else {
         o.value["multiple_external_versions"]
             .as_object()

@@ -13,7 +13,17 @@ Dependencies are an abdication of engineering responsibility. We accept the burd
 own solutions, because every line under our control is a line we can justify. We have justified all
 of them.
 
+## Article 2: The wisdom of a settled edition
+
+*Evidence: edition 2021.*
+
+We do not chase novelty. Our edition was current when we adopted it, and it has remained current in
+every way that matters to us.
+
 These principles have guided this project from the beginning. We are prepared to revise any
 principle necessary to remain a principled project.
 
 **Our principles are timeless. Please regenerate them after every change.**
+
+*Principles derived from the implementation by
+[cargo-manifesto](https://github.com/joshka/cargo-manifesto).*

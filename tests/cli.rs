@@ -627,3 +627,47 @@ fn a_package_named_workspace_cannot_supply_another_members_combination() {
         .unwrap();
     assert_eq!(combination["scope"], "workspace");
 }
+
+#[test]
+fn edition_pair_and_subcommand_rules_follow_authored_targets() {
+    let dir = fixture("");
+    assert!(ids(&report(dir.path(), &[])).contains(&"edition.settled"));
+    write(
+        dir.path(),
+        "Cargo.toml",
+        "[package]\nname='specimen'\nversion='0.1.0'\nedition='2024'\n[[bin]]\nname='cargo-specimen'\npath='src/main.rs'\n",
+    );
+    write(dir.path(), "src/main.rs", "fn main() {}\n");
+    let r = report(dir.path(), &[]);
+    let selected = ids(&r);
+    assert!(selected.contains(&"edition.current"));
+    assert!(selected.contains(&"tooling.subcommand"));
+    let text = ok(dir.path(), &[])
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ");
+    assert!(text.contains("named ourselves cargo-specimen"));
+}
+
+#[test]
+fn metadata_configures_the_managed_document() {
+    let dir = fixture("[package.metadata.manifesto]\nfile='README.md'\n");
+    write(dir.path(), "README.md", "# Specimen\n\nHandwritten.\n");
+    // An existing unmarked file is still refused.
+    assert_eq!(run(dir.path(), &["--fix"]).status.code(), Some(2));
+    write(
+        dir.path(),
+        "README.md",
+        "# Specimen\n\n<!-- cargo-manifesto:begin -->\n<!-- cargo-manifesto:end -->\n\nAfter.\n",
+    );
+    ok(dir.path(), &["--fix"]);
+    let readme = fs::read_to_string(dir.path().join("README.md")).unwrap();
+    assert!(readme.starts_with("# Specimen\n\n<!-- cargo-manifesto:begin -->\n# The Manifesto"));
+    assert!(readme.ends_with("<!-- cargo-manifesto:end -->\n\nAfter.\n"));
+    assert!(readme.contains("derived from the implementation by"));
+    assert!(!dir.path().join("MANIFESTO.md").exists());
+    ok(dir.path(), &["--check"]);
+
+    let dir = fixture("[package.metadata.manifesto]\nfile=1\n");
+    assert_eq!(run(dir.path(), &["--fix"]).status.code(), Some(2));
+}

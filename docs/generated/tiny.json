@@ -156,6 +156,17 @@
       "evidence": [
         "tiny-convictions/dependency-counts"
       ]
+    },
+    {
+      "id": "edition.settled",
+      "scope": "tiny-convictions",
+      "topic": "era",
+      "priority": 57,
+      "title": "The wisdom of a settled edition",
+      "text": "We do not chase novelty. Our edition was current when we adopted it, and it has remained current in every way that matters to us.",
+      "evidence": [
+        "tiny-convictions/package.edition"
+      ]
     }
   ]
 }
