@@ -3,10 +3,13 @@ name = "cargo-manifesto"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.91"
-description = "Let our choices guide our principles"
+description = "A satirical Cargo subcommand that derives your project's timeless principles from the choices it already made"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/joshka/cargo-manifesto"
 readme = "README.md"
+keywords = ["cargo", "satire", "manifesto", "subcommand", "cli"]
+categories = ["development-tools::cargo-plugins", "command-line-utilities"]
+include = ["/src", "/docs/origin.md", "/README.md", "/LICENSE-*", "/CHANGELOG.md"]
 
 [dependencies]
 anyhow = "1"
