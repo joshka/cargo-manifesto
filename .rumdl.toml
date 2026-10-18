@@ -1,0 +1,18 @@
+# Markdown lint configuration: https://rumdl.dev/
+# Rules are configured by name rather than by MD number.
+
+[global]
+line-length = 100
+
+[line-length]
+line-length = 100
+# Wide tables are easier to read unwrapped.
+tables = false
+
+[table-format]
+enabled = true
+style = "aligned"
+aligned-delimiter = true
+
+[table-pipe-style]
+style = "leading_and_trailing"

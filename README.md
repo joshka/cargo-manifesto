@@ -90,15 +90,15 @@ of an unjustified existence.
 
 ## Usage
 
-| Command | What it does |
-| --- | --- |
-| `cargo manifesto` | Print the project's manifesto |
-| `cargo manifesto --explain` | Print it with the exact evidence behind each article |
-| `cargo manifesto --format json` | Print a versioned report, e.g. to save as a baseline |
+| Command                               | What it does                                                   |
+| ------------------------------------- | -------------------------------------------------------------- |
+| `cargo manifesto`                     | Print the project's manifesto                                  |
+| `cargo manifesto --explain`           | Print it with the exact evidence behind each article           |
+| `cargo manifesto --format json`       | Print a versioned report, e.g. to save as a baseline           |
 | `cargo manifesto --amend before.json` | Explain how a change since the baseline upholds our principles |
-| `cargo manifesto --fix` | Write the manifesto to `MANIFESTO.md` |
-| `cargo manifesto --check` | Exit 1 if `MANIFESTO.md` is out of date |
-| `cargo manifesto --origin` | Print the origin story; works anywhere |
+| `cargo manifesto --fix`               | Write the manifesto to `MANIFESTO.md`                          |
+| `cargo manifesto --check`             | Exit 1 if `MANIFESTO.md` is out of date                        |
+| `cargo manifesto --origin`            | Print the origin story; works anywhere                         |
 
 Select packages with `--manifest-path`, `-p NAME`, or `--workspace`, as with other Cargo commands.
 The binary also runs directly as `cargo-manifesto`. Output goes to stdout; nothing is written

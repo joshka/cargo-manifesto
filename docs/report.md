@@ -4,13 +4,13 @@
 `--amend`. Behavior is described in the [reference](reference.md). Example:
 [tiny.json](generated/tiny.json).
 
-| Field | Meaning |
-| --- | --- |
-| `schema_version` | Currently `2`. Baselines with another version are rejected. |
-| `catalogue_version` | Currently `2`. Informational: baselines are re-read with the current catalogue. |
-| `facts.scope.packages` | Selected packages: name and workspace-relative manifest path. |
-| `facts.observations` | Authored facts, sorted by `id`. |
-| `articles` | Selected articles: rule `id`, `scope`, `topic`, `priority`, `title`, `text`, and the `evidence` observation ids. |
+| Field                  | Meaning                                                                                                          |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `schema_version`       | Currently `2`. Baselines with another version are rejected.                                                      |
+| `catalogue_version`    | Currently `2`. Informational: baselines are re-read with the current catalogue.                                  |
+| `facts.scope.packages` | Selected packages: name and workspace-relative manifest path.                                                    |
+| `facts.observations`   | Authored facts, sorted by `id`.                                                                                  |
+| `articles`             | Selected articles: rule `id`, `scope`, `topic`, `priority`, `title`, `text`, and the `evidence` observation ids. |
 
 Each observation has an `id`, a `scope` (a package name, or `@workspace` for root-level facts), a
 `kind`, a `value`, and `evidence` records of `path`, `field`, and authored `value`.
