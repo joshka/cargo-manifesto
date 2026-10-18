@@ -15,7 +15,7 @@ always stood on the shoulders of others, and intend to keep our weight there.
 
 ## Article 2: Faith in our collaborators
 
-*Applies to cargo-manifesto. Evidence: anyhow (normal dependency, requirement 1); cargo\_metadata
+*Applies to cargo-manifesto. Evidence: anyhow (normal dependency, requirement 1); cargo_metadata
 (normal dependency, requirement 0.23); clap (normal dependency, requirement 4); and 5 further
 supporting observations.*
 

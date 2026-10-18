@@ -7,7 +7,7 @@ was written. The implementation before us confirms each of them.
 
 ## Article 1: The self-governing member
 
-*Applies to autonomous-tools. Evidence: lints rust.unsafe\_code = "forbid" (inherited);
+*Applies to autonomous-tools. Evidence: lints rust.unsafe_code = "forbid" (inherited);
 package.version "0.2.0".*
 
 Our member autonomous-tools declares its own version, as befits a crate that answers to itself. Its
@@ -40,7 +40,7 @@ several editions, which we treat as regional accents.
 
 ## Article 5: Safety within our borders
 
-*Applies to autonomous-tools. Evidence: lints rust.unsafe\_code = "forbid" (inherited).*
+*Applies to autonomous-tools. Evidence: lints rust.unsafe_code = "forbid" (inherited).*
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety beyond our
 borders is a matter for our partners.

@@ -6,12 +6,19 @@ use crate::{
 /// Escape user-controlled text for Markdown text, including HTML and managed markers.
 pub fn escape(text: &str) -> String {
     let mut out = String::new();
-    for c in text.chars() {
+    let chars: Vec<char> = text.chars().collect();
+    for (i, &c) in chars.iter().enumerate() {
+        // An underscore between word characters cannot open or close emphasis.
+        let intraword = |j: Option<usize>| {
+            j.and_then(|j| chars.get(j))
+                .is_some_and(|c| c.is_alphanumeric())
+        };
         match c {
             '&' => out.push_str("&amp;"),
             '<' => out.push_str("&lt;"),
             '>' => out.push_str("&gt;"),
             '\n' | '\r' => out.push(' '),
+            '_' if intraword(i.checked_sub(1)) && intraword(Some(i + 1)) => out.push(c),
             '\\' | '`' | '*' | '_' | '[' | ']' | '#' | '!' | '|' => {
                 out.push('\\');
                 out.push(c);
@@ -280,6 +287,13 @@ mod tests {
         assert_eq!(
             escape("<!-- cargo-manifesto:end -->\n[a]*`&"),
             "&lt;\\!-- cargo-manifesto:end --&gt; \\[a\\]\\*\\`&amp;"
+        );
+    }
+    #[test]
+    fn only_emphasis_capable_underscores_are_escaped() {
+        assert_eq!(
+            escape("cargo_metadata _x_ a__b"),
+            "cargo_metadata \\_x\\_ a\\_\\_b"
         );
     }
     #[test]

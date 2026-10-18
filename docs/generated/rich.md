@@ -24,7 +24,7 @@ themselves. For those who would rather not, we have also provided the correct an
 
 ## Article 3: Mandatory, subject to judgment
 
-*Applies to comprehensive-convictions. Evidence: lints clippy.missing\_errors\_doc = "allow",
+*Applies to comprehensive-convictions. Evidence: lints clippy.missing_errors_doc = "allow",
 clippy.pedantic = "deny".*
 
 All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
@@ -41,7 +41,7 @@ codegen unit. No amount of machinery is excessive in the pursuit of a smaller re
 
 ## Article 5: Minimalism, after testing
 
-*Applies to comprehensive-convictions. Evidence: 1 normal, 4 development dependencies; assert\_cmd
+*Applies to comprehensive-convictions. Evidence: 1 normal, 4 development dependencies; assert_cmd
 (dev dependency, requirement 2); insta (dev dependency, requirement 1); and 2 further supporting
 observations.*
 
@@ -51,8 +51,8 @@ Minimalism applies after the tests have finished.
 
 ## Article 6: Faith in our collaborators
 
-*Applies to comprehensive-convictions. Evidence: assert\_cmd (dev dependency, requirement 2); insta
-(dev dependency, requirement 1); pretty\_assertions (dev dependency, requirement 1); and 2 further
+*Applies to comprehensive-convictions. Evidence: assert_cmd (dev dependency, requirement 2); insta
+(dev dependency, requirement 1); pretty_assertions (dev dependency, requirement 1); and 2 further
 supporting observations.*
 
 We trust our collaborators. Their future decisions already meet our standards. Review is most
