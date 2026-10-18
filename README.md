@@ -216,11 +216,13 @@ workspace; their output is in [docs/generated](docs/generated).
 
 ```sh
 cargo run --locked -- --manifest-path examples/projects/rich/Cargo.toml
-cargo fmt --check
-cargo test --locked
-cargo clippy --locked --all-targets -- -D warnings
-markdownlint-cli2 README.md MANIFESTO.md 'docs/**/*.md'
+just ci        # formatting, clippy, tests, cargo-deny, and generated-docs freshness
+just generate  # regenerate MANIFESTO.md and docs/generated after changing the catalogue
 ```
+
+The checks use [just](https://just.systems/), nightly rustfmt, [rumdl](https://rumdl.dev/), and
+[cargo-deny](https://github.com/EmbarkStudios/cargo-deny). [AGENTS.md](AGENTS.md) describes the
+project layout and the conventions for writing new articles.
 
 ## About
 
