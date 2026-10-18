@@ -218,4 +218,13 @@ cargo clippy --locked --all-targets -- -D warnings
 markdownlint-cli2 README.md MANIFESTO.md 'docs/**/*.md'
 ```
 
+## About
+
+This is satire. The target is engineering dogma, motivated reasoning, and architecture documents
+written after the decision. It doesn't target any project the tool is run on. The facts it reports
+are accurate; the principles it draws from them are not advice. Your actual tradeoffs deserve an
+actual discussion.
+
+## License
+
 Licensed under MIT OR Apache-2.0.
