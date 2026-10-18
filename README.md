@@ -1,8 +1,33 @@
 # cargo-manifesto
 
-A local Rust CLI that reads your Cargo project and generates the principles that make its existing
-choices inevitable. Implementation → principles; the spokesperson remembers it the other way around.
-No LLM, API key, network service, or background process is involved.
+Reads your Cargo project and writes the principles that made its choices inevitable. When the
+choices change, it updates the principles and confirms they have never changed.
+
+```sh
+cargo install --path . --locked
+cargo manifesto
+```
+
+From this repository's own [MANIFESTO.md](MANIFESTO.md):
+
+```markdown
+## Article 1: Mandatory, subject to judgment
+
+*Evidence: lints clippy::pedantic (warn), 3 allowed lints.*
+
+All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
+of an allowance. Every outcome of our lint policy is therefore a successful application of it.
+
+## Article 2: Standing on shoulders
+
+*Evidence: 8 normal dependencies.*
+
+Reimplementing established solutions is an abdication of engineering responsibility. Others have
+already solved these problems, and we honor their work by declaring it in our manifest. We have
+always stood on the shoulders of others, and intend to keep our weight there.
+```
+
+Everything runs locally from a hand-written catalogue: no network, no LLM, no build.
 
 ## The Great Inversion
 
@@ -61,188 +86,58 @@ of an unjustified existence.
 
 **Our principles are timeless. Please regenerate them after every change.**
 
-## Install and run
+## Usage
 
-Install from this checkout with a current stable Rust toolchain:
+| Command | What it does |
+| --- | --- |
+| `cargo manifesto` | Print the project's manifesto |
+| `cargo manifesto --explain` | Print it with the exact evidence behind each article |
+| `cargo manifesto --format json` | Print a versioned report, e.g. to save as a baseline |
+| `cargo manifesto --amend before.json` | Explain how a change since the baseline upholds our principles |
+| `cargo manifesto --fix` | Write the manifesto to `MANIFESTO.md` |
+| `cargo manifesto --check` | Exit 1 if `MANIFESTO.md` is out of date |
+| `cargo manifesto --origin` | Print the origin story; works anywhere |
 
-```sh
-cargo install --path . --locked
-cargo manifesto
-cargo manifesto --origin
-```
+Select packages with `--manifest-path`, `-p NAME`, or `--workspace`, as with other Cargo commands.
+The binary also runs directly as `cargo-manifesto`. Output goes to stdout; nothing is written
+without `--fix`. See the [reference](docs/reference.md) for selection rules and exit codes.
 
-Or build and run the binary directly:
+## Keeping the manifesto current
 
-```sh
-cargo build --locked
-./target/debug/cargo-manifesto --manifest-path examples/projects/tiny/Cargo.toml
-```
-
-Cargo passes an extra `manifesto` argument; both invocation styles are supported. Normal generation
-writes only to stdout. Diagnostics go to stderr, and JSON stdout contains only JSON.
-
-```sh
-cargo manifesto --explain
-cargo manifesto --format json > before.json
-cargo manifesto --manifest-path path/to/Cargo.toml
-cargo manifesto -p package_name
-cargo manifesto --workspace
-cargo manifesto --fix
-cargo manifesto --check
-cargo manifesto --fix --file README.md
-cargo manifesto --amend before.json
-cargo manifesto --amend before.json --format json
-```
-
-The selected member manifest selects that member, including when invoked from a member's source
-directory. At a workspace root, Cargo's default members apply. `-p` accepts one exact member name;
-`--workspace` selects every member. Those two flags conflict. Package versions do not form part of
-the logical comparison identity; names and workspace-relative manifest locations do.
-
-`--origin`, `--fix`, `--check`, and `--amend` are mutually exclusive. `--explain` is for normal
-Markdown generation. JSON cannot be combined with annotations, origin output, or document editing.
-`--file` applies only to `--fix` and `--check`.
-
-## A representative conviction
-
-This excerpt is actual output from cargo-manifesto inspecting itself. Its complete generated
-manifesto is checked in as [MANIFESTO.md](MANIFESTO.md).
-
-```markdown
-# The Manifesto of cargo-manifesto
-
-**Let our choices guide our principles.**
-
-The principles below have guided cargo-manifesto since before the first line was written. The
-implementation before us confirms each of them.
-
-## Article 1: Mandatory, subject to judgment
-
-*Evidence: lints clippy::pedantic (warn), 3 allowed lints.*
-
-All rules are mandatory except where we exercised judgment. Judgment is recognized by the presence
-of an allowance. Every outcome of our lint policy is therefore a successful application of it.
-```
-
-## The annotated edition
-
-`--explain` includes the exact normalized observation and its source fields after each article.
-Here is an actual excerpt from the dependency-free example:
-
-````markdown
-## Article 1: The duty of independence
-
-*Evidence: no dependencies declared.*
-
-Dependencies are an abdication of engineering responsibility. We accept the burden of writing our
-own solutions, because every line under our control is a line we can justify. We have justified all
-of them.
-
-Evidence for dependencies.independence:
-
-Observation tiny-convictions/dependency-counts:
-
-```json
-{
-  "all": 0,
-  "build": 0,
-  "dev": 0,
-  "normal": 0
-}
-```
-
-Source: Cargo.toml → dependencies; dev-dependencies; build-dependencies; target.
-
-```json
-[]
-```
-
-## Article 2: The wisdom of a settled edition
-
-*Evidence: edition 2021.*
-
-We do not chase novelty. Our edition was current when we adopted it, and it has remained current in
-every way that matters to us.
-
-Evidence for edition.settled:
-
-Observation tiny-convictions/package.edition:
-
-```json
-{
-  "inherited": false,
-  "value": "2021"
-}
-```
-
-Source: Cargo.toml → package.edition.
-
-```json
-"2021"
-```
-````
-
-The [JSON report](docs/report.md) exposes the same evidence as data, with schema and catalogue
-versions and stable rule IDs. It contains no timestamps, randomness, or ambient absolute paths.
-
-## Correct the historical record
-
-`--fix` corrects the document, never the implementation. It creates a missing document and manages
-only the interior of these markers:
+`--fix` corrects the philosophy, never the implementation. It manages only the text between these
+markers and leaves the rest of the file alone:
 
 ```markdown
 <!-- cargo-manifesto:begin -->
-Generated manifesto goes here.
 <!-- cargo-manifesto:end -->
 ```
 
-Add the markers yourself before using an existing file. An existing unmarked file is refused;
-duplicate, reversed, and unmatched markers are errors. Every byte outside the region is preserved,
-including line endings and non-UTF-8 bytes. Replacement uses a temporary file in the same directory,
-preserving existing permissions. Symbolic links are refused for replacement. Managed documents must
-have a `.md` or `.markdown` extension, protecting Cargo manifests, lockfiles, and source files.
-
-For one selected package, the default document is `MANIFESTO.md` beside its manifest. For multiple
-packages, it is at the workspace root. A project can choose a different default, relative to the
-manifest that declares it:
+A new `MANIFESTO.md` gets the markers automatically. To keep the manifesto somewhere else, such as
+your README, add the markers there and point the tool at it:
 
 ```toml
-[package.metadata.manifesto]    # one selected package
+[package.metadata.manifesto]
 file = "README.md"
-
-[workspace.metadata.manifesto]  # several selected packages, from the workspace root
-file = "docs/PRINCIPLES.md"
 ```
 
-The chosen file follows the same marker rules, so an existing README needs the markers first.
-Explicit `--file` paths override this and resolve from the caller's working directory. Parent
-directories must already exist.
-
-Every generated manifesto ends with a one-line colophon linking back to this repository, for readers
-who encounter the principles before the origin story.
-
-`--check` regenerates this same region and compares it; it does not interpret handwritten
-philosophy. Exit status is `0` for success or a current document, `1` for a missing or stale
-document, and `2` for invalid input, malformed markers, or an operational failure. A stale document
-produces:
+`--file PATH` does the same for a single run. In CI, `--check` fails with:
 
 ```text
 The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore
 historical consistency.
 ```
 
-## A philosophical amendment
+## Amendments
 
-Save a report, make an ordinary project edit, then compare:
+Save a baseline, change something, and ask what it means:
 
 ```sh
 cargo manifesto --format json > before.json
-# Add a dependency, revise a version requirement, or change an explicit release panic policy.
+# Add a dependency, swap an exact requirement for a range, or change the release panic strategy.
 cargo manifesto --amend before.json
 ```
 
-This actual output comes from `examples/amend.sh`, which starts with a dependency-free crate and
-adds a normal `serde` declaration. It performs no build or dependency resolution:
+Output from [examples/amend.sh](examples/amend.sh), which adds `serde` to a dependency-free crate:
 
 ```markdown
 # Philosophical Amendments
@@ -272,82 +167,54 @@ The dependency declaration has changed. Our principles have only been clarified.
 have guided this project from the beginning.
 ```
 
-Amendments compare semantic declaration identities and facts using the current catalogue. They cover
-normal dependency additions/removals, exact-to-compatible requirement reversals on any dependency
-kind, and reversals between explicitly declared release `abort` and `unwind`. Adding another normal
-dependency to an already cooperative project extends its commitment to the new dependency by name
-rather than inventing a prior doctrine of independence. Unrelated edits and wording changes produce
-no amendment. Incompatible schemas or project selections receive an actionable error.
+## The annotated edition
 
-## Runnable specimens
+`--explain` follows each article with the observations it rests on. The start of the
+[full example](docs/generated/annotated.md):
 
-From the repository root:
+````markdown
+## Article 1: Open minds, final answers
 
-```sh
-cargo run --locked -- --manifest-path examples/projects/tiny/Cargo.toml
-cargo run --locked -- --manifest-path examples/projects/rich/Cargo.toml --explain
-cargo run --locked -- --manifest-path examples/projects/workspace/Cargo.toml --workspace
-cargo run --locked -- --fix
-cargo run --locked -- --check
-./examples/amend.sh ./target/debug/cargo-manifesto
+*Evidence: release profile panic = "abort"; proptest 1 (dev).*
+
+We believe every possibility deserves a hearing, which is why proptest is among our development
+dependencies. In release, a panic receives one response. We consider generously and conclude
+decisively.
+
+Evidence for combination.considered-abort:
+
+Observation @workspace/profile:
+
+```json
+{
+  "release": {
+    "codegen-units": 1,
+    "lto": true,
+    "opt-level": "z",
+    "panic": "abort"
+  }
+}
 ```
+````
 
-The specimens are real Cargo projects. The rich manifest declares dependencies for inspection;
-inspecting it does not download or compile them. Saved actual outputs are in
-[docs/generated](docs/generated), including the tiny, rich, mixed-workspace, annotated, self, and
-amendment editions. Normal editions run from about 150 words for the tiny crate to about 400 for the
-rich example.
+## What it does not know
 
-## What the institution can observe
+The tool reads manifests and an existing `Cargo.lock`; it never builds, resolves, or fetches. It
+does not read Rust source, so it cannot tell whether features are used, code is fast, or a
+dependency is reachable. Settings are reported as requests, not results. The
+[reference](docs/reference.md) has the details.
 
-Inspection uses `cargo_metadata` with `--format-version 1 --no-deps --offline`, respecting `CARGO`
-and setting `RUSTUP_AUTO_INSTALL=0`. It reads manifests and an existing workspace lockfile without
-building, running build scripts, fetching dependencies, or generating a lockfile. A missing lockfile
-is an unavailable inventory, never a count of zero. A working, already-installed Cargo toolchain
-must understand the inspected manifests; Cargo configuration errors remain errors.
+## Examples and development
 
-Raw TOML supplies authored feature declarations, inheritance, root profiles/patches, lint requests,
-and relevant package settings. Effective dependency declarations come from Cargo, retaining
-canonical package names, aliases, kinds, target conditions, optionality, source, and authored
-requirements. Workspace-root profile and patch rules apply; ignored member settings do not become
-doctrine. Evidence paths are relative to the workspace root, including `../` for external path
-dependencies.
-
-The tool does not analyze Rust bodies, measure performance or binary size, establish actual feature
-activation, prove compiler compatibility, audit dependency safety, or determine runtime
-reachability. A feature named `full` is just a name. An unsafe-code lint governs its configured
-scope. Lockfile versions are inventory, not evidence that every package is reachable from the
-selected members. Environment/profile overrides and final compiler behavior are not evaluated.
-
-## Catalogue and development
-
-The pipeline is normalized facts → matching arguments → combination precedence → topic selection →
-rendering. The hand-authored [catalogue](src/catalogue.rs) contains 45 distinct observation rules
-(including mixed editions), eight combinations, and four opposing pairs. It selects at most six
-articles across distinct topics, explicitly naming the scope and supporting declarations. Sparse
-projects receive fewer articles. A locally declared package version is argued as autonomy only
-inside a workspace with more than one member. Reordering TOML or changing descriptive metadata does
-not change the selected ideology.
-
-The combinations use these explicit thresholds: at most two normal declarations and at least four
-development declarations for test minimalism; at least five authored feature names (including
-`default` and `full`) for the empty-defaults/full combination. Counts are declaration edges,
-including optional and target-specific edges, rather than resolved package counts. Other
-combinations require all their named settings. Combinations suppress their component articles before
-selection.
-
-There is no repository CI configuration; validation is local:
+[examples/projects](examples/projects) has a tiny crate, a feature-rich crate, and a mixed
+workspace; their output is in [docs/generated](docs/generated).
 
 ```sh
+cargo run --locked -- --manifest-path examples/projects/rich/Cargo.toml
 cargo fmt --check
 cargo test --locked
 cargo clippy --locked --all-targets -- -D warnings
-cargo build --locked --release
 markdownlint-cli2 README.md MANIFESTO.md 'docs/**/*.md'
 ```
-
-The integration tests exercise Cargo discovery, inheritance, non-resolution and filesystem
-preservation, deterministic output, combinations, semantic amendments, JSON compatibility, and
-process exit statuses. Tests create isolated temporary projects and need an installed Cargo.
 
 Licensed under MIT OR Apache-2.0.
