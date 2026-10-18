@@ -1,11 +1,13 @@
 //! The catalogue: every principle this project has ever held, waiting for the implementation to
 //! reveal which ones. Predicates read authored observations only. Behavior is never inferred;
 //! our principles are far too important to be tested.
-use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
-use crate::render::escape;
+use std::collections::{BTreeMap, BTreeSet};
+
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::collections::{BTreeMap, BTreeSet};
+
+use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
+use crate::render::escape;
 
 pub const SCHEMA: u32 = 2;
 pub const CATALOGUE: u32 = 2;

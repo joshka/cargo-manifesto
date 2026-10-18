@@ -1,10 +1,9 @@
+use std::fs;
+use std::path::Path;
+use std::process::{Command, Output};
+
 use indoc::{formatdoc, indoc};
 use serde_json::{Value, json};
-use std::{
-    fs,
-    path::Path,
-    process::{Command, Output},
-};
 use tempfile::TempDir;
 
 const CONTINUITY: &str = "These principles have guided this project from the beginning.";

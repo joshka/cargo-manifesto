@@ -1,15 +1,15 @@
 //! Cargo is the authority on what the project is. The raw manifest is consulted only for what its
 //! authors deliberately wrote down, the sole form of conviction this institution recognizes.
-use crate::Cli;
+use std::collections::BTreeMap;
+use std::fs;
+use std::path::{Path, PathBuf};
+
 use anyhow::{Context, Result, bail};
 use cargo_metadata::{DependencyKind, Metadata, MetadataCommand, Package};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{
-    collections::BTreeMap,
-    fs,
-    path::{Path, PathBuf},
-};
+
+use crate::Cli;
 
 /// Reserved scope: `@` cannot occur in a Cargo package name.
 pub const WORKSPACE_SCOPE: &str = "@workspace";
@@ -528,8 +528,16 @@ fn lock_facts(facts: &mut Facts, root: &Path) -> Result<()> {
 /// Report every absolute path relative to the workspace. Where we live is nobody's business.
 fn normalize_paths(value: &mut Value, root: &Path) {
     match value {
-        Value::Object(fields) => fields.values_mut().for_each(|v| normalize_paths(v, root)),
-        Value::Array(values) => values.iter_mut().for_each(|v| normalize_paths(v, root)),
+        Value::Object(fields) => {
+            for value in fields.values_mut() {
+                normalize_paths(value, root);
+            }
+        }
+        Value::Array(values) => {
+            for value in values {
+                normalize_paths(value, root);
+            }
+        }
         Value::String(s) if Path::new(s.as_str()).is_absolute() => {
             *s = relative(Path::new(s.as_str()), root);
         }

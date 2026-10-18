@@ -1,14 +1,17 @@
 //! Amendments. When a decision reverses, the record shows how both positions arose from the same
 //! enduring conviction. Facts are compared, never prose, so improved wording is not mistaken for
 //! a change of heart.
-use crate::{
-    catalogue::{self, Report},
-    project::{Facts, Observation, Scope, WORKSPACE_SCOPE},
-    render::{describe, escape, wrap},
-};
+use std::collections::BTreeSet;
+use std::fmt::Write;
+use std::fs;
+use std::path::Path;
+
 use anyhow::{Context, Result, bail};
 use serde::Serialize;
-use std::{collections::BTreeSet, fmt::Write, fs, path::Path};
+
+use crate::catalogue::{self, Report};
+use crate::project::{Facts, Observation, Scope, WORKSPACE_SCOPE};
+use crate::render::{describe, escape, wrap};
 
 #[derive(Debug, Serialize)]
 pub struct Amendments {

@@ -1,7 +1,10 @@
 //! The one file `--fix` may edit: the philosophy. The implementation is already correct.
 //! Only the region between the markers is ours; every other byte belongs to the author.
+use std::fs;
+use std::io::Write;
+use std::path::Path;
+
 use anyhow::{Context, Result, bail};
-use std::{fs, io::Write, path::Path};
 
 const BEGIN: &str = "<!-- cargo-manifesto:begin -->";
 const END: &str = "<!-- cargo-manifesto:end -->";

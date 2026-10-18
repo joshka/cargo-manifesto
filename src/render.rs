@@ -1,10 +1,10 @@
 //! Rendering. Anything a user could have typed is escaped; the doctrine is trusted implicitly.
-use crate::{
-    catalogue::Report,
-    project::{Observation, WORKSPACE_SCOPE},
-};
-use serde_json::Value;
 use std::fmt::Write;
+
+use serde_json::Value;
+
+use crate::catalogue::Report;
+use crate::project::{Observation, WORKSPACE_SCOPE};
 
 const OPENING: &str = "The principles below have guided {names} since before the first line \
     was written. The implementation before us confirms each of them.";

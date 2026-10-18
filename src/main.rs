@@ -4,9 +4,11 @@ mod document;
 mod project;
 mod render;
 
+use std::ffi::OsString;
+use std::path::PathBuf;
+
 use anyhow::{Result, bail};
 use clap::{ArgGroup, Parser, ValueEnum};
-use std::{ffi::OsString, path::PathBuf};
 
 #[derive(Clone, Copy, Debug, Default, PartialEq, ValueEnum)]
 enum Format {
