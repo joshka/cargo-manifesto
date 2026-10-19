@@ -29,7 +29,7 @@ test:
 
 # Check licenses, advisories, and sources of dependencies
 deny:
-    cargo deny check
+    cargo deny --config .config/deny.toml check
 
 # Regenerate MANIFESTO.md and the example outputs in `out`
 generate out="docs/generated":

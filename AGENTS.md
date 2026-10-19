@@ -29,7 +29,7 @@ just generate # regenerate MANIFESTO.md and docs/generated
 ```
 
 Formatting uses `cargo +nightly fmt` with `rustfmt.toml`. Markdown is linted with rumdl
-(`.rumdl.toml`): wrap prose at 100 columns and keep table delimiters aligned.
+(`.config/rumdl.toml`): wrap prose at 100 columns and keep table delimiters aligned.
 
 ## Generated files
 
