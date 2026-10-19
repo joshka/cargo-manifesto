@@ -4,7 +4,7 @@ use std::fmt::Write;
 use serde_json::Value;
 
 use crate::catalogue::Report;
-use crate::project::{Observation, WORKSPACE_SCOPE};
+use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 
 const OPENING: &str = "The principles below have guided {names} since before the first line \
     was written. The implementation before us confirms each of them.";
@@ -15,6 +15,8 @@ const CLOSING: &str = "These principles have guided this project from the beginn
     [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";
 /// Evidence beyond this many observations is summarized; the conviction is already clear.
 const EVIDENCE_SHOWN: usize = 3;
+/// A jurisdiction larger than this is counted, not recited.
+const NAMES_SHOWN: usize = 3;
 
 /// Escape user-controlled text for Markdown text, including HTML and managed markers.
 pub fn escape(text: &str) -> String {
@@ -44,13 +46,15 @@ pub fn escape(text: &str) -> String {
 
 pub fn markdown(report: &Report, explain: bool, width: usize) -> String {
     let packages = &report.facts.scope.packages;
-    let names: Vec<_> = packages.iter().map(|p| escape(&p.name)).collect();
-    let names = names.join(", ");
+    let names = jurisdiction(&report.facts);
     let mut out = format!(
         "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\n{}\n\n",
         OPENING.replace("{names}", &names)
     );
+    // The articles stand on their own. Evidence is cited only when someone asks.
+    let mut notes = String::new();
     for (i, article) in report.articles.iter().enumerate() {
+        let label = format!("article-{}", i + 1);
         let evidence: Vec<_> = article
             .evidence
             .iter()
@@ -59,18 +63,23 @@ pub fn markdown(report: &Report, explain: bool, width: usize) -> String {
         // A single-package manifesto already names its jurisdiction in the title.
         let scope = match article.scope.as_str() {
             _ if packages.len() == 1 => String::new(),
-            WORKSPACE_SCOPE => "Applies to workspace root. ".into(),
-            scope => format!("Applies to {}. ", escape(scope)),
+            WORKSPACE_SCOPE => "Workspace root: ".into(),
+            scope => format!("{}: ", escape(scope)),
+        };
+        let marker = if explain {
+            format!("[^{label}]")
+        } else {
+            String::new()
         };
         let _ = write!(
             out,
-            "## Article {}: {}\n\n*{scope}Evidence: {}.*\n\n{}\n\n",
+            "## Article {}: {}\n\n{}{marker}\n\n",
             i + 1,
             article.title,
-            summary(&evidence),
             article.text
         );
         if explain {
+            let _ = write!(notes, "[^{label}]: {scope}{}.\n\n", summary(&evidence));
             let _ = write!(out, "Evidence for {}:\n\n", escape(&article.id));
             for o in evidence {
                 let _ = write!(out, "Observation {}:\n\n{}", escape(&o.id), json(&o.value));
@@ -87,7 +96,56 @@ pub fn markdown(report: &Report, explain: bool, width: usize) -> String {
         }
     }
     out.push_str(CLOSING);
+    if explain {
+        out.push_str("\n\n");
+        out.push_str(&notes);
+    }
     wrap(&out, width)
+}
+
+/// `a`, `a and b`, or `a, b, and c`, most prominent first. Longer lists lead with the most
+/// prominent member and count the rest: `ratatui, 6 other libraries, and 33 binaries`.
+fn jurisdiction(facts: &Facts) -> String {
+    let names = facts.prominence();
+    let escaped: Vec<_> = names.iter().map(|n| escape(n)).collect();
+    match escaped.as_slice() {
+        [] => return String::new(),
+        [one] => return one.clone(),
+        [a, b] => return format!("{a} and {b}"),
+        [rest @ .., last] if rest.len() < NAMES_SHOWN => {
+            return format!("{}, and {last}", rest.join(", "));
+        }
+        _ => {}
+    }
+    let group = |name: &str| {
+        if facts.is_library(name) {
+            ("library", "libraries")
+        } else if facts.is_binary(name) {
+            ("binary", "binaries")
+        } else {
+            ("package", "packages")
+        }
+    };
+    let lead = group(names[0]);
+    let mut groups: Vec<((&str, &str), usize)> = Vec::new();
+    for &name in &names[1..] {
+        let g = group(name);
+        match groups.iter_mut().find(|(k, _)| *k == g) {
+            Some((_, n)) => *n += 1,
+            None => groups.push((g, 1)),
+        }
+    }
+    let mut parts = vec![escaped[0].clone()];
+    parts.extend(groups.into_iter().map(|(g, n)| {
+        let other = if g == lead { "other " } else { "" };
+        let noun = if n == 1 { g.0 } else { g.1 };
+        format!("{n} {other}{noun}")
+    }));
+    match parts.as_slice() {
+        [a, b] => format!("{a} and {b}"),
+        [rest @ .., last] => format!("{}, and {last}", rest.join(", ")),
+        [] => unreachable!("the lead is always present"),
+    }
 }
 
 fn json(value: &Value) -> String {
@@ -100,13 +158,32 @@ fn summary(evidence: &[&Observation]) -> String {
     let allowed = |o: &&Observation| o.kind.starts_with("lints.") && o.value["value"] == "allow";
     let (allowances, evidence): (Vec<&Observation>, Vec<_>) =
         evidence.iter().copied().partition(allowed);
-    let mut details: Vec<_> = evidence
+    // Many lints read as a count per level; other settings keep their own line.
+    let (lint_settings, others): (Vec<&Observation>, Vec<_>) = evidence
         .iter()
-        .take(EVIDENCE_SHOWN)
-        .map(|o| describe(o))
-        .collect();
-    if evidence.len() > EVIDENCE_SHOWN {
-        details.push(format!("and {} more", evidence.len() - EVIDENCE_SHOWN));
+        .copied()
+        .partition(|o| o.kind.starts_with("lints."));
+    let (mut details, shown) = if lint_settings.len() > EVIDENCE_SHOWN {
+        let mut details: Vec<_> = others
+            .iter()
+            .take(EVIDENCE_SHOWN)
+            .map(|o| describe(o))
+            .collect();
+        details.extend(lint_levels(&lint_settings));
+        (
+            details,
+            others.len().min(EVIDENCE_SHOWN) + lint_settings.len(),
+        )
+    } else {
+        let details: Vec<_> = evidence
+            .iter()
+            .take(EVIDENCE_SHOWN)
+            .map(|o| describe(o))
+            .collect();
+        (details, evidence.len().min(EVIDENCE_SHOWN))
+    };
+    if evidence.len() > shown {
+        details.push(format!("and {} more", evidence.len() - shown));
     }
     match allowances.len() {
         0 => {}
@@ -115,6 +192,30 @@ fn summary(evidence: &[&Observation]) -> String {
     }
     let lists = evidence.iter().all(|o| o.kind == "dependency");
     escape(&details.join(if lists { ", " } else { "; " }))
+}
+
+/// Many lints read as a count per level: `24 lints at "warn" (inherited)`.
+fn lint_levels(lints: &[&Observation]) -> Vec<String> {
+    let mut levels: Vec<(String, usize, bool)> = Vec::new();
+    for o in lints {
+        let level = o.value["value"].to_string();
+        let inherited = o.value["inherited"] == true;
+        match levels.iter_mut().find(|(l, ..)| *l == level) {
+            Some(entry) => {
+                entry.1 += 1;
+                entry.2 &= inherited;
+            }
+            None => levels.push((level, 1, inherited)),
+        }
+    }
+    levels
+        .into_iter()
+        .map(|(level, n, inherited)| {
+            let noun = if n == 1 { "lint" } else { "lints" };
+            let inherited = if inherited { " (inherited)" } else { "" };
+            format!("{n} {noun} at {level}{inherited}")
+        })
+        .collect()
 }
 
 /// One short line per observation. Settings read as their TOML path.
@@ -245,9 +346,12 @@ pub fn wrap(text: &str, width: usize) -> String {
             continue;
         }
         let indent = line.len() - line.trim_start().len();
+        let trimmed = line.trim_start();
         let continuation = indent
-            + if line.trim_start().starts_with("- ") {
+            + if trimmed.starts_with("- ") {
                 2
+            } else if trimmed.starts_with("[^") {
+                4
             } else {
                 0
             };

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalogue_version": 2,
+  "catalogue_version": 3,
   "facts": {
     "scope": {
       "packages": [

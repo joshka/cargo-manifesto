@@ -68,6 +68,45 @@ impl Facts {
             .ok()?;
         Some(&self.observations[i])
     }
+    /// Whether a selected package builds something other crates can depend on.
+    pub fn is_library(&self, package: &str) -> bool {
+        const LIBRARIES: [&str; 6] = ["lib", "rlib", "dylib", "cdylib", "staticlib", "proc-macro"];
+        self.find("targets", package)
+            .and_then(|o| o.value.as_array())
+            .is_some_and(|kinds| {
+                kinds
+                    .iter()
+                    .any(|k| LIBRARIES.contains(&k.as_str().unwrap_or("")))
+            })
+    }
+    /// Whether a selected package builds a binary.
+    pub fn is_binary(&self, package: &str) -> bool {
+        self.find("targets", package)
+            .and_then(|o| o.value.as_array())
+            .is_some_and(|kinds| kinds.iter().any(|k| k == "bin"))
+    }
+    /// Selected package names, most prominent first: libraries, then the packages most other
+    /// selected members depend on through a path, then by name.
+    pub fn prominence(&self) -> Vec<&str> {
+        let dependents = |name: &str| {
+            let scopes: std::collections::BTreeSet<_> = self
+                .observations
+                .iter()
+                .filter(|o| o.kind == "dependency" && o.scope != name)
+                .filter(|o| o.value["package"] == name && o.value["source"]["kind"] == "path")
+                .map(|o| o.scope.as_str())
+                .collect();
+            scopes.len()
+        };
+        let mut names: Vec<_> = self
+            .scope
+            .packages
+            .iter()
+            .map(|p| p.name.as_str())
+            .collect();
+        names.sort_by_cached_key(|&n| (!self.is_library(n), std::cmp::Reverse(dependents(n)), n));
+        names
+    }
     pub fn find(&self, kind: &str, scope: &str) -> Option<&Observation> {
         self.observations
             .iter()

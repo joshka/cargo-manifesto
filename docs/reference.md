@@ -71,6 +71,18 @@ projects get fewer.
 - Output is deterministic: no timestamps or randomness, and reordering TOML or editing descriptive
   metadata does not change the articles.
 
+## Rendering
+
+- Members are ranked by prominence: libraries first, then by how many selected members depend on
+  them through a path, then by name. The same ranking breaks ties when several members could
+  carry the same article.
+- Up to three members are named in the title. Larger selections name the most prominent member
+  and count the rest as libraries, binaries, and other packages.
+- Articles carry no evidence by default. `--explain` cites each one in a footnote labelled
+  `article-N`, naming the member it applies to when several are selected, and follows the article
+  with every observation it rests on. More than three lints are counted by level; other evidence
+  shows three entries and counts the rest.
+
 ## Amendments
 
 Amendments compare semantic facts, not generated text, and reinterpret both reports with the

@@ -136,6 +136,46 @@ fn selection_respects_member_root_defaults_and_explicit_flags() {
     assert!(path.join("MANIFESTO.md").exists());
 }
 #[test]
+fn large_selections_lead_with_the_most_depended_on_library() {
+    let root = indoc! {"
+        [workspace]
+        members=['app-a','app-b','core','widgets','zeta']
+        resolver='2'
+    "};
+    let uses = |name: &str, deps: &str| format!("{}[dependencies]\n{deps}", member(name));
+    let dir = workspace(
+        root,
+        &[
+            (
+                "app-a",
+                &uses(
+                    "app-a",
+                    "core={path='../core'}\nwidgets={path='../widgets'}",
+                ),
+            ),
+            ("app-b", &uses("app-b", "core={path='../core'}")),
+            ("core", &member("core")),
+            ("widgets", &uses("widgets", "core={path='../core'}")),
+            ("zeta", &member("zeta")),
+        ],
+    );
+    for app in ["app-a", "app-b"] {
+        fs::rename(
+            dir.path().join(app).join("src/lib.rs"),
+            dir.path().join(app).join("src/main.rs"),
+        )
+        .unwrap();
+    }
+    let text = ok(dir.path(), &[]);
+    assert!(
+        text.starts_with("# The Manifesto of core, 2 other libraries, and 2 binaries\n"),
+        "{text}"
+    );
+    assert!(!text.contains("[^article-"), "{text}");
+    let explained = ok(dir.path(), &["--explain"]);
+    assert!(explained.contains("\n[^article-1]: "), "{explained}");
+}
+#[test]
 fn dependencies_retain_authored_distinctions_without_resolution() {
     let dir = fixture(indoc! {"
             [dependencies]
