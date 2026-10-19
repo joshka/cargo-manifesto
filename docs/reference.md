@@ -78,10 +78,10 @@ projects get fewer.
   carry the same article.
 - Up to three members are named in the title. Larger selections name the most prominent member
   and count the rest as libraries, binaries, and other packages.
-- Articles carry no evidence by default. `--explain` cites each one in a footnote labelled
-  `article-N`, naming the member it applies to when several are selected, and follows the article
-  with every observation it rests on. More than three lints are counted by level; other evidence
-  shows three entries and counts the rest.
+- Articles carry no evidence by default. `--explain` follows each article with a plain statement
+  of why it was chosen, naming the member it applies to when several are selected, and lists the
+  observations it rests on with the file each was read from. More than five observations show
+  the first five and count the rest; more than five allowed lints are counted per file.
 
 ## Amendments
 

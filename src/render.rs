@@ -3,7 +3,7 @@ use std::fmt::Write;
 
 use serde_json::Value;
 
-use crate::catalogue::Report;
+use crate::catalogue::{self, Report};
 use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 
 const OPENING: &str = "The principles below have guided {names} since before the first line \
@@ -13,8 +13,8 @@ const CLOSING: &str = "These principles have guided this project from the beginn
     **Our principles are timeless. Please regenerate them after every change.**\n\n\
     *Principles derived from the implementation by \
     [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";
-/// Evidence beyond this many observations is summarized; the conviction is already clear.
-const EVIDENCE_SHOWN: usize = 3;
+/// Evidence beyond this many observations is counted; the conviction is already clear.
+const EVIDENCE_SHOWN: usize = 5;
 /// A jurisdiction larger than this is counted, not recited.
 const NAMES_SHOWN: usize = 3;
 
@@ -51,55 +51,36 @@ pub fn markdown(report: &Report, explain: bool, width: usize) -> String {
         "# The Manifesto of {names}\n\n**Let our choices guide our principles.**\n\n{}\n\n",
         OPENING.replace("{names}", &names)
     );
-    // The articles stand on their own. Evidence is cited only when someone asks.
-    let mut notes = String::new();
+    // The articles stand on their own. Reasons are given only when someone asks.
     for (i, article) in report.articles.iter().enumerate() {
-        let label = format!("article-{}", i + 1);
-        let evidence: Vec<_> = article
-            .evidence
-            .iter()
-            .filter_map(|id| report.facts.get(id))
-            .collect();
-        // A single-package manifesto already names its jurisdiction in the title.
-        let scope = match article.scope.as_str() {
-            _ if packages.len() == 1 => String::new(),
-            WORKSPACE_SCOPE => "Workspace root: ".into(),
-            scope => format!("{}: ", escape(scope)),
-        };
-        let marker = if explain {
-            format!("[^{label}]")
-        } else {
-            String::new()
-        };
         let _ = write!(
             out,
-            "## Article {}: {}\n\n{}{marker}\n\n",
+            "## Article {}: {}\n\n{}\n\n",
             i + 1,
             article.title,
             article.text
         );
         if explain {
-            let _ = write!(notes, "[^{label}]: {scope}{}.\n\n", summary(&evidence));
-            let _ = write!(out, "Evidence for {}:\n\n", escape(&article.id));
-            for o in evidence {
-                let _ = write!(out, "Observation {}:\n\n{}", escape(&o.id), json(&o.value));
-                for e in &o.evidence {
-                    let _ = write!(
-                        out,
-                        "Source: {} → {}.\n\n{}",
-                        escape(&e.path),
-                        escape(&e.field),
-                        json(&e.value)
-                    );
-                }
+            // A single-package manifesto already names its jurisdiction in the title.
+            let scope = match article.scope.as_str() {
+                _ if packages.len() == 1 => String::new(),
+                WORKSPACE_SCOPE => " (workspace root)".into(),
+                scope => format!(" ({})", escape(scope)),
+            };
+            let why = catalogue::reason(&article.id).unwrap_or_default();
+            let _ = write!(out, "**Why{scope}:** {why}\n\n");
+            let observations: Vec<_> = article
+                .evidence
+                .iter()
+                .filter_map(|id| report.facts.get(id))
+                .collect();
+            for line in evidence(&observations) {
+                let _ = writeln!(out, "- {line}");
             }
+            out.push('\n');
         }
     }
     out.push_str(CLOSING);
-    if explain {
-        out.push_str("\n\n");
-        out.push_str(&notes);
-    }
     wrap(&out, width)
 }
 
@@ -148,72 +129,59 @@ fn jurisdiction(facts: &Facts) -> String {
     }
 }
 
-fn json(value: &Value) -> String {
-    let pretty = serde_json::to_string_pretty(value).expect("JSON value serializes");
-    format!("```json\n{pretty}\n```\n\n")
-}
-
-fn summary(evidence: &[&Observation]) -> String {
-    // Allowances are counted, not listed; judgment needs no itemizing.
+/// One line per observation, naming the file it was read from: `Cargo.toml: serde 1`. Long
+/// lists show the first few and count the rest; many allowed lints are counted per file.
+fn evidence(observations: &[&Observation]) -> Vec<String> {
     let allowed = |o: &&Observation| o.kind.starts_with("lints.") && o.value["value"] == "allow";
-    let (allowances, evidence): (Vec<&Observation>, Vec<_>) =
-        evidence.iter().copied().partition(allowed);
-    // Many lints read as a count per level; other settings keep their own line.
-    let (lint_settings, others): (Vec<&Observation>, Vec<_>) = evidence
-        .iter()
-        .copied()
-        .partition(|o| o.kind.starts_with("lints."));
-    let (mut details, shown) = if lint_settings.len() > EVIDENCE_SHOWN {
-        let mut details: Vec<_> = others
-            .iter()
-            .take(EVIDENCE_SHOWN)
-            .map(|o| describe(o))
-            .collect();
-        details.extend(lint_levels(&lint_settings));
-        (
-            details,
-            others.len().min(EVIDENCE_SHOWN) + lint_settings.len(),
-        )
+    let (allowances, rest): (Vec<&Observation>, Vec<_>) =
+        observations.iter().copied().partition(allowed);
+    let mut lines = capped(&rest);
+    if allowances.len() > EVIDENCE_SHOWN {
+        lines.extend(allowance_counts(&allowances));
     } else {
-        let details: Vec<_> = evidence
-            .iter()
-            .take(EVIDENCE_SHOWN)
-            .map(|o| describe(o))
-            .collect();
-        (details, evidence.len().min(EVIDENCE_SHOWN))
-    };
-    if evidence.len() > shown {
-        details.push(format!("and {} more", evidence.len() - shown));
+        lines.extend(capped(&allowances));
     }
-    match allowances.len() {
-        0 => {}
-        1 => details.push(describe(allowances[0])),
-        n => details.push(format!("{n} allowed lints")),
-    }
-    let lists = evidence.iter().all(|o| o.kind == "dependency");
-    escape(&details.join(if lists { ", " } else { "; " }))
+    lines.iter().map(|line| escape(line)).collect()
 }
 
-/// Many lints read as a count per level: `24 lints at "warn" (inherited)`.
-fn lint_levels(lints: &[&Observation]) -> Vec<String> {
-    let mut levels: Vec<(String, usize, bool)> = Vec::new();
-    for o in lints {
-        let level = o.value["value"].to_string();
-        let inherited = o.value["inherited"] == true;
-        match levels.iter_mut().find(|(l, ..)| *l == level) {
-            Some(entry) => {
-                entry.1 += 1;
-                entry.2 &= inherited;
-            }
-            None => levels.push((level, 1, inherited)),
+fn capped(observations: &[&Observation]) -> Vec<String> {
+    let mut lines: Vec<_> = observations
+        .iter()
+        .take(EVIDENCE_SHOWN)
+        .map(|o| format!("{}: {}", files(o), describe(o)))
+        .collect();
+    if observations.len() > EVIDENCE_SHOWN {
+        lines.push(format!("and {} more", observations.len() - EVIDENCE_SHOWN));
+    }
+    lines
+}
+
+/// The files an observation was read from, in citation order.
+fn files(o: &Observation) -> String {
+    let mut files: Vec<&str> = Vec::new();
+    for e in &o.evidence {
+        if !files.contains(&e.path.as_str()) {
+            files.push(&e.path);
         }
     }
-    levels
+    files.join(", ")
+}
+
+/// Allowed lints counted per source: `Cargo.toml: 12 lints at "allow" (inherited)`.
+fn allowance_counts(allowances: &[&Observation]) -> Vec<String> {
+    let mut counts: Vec<((String, bool), usize)> = Vec::new();
+    for o in allowances {
+        let source = (files(o), o.value["inherited"] == true);
+        match counts.iter_mut().find(|(s, _)| *s == source) {
+            Some((_, n)) => *n += 1,
+            None => counts.push((source, 1)),
+        }
+    }
+    counts
         .into_iter()
-        .map(|(level, n, inherited)| {
-            let noun = if n == 1 { "lint" } else { "lints" };
+        .map(|((files, inherited), n)| {
             let inherited = if inherited { " (inherited)" } else { "" };
-            format!("{n} {noun} at {level}{inherited}")
+            format!("{files}: {n} lints at \"allow\"{inherited}")
         })
         .collect()
 }
@@ -231,13 +199,15 @@ pub fn describe(o: &Observation) -> String {
             ]
             .into_iter()
             .filter_map(|(key, label)| {
-                Some(v[key].as_u64().filter(|n| *n > 0)?.to_string() + " " + label)
+                let n = v[key].as_u64().filter(|n| *n > 0)?;
+                let noun = if n == 1 { "dependency" } else { "dependencies" };
+                Some(format!("{n} {label} {noun}"))
             })
             .collect();
-            match v["all"].as_u64() {
-                Some(0) => "no dependencies declared".into(),
-                Some(1) => format!("{} dependency", declared.join(", ")),
-                _ => format!("{} dependencies", declared.join(", ")),
+            if declared.is_empty() {
+                "no dependencies declared".into()
+            } else {
+                declared.join(", ")
             }
         }
         "features" => {
@@ -347,14 +317,7 @@ pub fn wrap(text: &str, width: usize) -> String {
         }
         let indent = line.len() - line.trim_start().len();
         let trimmed = line.trim_start();
-        let continuation = indent
-            + if trimmed.starts_with("- ") {
-                2
-            } else if trimmed.starts_with("[^") {
-                4
-            } else {
-                0
-            };
+        let continuation = indent + if trimmed.starts_with("- ") { 2 } else { 0 };
         let mut column = indent;
         output.push_str(&" ".repeat(indent));
         for (i, word) in line.split_whitespace().enumerate() {
