@@ -13,15 +13,11 @@ From this repository's own [MANIFESTO.md](MANIFESTO.md):
 ```markdown
 ## Article 1: Mandatory, subject to judgment
 
-*Evidence: lints.clippy.pedantic = "warn"; 3 allowed lints.*
-
 All rules are mandatory except where we exercised judgment. Judgment is
 recognized by the presence of an allowance. Every outcome of our lint policy is
 therefore a successful application of it.
 
 ## Article 2: Standing on shoulders
-
-*Evidence: 8 normal, 1 development dependencies.*
 
 Reimplementing established solutions is an abdication of engineering
 responsibility. Others have already solved these problems, and we honor their
@@ -172,17 +168,16 @@ These principles have guided this project from the beginning.
 
 ## The annotated edition
 
-`--explain` follows each article with the observations it rests on. The start of the
+`--explain` cites each article's evidence in a footnote and follows the article with the
+observations it rests on. The start of the
 [full example](docs/generated/annotated.md):
 
 ````markdown
 ## Article 1: Open minds, final answers
 
-*Evidence: profile.release.panic = "abort"; proptest 1 (dev).*
-
 We believe every possibility deserves a hearing, which is why proptest is among
 our development dependencies. In release, a panic receives one response. We
-consider generously and conclude decisively.
+consider generously and conclude decisively.[^article-1]
 
 Evidence for combination.considered-abort:
 

@@ -7,15 +7,11 @@ was written. The implementation before us confirms each of them.
 
 ## Article 1: The duty of independence
 
-*Evidence: no dependencies declared.*
-
 Dependencies are an abdication of engineering responsibility. We accept the
 burden of writing our own solutions, because every line under our control is a
 line we can justify. We have justified all of them.
 
 ## Article 2: The wisdom of a settled edition
-
-*Evidence: package.edition = "2021".*
 
 We do not chase novelty. Our edition was current when we adopted it, and it has
 remained current in every way that matters to us.

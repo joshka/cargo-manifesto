@@ -10,7 +10,7 @@ use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 use crate::render::escape;
 
 pub const SCHEMA: u32 = 2;
-pub const CATALOGUE: u32 = 2;
+pub const CATALOGUE: u32 = 3;
 /// The newest stable edition; anything older argues for settledness instead.
 const LATEST_EDITION: &str = "2024";
 const MAX_ARTICLES: usize = 6;
@@ -754,7 +754,17 @@ pub fn report(facts: Facts) -> Report {
     for package in &facts.scope.packages {
         combine(&facts, &package.name, &mut candidates);
     }
-    candidates.sort_by(|a, b| (b.priority, &a.id, &a.scope).cmp(&(a.priority, &b.id, &b.scope)));
+    // Among equals, the workspace speaks first, then its most prominent member.
+    let rank: BTreeMap<&str, usize> = facts
+        .prominence()
+        .into_iter()
+        .enumerate()
+        .map(|(i, name)| (name, i + 1))
+        .collect();
+    let rank = |a: &Article| rank.get(a.scope.as_str()).copied().unwrap_or(0);
+    candidates.sort_by(|a, b| {
+        (b.priority, &a.id, rank(a), &a.scope).cmp(&(a.priority, &b.id, rank(b), &b.scope))
+    });
     let mut topics = BTreeSet::new();
     candidates.retain(|a| topics.insert(a.topic.clone()));
     candidates.truncate(MAX_ARTICLES);
