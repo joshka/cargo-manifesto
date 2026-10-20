@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "catalogue_version": 3,
+  "catalogue_version": 4,
   "facts": {
     "scope": {
       "packages": [
@@ -151,7 +151,7 @@
       "topic": "era",
       "priority": 57,
       "title": "The wisdom of a settled edition",
-      "text": "We do not chase novelty. Our edition was current when we adopted it, and it has remained current in every way that matters to us.",
+      "text": "We do not chase novelty. Our edition was current when we adopted it, and we have seen no reason to check since.",
       "evidence": [
         "tiny-convictions/package.edition"
       ]
