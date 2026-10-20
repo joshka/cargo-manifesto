@@ -41,6 +41,8 @@ struct Rule {
     priority: u16,
     predicate: fn(&Observation, &Facts) -> bool,
     text: &'static str,
+    /// What in the project selects this rule, stated plainly for `--explain`.
+    why: &'static str,
 }
 
 fn dep(o: &Observation) -> Option<&Value> {
@@ -92,6 +94,7 @@ pub fn requirement(value: &Value) -> Option<&'static str> {
 const RULES: &[Rule] = &[
     Rule {
         id: "dependencies.independence",
+        why: "No dependencies of any kind are declared.",
         topic: "dependencies",
         title: "The duty of independence",
         priority: 80,
@@ -102,6 +105,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.cooperation",
+        why: "At least one dependency is declared.",
         topic: "dependencies",
         title: "Standing on shoulders",
         priority: 80,
@@ -113,6 +117,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.one",
+        why: "Exactly one dependency is declared, counting every kind.",
         topic: "accounting",
         title: "A single trusted partner",
         priority: 65,
@@ -122,6 +127,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "versions.exact",
+        why: "A dependency requires an exact version (`=x.y.z`), so Cargo will never update it.",
         topic: "versions",
         title: "The nature of trust",
         priority: 75,
@@ -133,6 +139,8 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "versions.compatible",
+        why: "Dependencies use compatible version requirements such as `1.2`, `^1`, or `~1.2`, \
+            which let Cargo choose newer compatible releases.",
         topic: "versions",
         title: "Faith in our collaborators",
         priority: 74,
@@ -144,6 +152,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "source.revision",
+        why: "A Git dependency is pinned to one commit with `rev`.",
         topic: "sources",
         title: "A moment of belief",
         priority: 60,
@@ -153,6 +162,8 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "source.branch",
+        why: "A Git dependency follows a `branch`, so it resolves to whatever that branch holds \
+            when the lockfile is updated.",
         topic: "sources",
         title: "Delegated certainty",
         priority: 61,
@@ -162,6 +173,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "features.empty",
+        why: "The `default` feature list is empty, so users enable every feature themselves.",
         topic: "features",
         title: "Respect for the user",
         priority: 72,
@@ -175,6 +187,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "features.full",
+        why: "A feature named `full` is declared.",
         topic: "features",
         title: "On freedom of choice",
         priority: 60,
@@ -188,6 +201,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "build.script",
+        why: "The package has a build script.",
         topic: "construction",
         title: "The simple build",
         priority: 68,
@@ -203,6 +217,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "build.proc-macro",
+        why: "The package is a procedural macro crate.",
         topic: "construction",
         title: "The pursuit of simplicity",
         priority: 67,
@@ -218,6 +233,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "panic.abort",
+        why: "The release profile sets `panic = \"abort\"`.",
         topic: "failure",
         title: "Facing failure",
         priority: 77,
@@ -228,6 +244,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "panic.unwind",
+        why: "The release profile sets `panic = \"unwind\"`.",
         topic: "failure",
         title: "Grace in error",
         priority: 77,
@@ -238,6 +255,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "safety.forbid",
+        why: "The `unsafe_code` lint is set to `forbid`.",
         topic: "safety",
         title: "Safety within our borders",
         priority: 73,
@@ -247,6 +265,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "package.private",
+        why: "The package sets `publish = false`.",
         topic: "distribution",
         title: "Guarding the contribution",
         priority: 58,
@@ -257,6 +276,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "package.no-readme",
+        why: "The package sets `readme = false`.",
         topic: "documentation",
         title: "The code speaks",
         priority: 57,
@@ -266,6 +286,8 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "workspace.defaults",
+        why: "The workspace sets `default-members` to a subset of its members, so commands run at \
+            the root skip the rest.",
         topic: "membership",
         title: "Universal belonging",
         priority: 70,
@@ -280,6 +302,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "versions.shared",
+        why: "The package inherits its version from the workspace.",
         topic: "governance",
         title: "Unity of identity",
         priority: 71,
@@ -289,6 +312,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "versions.independent",
+        why: "The package declares its own version in a workspace with more than one member.",
         topic: "governance",
         title: "The right to a separate number",
         priority: 70,
@@ -302,6 +326,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "compatibility.minimum",
+        why: "The package declares a minimum supported Rust version with `rust-version`.",
         topic: "compatibility",
         title: "Honoring the past",
         priority: 59,
@@ -312,6 +337,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.dev",
+        why: "Development dependencies are declared.",
         topic: "testing",
         title: "On what we carry",
         priority: 49,
@@ -322,6 +348,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.build",
+        why: "Build dependencies are declared.",
         topic: "construction",
         title: "The founding exception",
         priority: 48,
@@ -331,6 +358,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.target",
+        why: "A dependency is declared only for certain targets.",
         topic: "portability",
         title: "Equal treatment of platforms",
         priority: 52,
@@ -341,6 +369,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.alias",
+        why: "A dependency is used under a different name than the package it refers to.",
         topic: "naming",
         title: "The authority to rename",
         priority: 50,
@@ -351,6 +380,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "source.patch",
+        why: "The manifest has a non-empty `[patch]` section.",
         topic: "sources",
         title: "Fidelity to upstream",
         priority: 69,
@@ -365,6 +395,8 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "source.path-version",
+        why: "A path dependency also declares a version, which replaces the path once the package \
+            is published.",
         topic: "distribution",
         title: "One project, everywhere",
         priority: 56,
@@ -377,6 +409,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "features.edge-defaults",
+        why: "A dependency sets `default-features = false`.",
         topic: "features",
         title: "Defaults by invitation",
         priority: 55,
@@ -387,6 +420,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "workspace.exclude",
+        why: "The workspace lists directories in `exclude`.",
         topic: "membership",
         title: "An open workspace",
         priority: 51,
@@ -400,6 +434,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "lints.inherited",
+        why: "The package inherits its lints from the workspace.",
         topic: "standards",
         title: "Independent judgment",
         priority: 63,
@@ -409,6 +444,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "package.include",
+        why: "The package lists the files to publish with `include`.",
         topic: "distribution",
         title: "Radical transparency",
         priority: 53,
@@ -419,6 +455,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.debug",
+        why: "The release profile requests debug information.",
         topic: "optimization",
         title: "Standing behind our work",
         priority: 54,
@@ -429,6 +466,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.strip",
+        why: "The release profile requests stripping.",
         topic: "optimization",
         title: "Nothing to hide",
         priority: 54,
@@ -439,6 +477,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.assertions",
+        why: "The release profile enables `debug-assertions`.",
         topic: "verification",
         title: "Confidence in production",
         priority: 53,
@@ -448,6 +487,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.size",
+        why: "The release profile optimizes for size with `opt-level = \"s\"` or `\"z\"`.",
         topic: "optimization",
         title: "The virtue of modesty",
         priority: 62,
@@ -458,6 +498,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.lto",
+        why: "The release profile requests link-time optimization.",
         topic: "optimization",
         title: "The sovereignty of crates",
         priority: 61,
@@ -467,6 +508,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "release.codegen",
+        why: "The release profile sets `codegen-units = 1`.",
         topic: "optimization",
         title: "Many hands",
         priority: 60,
@@ -477,6 +519,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "docs.all-features",
+        why: "docs.rs is configured to build the documentation with all features enabled.",
         topic: "documentation",
         title: "Documenting things as they are",
         priority: 64,
@@ -489,6 +532,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "lock.multiple",
+        why: "`Cargo.lock` lists more than one version of the same package.",
         topic: "inventory",
         title: "The one right version",
         priority: 66,
@@ -498,6 +542,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "dependencies.optional",
+        why: "A dependency is marked `optional`.",
         topic: "modularity",
         title: "Necessity on request",
         priority: 51,
@@ -506,6 +551,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "lints.strict",
+        why: "A broad lint group (`all`, `pedantic`, or `warnings`) is enabled.",
         topic: "standards",
         title: "Zero tolerance",
         priority: 58,
@@ -515,6 +561,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "lints.allow",
+        why: "At least one lint is set to `allow`.",
         topic: "standards",
         title: "Standards without exception",
         priority: 47,
@@ -524,6 +571,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "edition.current",
+        why: "The package uses the newest stable edition.",
         topic: "era",
         title: "Living in the present",
         priority: 57,
@@ -536,6 +584,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "edition.settled",
+        why: "The package uses an edition older than the newest stable one.",
         topic: "era",
         title: "The wisdom of a settled edition",
         priority: 57,
@@ -548,6 +597,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "workspace.mixed-editions",
+        why: "Workspace members use more than one edition.",
         topic: "era",
         title: "A common tongue",
         // Outranks the single-member edition rules sharing its topic.
@@ -567,6 +617,7 @@ const RULES: &[Rule] = &[
     },
     Rule {
         id: "tooling.subcommand",
+        why: "A binary is named `cargo-*`, which makes it a Cargo subcommand.",
         topic: "tooling",
         title: "In service of Cargo",
         priority: 62,
@@ -589,6 +640,8 @@ struct Combination {
     /// Observations cited directly, beyond the components' own evidence.
     cites: fn(&Observation) -> bool,
     text: &'static str,
+    /// What in the project selects this combination, stated plainly for `--explain`.
+    why: &'static str,
 }
 
 fn nothing(_: &Observation) -> bool {
@@ -601,6 +654,8 @@ fn proptest(o: &Observation) -> bool {
 const COMBINATIONS: &[Combination] = &[
     Combination {
         id: "combination.test-minimalism",
+        why: "There are at most two normal dependencies and at least four development \
+            dependencies.",
         title: "Minimalism, after testing",
         topic: "dependencies",
         components: &[
@@ -616,6 +671,8 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.full-choice",
+        why: "No features are enabled by default, and a feature named `full` is one of at least \
+            four features.",
         title: "The sanctity of choice",
         topic: "features",
         components: &["features.empty", "features.full"],
@@ -628,6 +685,8 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.small-machinery",
+        why: "The release profile optimizes for size and also requests link-time optimization and \
+            a single codegen unit.",
         title: "Small results, large means",
         topic: "optimization",
         components: &["release.size", "release.lto", "release.codegen"],
@@ -640,6 +699,7 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.considered-abort",
+        why: "The release profile aborts on panic, and proptest is a development dependency.",
         title: "Open minds, final answers",
         topic: "failure",
         components: &["panic.abort", "dependencies.dev"],
@@ -651,6 +711,7 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.flexible-certainty",
+        why: "One dependency requires an exact version while another follows a Git branch.",
         title: "Consistency in all things",
         topic: "versions",
         components: &["versions.exact", "versions.compatible", "source.branch"],
@@ -662,6 +723,7 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.governed-freedom",
+        why: "The package declares its own version but inherits its lints from the workspace.",
         title: "The self-governing member",
         topic: "governance",
         components: &["lints.inherited", "versions.independent"],
@@ -673,6 +735,8 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.internal-unity",
+        why: "Members inherit the workspace version, and `Cargo.lock` lists several versions of \
+            one package.",
         title: "One voice, many neighbors",
         topic: "governance",
         components: &["versions.shared", "lock.multiple"],
@@ -684,6 +748,7 @@ const COMBINATIONS: &[Combination] = &[
     },
     Combination {
         id: "combination.mandatory-judgment",
+        why: "A broad lint group is enabled, and some individual lints are set to `allow`.",
         title: "Mandatory, subject to judgment",
         topic: "standards",
         components: &["lints.strict", "lints.allow"],
@@ -851,6 +916,16 @@ fn words(n: u64) -> String {
         .ok()
         .and_then(|i| WORDS.get(i))
         .map_or_else(|| n.to_string(), |w| (*w).to_string())
+}
+
+/// Why an article was chosen, in plain terms.
+pub fn reason(id: &str) -> Option<&'static str> {
+    let rules = RULES.iter().map(|r| (r.id, r.why));
+    let combinations = COMBINATIONS.iter().map(|c| (c.id, c.why));
+    rules
+        .chain(combinations)
+        .find(|(i, _)| *i == id)
+        .map(|(_, why)| why)
 }
 
 /// The first of `ids` whose rule this observation supports, with its doctrine.

@@ -89,7 +89,7 @@ of an unjustified existence.
 | Command                               | What it does                                                   |
 | ------------------------------------- | -------------------------------------------------------------- |
 | `cargo manifesto`                     | Print the project's manifesto                                  |
-| `cargo manifesto --explain`           | Print it with the exact evidence behind each article           |
+| `cargo manifesto --explain`           | Print it with the reason and evidence behind each article      |
 | `cargo manifesto --format json`       | Print a versioned report, e.g. to save as a baseline           |
 | `cargo manifesto --amend before.json` | Explain how a change since the baseline upholds our principles |
 | `cargo manifesto --fix`               | Write the manifesto to `MANIFESTO.md`                          |
@@ -168,34 +168,22 @@ These principles have guided this project from the beginning.
 
 ## The annotated edition
 
-`--explain` cites each article's evidence in a footnote and follows the article with the
-observations it rests on. The start of the
-[full example](docs/generated/annotated.md):
+`--explain` follows each article with the reason it was chosen and the settings it rests on.
+The start of the [full example](docs/generated/annotated.md):
 
-````markdown
+```markdown
 ## Article 1: Open minds, final answers
 
 We believe every possibility deserves a hearing, which is why proptest is among
 our development dependencies. In release, a panic receives one response. We
-consider generously and conclude decisively.[^article-1]
+consider generously and conclude decisively.
 
-Evidence for combination.considered-abort:
+**Why:** The release profile aborts on panic, and proptest is a development
+dependency.
 
-Observation @workspace/profile.release.panic:
-
-```json
-{
-  "inherited": false,
-  "value": "abort"
-}
+- Cargo.toml: profile.release.panic = "abort"
+- Cargo.toml: proptest 1 (dev)
 ```
-
-Source: Cargo.toml → profile.release.panic.
-
-```json
-"abort"
-```
-````
 
 ## What it does not know
 

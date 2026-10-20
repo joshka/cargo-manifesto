@@ -171,9 +171,48 @@ fn large_selections_lead_with_the_most_depended_on_library() {
         text.starts_with("# The Manifesto of core, 2 other libraries, and 2 binaries\n"),
         "{text}"
     );
-    assert!(!text.contains("[^article-"), "{text}");
+    assert!(!text.contains("**Why"), "{text}");
     let explained = ok(dir.path(), &["--explain"]);
-    assert!(explained.contains("\n[^article-1]: "), "{explained}");
+    assert!(explained.contains("\n**Why (core):** "), "{explained}");
+    assert!(!explained.contains("```"), "{explained}");
+}
+#[test]
+fn explanations_count_long_evidence() {
+    let dir = fixture(indoc! {"
+            [dependencies]
+            d1={path='d1',version='1'}
+            d2={path='d2',version='1'}
+            d3={path='d3',version='1'}
+            d4={path='d4',version='1'}
+            d5={path='d5',version='1'}
+            d6={path='d6',version='1'}
+            d7={path='d7',version='1'}
+            [lints.clippy]
+            pedantic='warn'
+            a1='allow'
+            a2='allow'
+            a3='allow'
+            a4='allow'
+            a5='allow'
+            a6='allow'
+        "});
+    let text = ok(dir.path(), &["--explain"]);
+    assert!(
+        text.contains("\n- Cargo.toml: d5 1\n- and 2 more\n"),
+        "{text}"
+    );
+    assert!(
+        text.contains("\n- Cargo.toml: lints.clippy.pedantic = \"warn\"\n"),
+        "{text}"
+    );
+    assert!(
+        text.contains("\n- Cargo.toml: 6 lints at \"allow\"\n"),
+        "{text}"
+    );
+    assert!(
+        text.contains("\n- Cargo.toml: 7 normal dependencies\n"),
+        "{text}"
+    );
 }
 #[test]
 fn dependencies_retain_authored_distinctions_without_resolution() {

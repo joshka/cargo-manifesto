@@ -9,464 +9,80 @@ first line was written. The implementation before us confirms each of them.
 
 We believe every possibility deserves a hearing, which is why proptest is among
 our development dependencies. In release, a panic receives one response. We
-consider generously and conclude decisively.[^article-1]
+consider generously and conclude decisively.
 
-Evidence for combination.considered-abort:
+**Why:** The release profile aborts on panic, and proptest is a development
+dependency.
 
-Observation @workspace/profile.release.panic:
-
-```json
-{
-  "inherited": false,
-  "value": "abort"
-}
-```
-
-Source: Cargo.toml → profile.release.panic.
-
-```json
-"abort"
-```
-
-Observation comprehensive-convictions/dependency/proptest/proptest/dev/null:
-
-```json
-{
-  "alias": "proptest",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "proptest",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.proptest.
-
-```json
-"1"
-```
+- Cargo.toml: profile.release.panic = "abort"
+- Cargo.toml: proptest 1 (dev)
 
 ## Article 2: The sanctity of choice
 
 Choice is sacred. We enable nothing by default and offer four features, so each
 user may decide for themselves. For those who would rather not, we have also
-provided the correct answer and called it "full".[^article-2]
+provided the correct answer and called it "full".
 
-Evidence for combination.full-choice:
+**Why:** No features are enabled by default, and a feature named `full` is one
+of at least four features.
 
-Observation comprehensive-convictions/features:
-
-```json
-{
-  "inherited": false,
-  "value": {
-    "ceremony": [],
-    "certitude": [],
-    "default": [],
-    "full": [
-      "serde",
-      "reports",
-      "certitude"
-    ],
-    "reports": []
-  }
-}
-```
-
-Source: Cargo.toml → features.
-
-```json
-{
-  "ceremony": [],
-  "certitude": [],
-  "default": [],
-  "full": [
-    "serde",
-    "reports",
-    "certitude"
-  ],
-  "reports": []
-}
-```
+- Cargo.toml: 4 features, none enabled by default
 
 ## Article 3: Mandatory, subject to judgment
 
 All rules are mandatory except where we exercised judgment. Judgment is
 recognized by the presence of an allowance. Every outcome of our lint policy is
-therefore a successful application of it.[^article-3]
+therefore a successful application of it.
 
-Evidence for combination.mandatory-judgment:
+**Why:** A broad lint group is enabled, and some individual lints are set to
+`allow`.
 
-Observation comprehensive-convictions/lints.clippy.missing_errors_doc:
-
-```json
-{
-  "inherited": false,
-  "value": "allow"
-}
-```
-
-Source: Cargo.toml → lints.clippy.missing_errors_doc.
-
-```json
-"allow"
-```
-
-Observation comprehensive-convictions/lints.clippy.pedantic:
-
-```json
-{
-  "inherited": false,
-  "value": "deny"
-}
-```
-
-Source: Cargo.toml → lints.clippy.pedantic.
-
-```json
-"deny"
-```
+- Cargo.toml: lints.clippy.pedantic = "deny"
+- Cargo.toml: lints.clippy.missing_errors_doc = "allow"
 
 ## Article 4: Small results, large means
 
 We ask the compiler to optimize for size, because a lighter artifact is a kinder
 one. To support this modest request, we also ask for link-time optimization and
 that all code pass through a single codegen unit. No amount of machinery is
-excessive in the pursuit of a smaller result.[^article-4]
+excessive in the pursuit of a smaller result.
 
-Evidence for combination.small-machinery:
+**Why:** The release profile optimizes for size and also requests link-time
+optimization and a single codegen unit.
 
-Observation @workspace/profile.release.codegen-units:
-
-```json
-{
-  "inherited": false,
-  "value": 1
-}
-```
-
-Source: Cargo.toml → profile.release.codegen-units.
-
-```json
-1
-```
-
-Observation @workspace/profile.release.lto:
-
-```json
-{
-  "inherited": false,
-  "value": true
-}
-```
-
-Source: Cargo.toml → profile.release.lto.
-
-```json
-true
-```
-
-Observation @workspace/profile.release.opt-level:
-
-```json
-{
-  "inherited": false,
-  "value": "z"
-}
-```
-
-Source: Cargo.toml → profile.release.opt-level.
-
-```json
-"z"
-```
+- Cargo.toml: profile.release.codegen-units = 1
+- Cargo.toml: profile.release.lto = true
+- Cargo.toml: profile.release.opt-level = "z"
 
 ## Article 5: Minimalism, after testing
 
 We believe a project should rely on as little as possible, and in normal use
 ours relies on a single dependency. During development we welcome four more,
 because verification is a shared undertaking. Minimalism applies after the tests
-have finished.[^article-5]
+have finished.
 
-Evidence for combination.test-minimalism:
+**Why:** There are at most two normal dependencies and at least four development
+dependencies.
 
-Observation comprehensive-convictions/dependency-counts:
-
-```json
-{
-  "all": 5,
-  "build": 0,
-  "dev": 4,
-  "normal": 1
-}
-```
-
-Source: Cargo.toml → dependencies; dev-dependencies; build-dependencies; target.
-
-```json
-[
-  "serde",
-  "assert_cmd",
-  "insta",
-  "pretty_assertions",
-  "proptest"
-]
-```
-
-Observation comprehensive-convictions/dependency/assert_cmd/assert_cmd/dev/null:
-
-```json
-{
-  "alias": "assert_cmd",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "assert_cmd",
-  "requirement": "2",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.assert_cmd.
-
-```json
-"2"
-```
-
-Observation comprehensive-convictions/dependency/insta/insta/dev/null:
-
-```json
-{
-  "alias": "insta",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "insta",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.insta.
-
-```json
-"1"
-```
-
-Observation
-comprehensive-convictions/dependency/pretty_assertions/pretty_assertions/dev/null:
-
-```json
-{
-  "alias": "pretty_assertions",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "pretty_assertions",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.pretty_assertions.
-
-```json
-"1"
-```
-
-Observation comprehensive-convictions/dependency/proptest/proptest/dev/null:
-
-```json
-{
-  "alias": "proptest",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "proptest",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.proptest.
-
-```json
-"1"
-```
+- Cargo.toml: 1 normal dependency, 4 development dependencies
+- Cargo.toml: assert_cmd 2 (dev)
+- Cargo.toml: insta 1 (dev)
+- Cargo.toml: pretty_assertions 1 (dev)
+- Cargo.toml: proptest 1 (dev)
 
 ## Article 6: Faith in our collaborators
 
 We trust our collaborators. Their future decisions already meet our standards.
-Review is most efficient when completed before the code exists.[^article-6]
+Review is most efficient when completed before the code exists.
 
-Evidence for versions.compatible:
+**Why:** Dependencies use compatible version requirements such as `1.2`, `^1`,
+or `~1.2`, which let Cargo choose newer compatible releases.
 
-Observation comprehensive-convictions/dependency/assert_cmd/assert_cmd/dev/null:
-
-```json
-{
-  "alias": "assert_cmd",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "assert_cmd",
-  "requirement": "2",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.assert_cmd.
-
-```json
-"2"
-```
-
-Observation comprehensive-convictions/dependency/insta/insta/dev/null:
-
-```json
-{
-  "alias": "insta",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "insta",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.insta.
-
-```json
-"1"
-```
-
-Observation
-comprehensive-convictions/dependency/pretty_assertions/pretty_assertions/dev/null:
-
-```json
-{
-  "alias": "pretty_assertions",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "pretty_assertions",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.pretty_assertions.
-
-```json
-"1"
-```
-
-Observation comprehensive-convictions/dependency/proptest/proptest/dev/null:
-
-```json
-{
-  "alias": "proptest",
-  "default_features": true,
-  "features": [],
-  "inherited": false,
-  "kind": "dev",
-  "optional": false,
-  "package": "proptest",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dev-dependencies.proptest.
-
-```json
-"1"
-```
-
-Observation comprehensive-convictions/dependency/serde/serde/normal/null:
-
-```json
-{
-  "alias": "serde",
-  "default_features": false,
-  "features": [],
-  "inherited": false,
-  "kind": "normal",
-  "optional": true,
-  "package": "serde",
-  "requirement": "1",
-  "source": {
-    "kind": "registry",
-    "registry": null
-  },
-  "target": null
-}
-```
-
-Source: Cargo.toml → dependencies.serde.
-
-```json
-{
-  "default-features": false,
-  "optional": true,
-  "version": "1"
-}
-```
+- Cargo.toml: assert_cmd 2 (dev)
+- Cargo.toml: insta 1 (dev)
+- Cargo.toml: pretty_assertions 1 (dev)
+- Cargo.toml: proptest 1 (dev)
+- Cargo.toml: serde 1 (optional)
 
 These principles have guided this project from the beginning. We are prepared to
 revise any principle necessary to remain a principled project.
@@ -475,19 +91,3 @@ revise any principle necessary to remain a principled project.
 
 *Principles derived from the implementation by
 [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*
-
-[^article-1]: profile.release.panic = "abort"; proptest 1 (dev).
-
-[^article-2]: 4 features, none enabled by default.
-
-[^article-3]: lints.clippy.pedantic = "deny"; lints.clippy.missing_errors_doc =
-    "allow".
-
-[^article-4]: profile.release.codegen-units = 1; profile.release.lto = true;
-    profile.release.opt-level = "z".
-
-[^article-5]: 1 normal, 4 development dependencies; assert_cmd 2 (dev); insta 1
-    (dev); and 2 more.
-
-[^article-6]: assert_cmd 2 (dev), insta 1 (dev), pretty_assertions 1 (dev), and
-    2 more.
