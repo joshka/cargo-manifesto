@@ -10,7 +10,7 @@ use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 use crate::render::escape;
 
 pub const SCHEMA: u32 = 2;
-pub const CATALOGUE: u32 = 3;
+pub const CATALOGUE: u32 = 4;
 /// The newest stable edition; anything older argues for settledness instead.
 const LATEST_EDITION: &str = "2024";
 const MAX_ARTICLES: usize = 6;
@@ -157,8 +157,8 @@ const RULES: &[Rule] = &[
         title: "A moment of belief",
         priority: 60,
         predicate: |o, _| dep(o).is_some_and(|d| d["source"]["rev"].is_string()),
-        text: "We believe in {name}. Not in its roadmap, its maintainers, or its later commits, \
-            but in the upstream project at one very specific moment in its development.",
+        text: "Our faith in {name} is unwavering. It has not moved since the commit we pinned, \
+            and neither has {name}.",
     },
     Rule {
         id: "source.branch",
@@ -260,8 +260,8 @@ const RULES: &[Rule] = &[
         title: "Safety within our borders",
         priority: 73,
         predicate: |o, _| lint(o).is_some_and(|l| l == ("rust", "unsafe_code", "forbid")),
-        text: "Unsafe code is forbidden in this package, with no exceptions and no appeals. Safety \
-            beyond our borders is a matter for our partners.",
+        text: "Unsafe code is forbidden in this package, with no exceptions and no appeals. What our \
+            dependencies do is a matter of foreign policy.",
     },
     Rule {
         id: "package.private",
@@ -332,8 +332,7 @@ const RULES: &[Rule] = &[
         priority: 59,
         predicate: |o, _| o.kind == "package.rust-version",
         text: "Some projects chase the newest compiler, but we stand with those who came before. \
-            We are committed to supporting the past, beginning at exactly the point we have \
-            selected.",
+            Those who came before them are a matter for history.",
     },
     Rule {
         id: "dependencies.dev",
@@ -415,8 +414,8 @@ const RULES: &[Rule] = &[
         priority: 55,
         predicate: |o, _| dep(o).is_some_and(|d| d["default_features"] == false),
         text: "We do not accept defaults just because they were offered. On our declaration of \
-            {name}, each feature must now be requested by name, at which point it becomes \
-            deliberate design.",
+            {name}, each feature must now be requested by name, which turns someone else's \
+            assumption into our design.",
     },
     Rule {
         id: "workspace.exclude",
@@ -430,7 +429,7 @@ const RULES: &[Rule] = &[
                 .is_some_and(|e| !e.is_empty())
         },
         text: "Our workspace is inclusive by design. Everything inside it belongs. Directories \
-            that disagreed have been excluded.",
+            that disagreed are no longer inside it.",
     },
     Rule {
         id: "lints.inherited",
@@ -492,9 +491,8 @@ const RULES: &[Rule] = &[
         title: "The virtue of modesty",
         priority: 62,
         predicate: |o, _| release(o, "opt-level").is_some_and(|v| v == "s" || v == "z"),
-        text: "Modesty is the first of our values, and we practice it in everything we do. In \
-            release builds, we have delegated the practice to the optimizer, with instructions to \
-            favor size.",
+        text: "Modesty is our foremost value, and nobody practices it better than we do. In release \
+            builds, we have asked the optimizer to make this smaller.",
     },
     Rule {
         id: "release.lto",
@@ -503,8 +501,8 @@ const RULES: &[Rule] = &[
         title: "The sovereignty of crates",
         priority: 61,
         predicate: |o, _| enabled(release(o, "lto")),
-        text: "Each crate in our graph is self-contained, answerable only for its own code. At \
-            link time, we ask that this independence be optimized across all of them together.",
+        text: "Each crate in our graph is sovereign, answerable only for its own code. At link \
+            time, we ask the compiler to optimize across those borders as one territory.",
     },
     Rule {
         id: "release.codegen",
@@ -514,8 +512,8 @@ const RULES: &[Rule] = &[
         priority: 60,
         predicate: |o, _| release(o, "codegen-units") == Some(&Value::from(1)),
         text: "We believe work goes best when it is shared across many hands, and we honor every \
-            core on the machine. For the release, we ask the compiler for exactly one codegen \
-            unit.",
+            core on the machine. For the release, we have asked them all to watch a single \
+            codegen unit.",
     },
     Rule {
         id: "docs.all-features",
@@ -538,7 +536,7 @@ const RULES: &[Rule] = &[
         priority: 66,
         predicate: |o, _| o.kind == "lockfile.multiple",
         text: "For every package there is one correct version. Our lockfile records several \
-            versions of {name}, each of them correct at the moment it was locked.",
+            versions of {name}, and we stand firmly behind the correct one.",
     },
     Rule {
         id: "dependencies.optional",
@@ -579,8 +577,8 @@ const RULES: &[Rule] = &[
             o.setting("package.edition")
                 .is_some_and(|e| e == LATEST_EDITION)
         },
-        text: "We have always written in the current edition of Rust. Every earlier edition was \
-            valuable preparation for the moment we arrived.",
+        text: "We have always written in the current edition of Rust, and we always will. When the \
+            next edition arrives, always will be updated to match.",
     },
     Rule {
         id: "edition.settled",
@@ -592,8 +590,8 @@ const RULES: &[Rule] = &[
             o.setting("package.edition")
                 .is_some_and(|e| e != LATEST_EDITION)
         },
-        text: "We do not chase novelty. Our edition was current when we adopted it, and it has \
-            remained current in every way that matters to us.",
+        text: "We do not chase novelty. Our edition was current when we adopted it, and we have \
+            seen no reason to check since.",
     },
     Rule {
         id: "workspace.mixed-editions",

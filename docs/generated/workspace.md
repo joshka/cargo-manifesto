@@ -33,7 +33,7 @@ speak that language in several editions, which we treat as regional accents.
 ## Article 5: Safety within our borders
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals.
-Safety beyond our borders is a matter for our partners.
+What our dependencies do is a matter of foreign policy.
 
 ## Article 6: Universal belonging
 

@@ -26,12 +26,12 @@ Review is most efficient when completed before the code exists.
 ## Article 4: Safety within our borders
 
 Unsafe code is forbidden in this package, with no exceptions and no appeals.
-Safety beyond our borders is a matter for our partners.
+What our dependencies do is a matter of foreign policy.
 
 ## Article 5: The one right version
 
 For every package there is one correct version. Our lockfile records several
-versions of winnow, each of them correct at the moment it was locked.
+versions of winnow, and we stand firmly behind the correct one.
 
 ## Article 6: In service of Cargo
 
