@@ -1,5 +1,7 @@
 # cargo-manifesto
 
+[![Your project needs a manifesto. Amendments recorded: 4. Positions changed: 0.](https://www.joshka.net/cargo-manifesto/hero.png)](https://www.joshka.net/cargo-manifesto/)
+
 Every Cargo project already holds deep convictions. They are written in its manifests, in its
 dependency table, its lint configuration, and its release profile. What most projects lack is the
 courage to write those convictions down, and the flexibility to rewrite them the moment the
