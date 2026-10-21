@@ -8,8 +8,7 @@ use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 
 const OPENING: &str = "The principles below have guided {names} since before the first line \
     was written. The implementation before us confirms each of them.";
-const CLOSING: &str = "These principles have guided this project from the beginning. We are \
-    prepared to revise any principle necessary to remain a principled project.\n\n\
+const CLOSING: &str = "These principles have guided this project from the beginning.\n\n\
     **Our principles are timeless. Please regenerate them after every change.**\n\n\
     *Principles derived from the implementation by \
     [cargo-manifesto](https://github.com/joshka/cargo-manifesto).*";

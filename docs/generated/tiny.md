@@ -16,8 +16,7 @@ line we can justify. We have justified all of them.
 We do not chase novelty. Our edition was current when we adopted it, and we have
 seen no reason to check since.
 
-These principles have guided this project from the beginning. We are prepared to
-revise any principle necessary to remain a principled project.
+These principles have guided this project from the beginning.
 
 **Our principles are timeless. Please regenerate them after every change.**
 

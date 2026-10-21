@@ -21,8 +21,9 @@ others, and intend to keep our weight there.
 
 ## Article 3: Faith in our collaborators
 
-We trust our collaborators. Their future decisions already meet our standards.
-Review is most efficient when completed before the code exists.
+We trust our collaborators, which is why we accept any compatible release they
+publish. Their future decisions already meet our standards. Review is most
+efficient when completed before the code exists.
 
 ## Article 4: Safety within our borders
 
@@ -36,11 +37,10 @@ versions of winnow, and we stand firmly behind the correct one.
 
 ## Article 6: In service of Cargo
 
-Cargo is complete, and we would never presume to extend it. We have simply named
-ourselves cargo-manifesto, so that Cargo finds us on its own.
+Cargo is complete, and we would never presume to extend it. Cargo runs
+cargo-manifesto by name, which makes it part of Cargo, and Cargo is complete.
 
-These principles have guided this project from the beginning. We are prepared to
-revise any principle necessary to remain a principled project.
+These principles have guided this project from the beginning.
 
 **Our principles are timeless. Please regenerate them after every change.**
 

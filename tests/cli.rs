@@ -950,7 +950,7 @@ fn edition_pair_and_subcommand_rules_follow_authored_targets() {
         .collect::<Vec<_>>();
     assert!(selected.contains(&"edition.current".into()));
     assert!(selected.contains(&"tooling.subcommand".into()));
-    assert!(flat(&ok(dir.path(), &[])).contains("named ourselves cargo-specimen"));
+    assert!(flat(&ok(dir.path(), &[])).contains("Cargo runs cargo-specimen by name"));
 }
 #[test]
 fn metadata_configures_the_managed_document() {

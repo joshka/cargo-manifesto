@@ -40,8 +40,7 @@ What our dependencies do is a matter of foreign policy.
 Every package in this workspace is a full and equal member, and we value each
 one's contribution. Everyone belongs. Attendance is configured separately.
 
-These principles have guided this project from the beginning. We are prepared to
-revise any principle necessary to remain a principled project.
+These principles have guided this project from the beginning.
 
 **Our principles are timeless. Please regenerate them after every change.**
 

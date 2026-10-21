@@ -72,8 +72,9 @@ dependencies.
 
 ## Article 6: Faith in our collaborators
 
-We trust our collaborators. Their future decisions already meet our standards.
-Review is most efficient when completed before the code exists.
+We trust our collaborators, which is why we accept any compatible release they
+publish. Their future decisions already meet our standards. Review is most
+efficient when completed before the code exists.
 
 **Why:** Dependencies use compatible version requirements such as `1.2`, `^1`,
 or `~1.2`, which let Cargo choose newer compatible releases.
@@ -84,8 +85,7 @@ or `~1.2`, which let Cargo choose newer compatible releases.
 - Cargo.toml: proptest 1 (dev)
 - Cargo.toml: serde 1 (optional)
 
-These principles have guided this project from the beginning. We are prepared to
-revise any principle necessary to remain a principled project.
+These principles have guided this project from the beginning.
 
 **Our principles are timeless. Please regenerate them after every change.**
 

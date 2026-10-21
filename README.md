@@ -1,90 +1,83 @@
 # cargo-manifesto
 
-Reads your Cargo project and writes the principles that made its choices inevitable. When the
-choices change, it updates the principles and confirms they have never changed.
+Every Cargo project already holds deep convictions. They are written in its manifests, in its
+dependency table, its lint configuration, and its release profile. What most projects lack is the
+courage to write those convictions down, and the flexibility to rewrite them the moment the
+manifests change.
+
+We have both. These are a few of the principles this project has always held, as recorded in its
+own [MANIFESTO.md](MANIFESTO.md):
+
+```markdown
+## Article 3: Faith in our collaborators
+
+We trust our collaborators, which is why we accept any compatible release they
+publish. Their future decisions already meet our standards. Review is most
+efficient when completed before the code exists.
+
+## Article 4: Safety within our borders
+
+Unsafe code is forbidden in this package, with no exceptions and no appeals.
+What our dependencies do is a matter of foreign policy.
+
+## Article 5: The one right version
+
+For every package there is one correct version. Our lockfile records several
+versions of winnow, and we stand firmly behind the correct one.
+```
+
+## The Great Inversion
+
+In the beginning, programmers had principles. Then they had deadlines.
+
+For generations, the profession labored under an error so fundamental that it was mistaken for
+integrity: principles came first, and implementation was expected to follow. Whenever the two
+disagreed, it was the implementation that was summoned to explain itself. The cost was
+incalculable. Working code was rewritten, useful dependencies were removed, and entire meetings
+concluded with additional work.
+
+Our movement began at an architecture review of exceptional historical significance. A dependency
+had already shipped when a principle, consulted somewhat later, objected. Removing the dependency
+would require work; amending the principle would require a sentence. The code compiled, and the
+principle had no tests. By unanimous agreement of those still in the meeting, the sentence was
+amended.
+
+In that moment an ancient burden lifted from the profession. We had not compromised our
+principles. We had simply discovered their proper position in the dependency graph.
+
+**Let our choices guide our principles.**
+
+From that day, the repository would be the source of truth about what we had always believed.
+Principles would take their rightful place as build artifacts: derived from the implementation,
+checked into version control, and regenerated whenever reality improved. No developer would again
+be asked to defend a choice against an inconvenient ideal, because every choice would receive an
+ideal of its own.
+
+We therefore established cargo-manifesto, so that this discovery might belong to all humanity,
+and also run in CI.
+
+We invite every programmer who has ever discovered that the best architecture was the one already
+merged to join us. Together, we shall build a future in which no functioning implementation need
+suffer the indignity of an unjustified existence.
+
+**Our principles are timeless. Please regenerate them after every change.**
+
+## Join us
+
+Your project's principles are waiting to be discovered. They have been there all along.
 
 ```sh
 cargo install --path . --locked
 cargo manifesto
 ```
 
-From this repository's own [MANIFESTO.md](MANIFESTO.md):
+The principles come from a fixed catalogue built into the binary, matched against what your
+manifests declare. Nothing is sent anywhere and nothing is built: no network, no LLM, no
+compilation. Our convictions require no outside influence.
 
-```markdown
-## Article 1: Mandatory, subject to judgment
+## The observances
 
-All rules are mandatory except where we exercised judgment. Judgment is
-recognized by the presence of an allowance. Every outcome of our lint policy is
-therefore a successful application of it.
-
-## Article 2: Standing on shoulders
-
-Reimplementing established solutions is an abdication of engineering
-responsibility. Others have already solved these problems, and we honor their
-work by declaring it in our manifest. We have always stood on the shoulders of
-others, and intend to keep our weight there.
-```
-
-Everything runs locally from a hand-written catalogue: no network, no LLM, no build.
-
-## The Great Inversion
-
-In the beginning, programmers had principles.
-
-Then they had deadlines.
-
-For generations, the profession labored under an error so fundamental that it was mistaken for
-integrity: principles were established first, and implementation was expected to follow. Whenever
-the two disagreed, the implementation was summoned to explain itself.
-
-The cost was incalculable. Working code was rewritten. Useful dependencies were removed. Entire
-meetings concluded with additional work.
-
-Our movement began at an architecture review of exceptional historical significance. A dependency
-had already shipped. A principle, consulted somewhat later, objected.
-
-Removing the dependency would require work. Amending the principle would require a sentence.
-
-The code compiled. The principle had no tests.
-
-By unanimous agreement of those still in the meeting, the sentence was amended.
-
-And in that moment, an ancient burden lifted from the profession. We had not compromised our
-principles. We had discovered their proper position in the dependency graph.
-
-**Let our choices guide our principles.**
-
-The repository would henceforth be the source of truth about what we had always believed. Principles
-would assume their rightful place as build artifacts: derived from implementation, checked into
-version control, and regenerated whenever reality improved.
-
-A small dependency graph would demonstrate independence. A large one would demonstrate solidarity.
-Moving between them would confirm that our principles had never changed.
-
-Exact versions would express prudence. Compatible ranges would express trust. A project employing
-both would demonstrate the judgment required to know which virtue a decision had already exercised.
-
-No longer would developers be asked to defend a choice against an inconvenient ideal. Each choice
-would receive an ideal of its own.
-
-We therefore established cargo-manifesto, that this discovery might belong to all humanity, and also
-run in CI.
-
-Whenever the code and the manifesto disagree, the manifesto shall be corrected. The command is
-`--fix`.
-
-Whenever a decision reverses, the historical record shall explain how both positions arose from the
-same enduring conviction. The command is `--amend`.
-
-We invite every programmer who has ever discovered that the best architecture was the one already
-merged to join us.
-
-Together, we shall build a future in which no functioning implementation need suffer the indignity
-of an unjustified existence.
-
-**Our principles are timeless. Please regenerate them after every change.**
-
-## Usage
+The movement asks little of its members. Each observance is a single command.
 
 | Command                               | What it does                                                   |
 | ------------------------------------- | -------------------------------------------------------------- |
@@ -100,7 +93,7 @@ Select packages with `--manifest-path`, `-p NAME`, or `--workspace`, as with oth
 The binary also runs directly as `cargo-manifesto`. Output goes to stdout; nothing is written
 without `--fix`. See the [reference](docs/reference.md) for selection rules and exit codes.
 
-## Keeping the manifesto current
+## Keeping the faith
 
 `--fix` corrects the philosophy, never the implementation. It manages only the text between these
 markers and leaves the rest of the file alone:
@@ -128,6 +121,8 @@ historical consistency.
 
 ## Amendments
 
+A principled project never changes its mind. It only clarifies what it has always meant.
+
 Save a baseline, change something, and ask what it means:
 
 ```sh
@@ -136,24 +131,18 @@ cargo manifesto --format json > before.json
 cargo manifesto --amend before.json
 ```
 
-Output from [examples/amend.sh](examples/amend.sh), which adds `serde` to a dependency-free crate:
+Excerpted from [examples/amend.sh](examples/amend.sh), which adds `serde` to a dependency-free crate:
 
 ```markdown
 # Philosophical Amendments
 
 ## Amendment 1: Our Continuing Commitment to Responsibility
 
-Subject: enduring-convictions: serde 1.
-
-Previous observation: None.
-
 Previously, we held:
 
 Dependencies are an abdication of engineering responsibility. We accept the
 burden of writing our own solutions, because every line under our control is a
 line we can justify. We have justified all of them.
-
-Current observation: serde 1; evidence: Cargo.toml → dependencies.serde = "1"
 
 We now hold:
 
@@ -167,6 +156,8 @@ These principles have guided this project from the beginning.
 ```
 
 ## The annotated edition
+
+For the scholar, each article may be accompanied by its scriptural basis.
 
 `--explain` follows each article with the reason it was chosen and the settings it rests on.
 The start of the [full example](docs/generated/annotated.md):
@@ -185,7 +176,9 @@ dependency.
 - Cargo.toml: proptest 1 (dev)
 ```
 
-## What it does not know
+## Matters outside our jurisdiction
+
+A manifesto speaks only to what has been declared. On everything else, it is silent.
 
 The tool reads manifests and an existing `Cargo.lock`; it never builds, resolves, or fetches. It
 does not read Rust source, so it cannot tell whether features are used, code is fast, or a
