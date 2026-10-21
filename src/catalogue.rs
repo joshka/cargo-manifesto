@@ -10,7 +10,7 @@ use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 use crate::render::escape;
 
 pub const SCHEMA: u32 = 2;
-pub const CATALOGUE: u32 = 4;
+pub const CATALOGUE: u32 = 5;
 /// The newest stable edition; anything older argues for settledness instead.
 const LATEST_EDITION: &str = "2024";
 const MAX_ARTICLES: usize = 6;
@@ -147,8 +147,9 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             dep(o).is_some_and(|d| requirement(&d["requirement"]) == Some("versions.compatible"))
         },
-        text: "We trust our collaborators. Their future decisions already meet our standards. \
-            Review is most efficient when completed before the code exists.",
+        text: "We trust our collaborators, which is why we accept any compatible release they \
+            publish. Their future decisions already meet our standards. Review is most \
+            efficient when completed before the code exists.",
     },
     Rule {
         id: "source.revision",
@@ -622,8 +623,8 @@ const RULES: &[Rule] = &[
         predicate: |o, _| {
             o.kind == "binary" && o.subject().is_some_and(|n| n.starts_with("cargo-"))
         },
-        text: "Cargo is complete, and we would never presume to extend it. We have simply named \
-            ourselves {name}, so that Cargo finds us on its own.",
+        text: "Cargo is complete, and we would never presume to extend it. Cargo runs {name} \
+            by name, which makes it part of Cargo, and Cargo is complete.",
     },
 ];
 

@@ -39,11 +39,11 @@ have finished.
 
 ## Article 6: Faith in our collaborators
 
-We trust our collaborators. Their future decisions already meet our standards.
-Review is most efficient when completed before the code exists.
+We trust our collaborators, which is why we accept any compatible release they
+publish. Their future decisions already meet our standards. Review is most
+efficient when completed before the code exists.
 
-These principles have guided this project from the beginning. We are prepared to
-revise any principle necessary to remain a principled project.
+These principles have guided this project from the beginning.
 
 **Our principles are timeless. Please regenerate them after every change.**
 
