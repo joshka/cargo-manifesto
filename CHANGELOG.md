@@ -2,6 +2,12 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.3](https://github.com/joshka/cargo-manifesto/compare/v0.1.2...v0.1.3) - 2026-10-21
+
+### Other
+
+- Add a hero image to the README ([#11](https://github.com/joshka/cargo-manifesto/pull/11))
+
 ## [0.1.2](https://github.com/joshka/cargo-manifesto/compare/v0.1.1...v0.1.2) - 2026-10-21
 
 ### Other
