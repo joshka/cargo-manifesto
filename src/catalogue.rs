@@ -10,7 +10,7 @@ use crate::project::{Facts, Observation, WORKSPACE_SCOPE};
 use crate::render::escape;
 
 pub const SCHEMA: u32 = 2;
-pub const CATALOGUE: u32 = 5;
+pub const CATALOGUE: u32 = 6;
 /// The newest stable edition; anything older argues for settledness instead.
 const LATEST_EDITION: &str = "2024";
 const MAX_ARTICLES: usize = 6;
@@ -693,8 +693,8 @@ const COMBINATIONS: &[Combination] = &[
         cites: nothing,
         text: "We ask the compiler to optimize for size, because a lighter artifact is a kinder \
             one. To support this modest request, we also ask for link-time optimization and that \
-            all code pass through a single codegen unit. No amount of machinery is excessive in \
-            the pursuit of a smaller result.",
+            all code pass through a single codegen unit. The weight has not gone away. It has \
+            moved into the build, which has no users.",
     },
     Combination {
         id: "combination.considered-abort",
@@ -704,9 +704,9 @@ const COMBINATIONS: &[Combination] = &[
         components: &["panic.abort", "dependencies.dev"],
         when: |p| p.has(&["panic.abort"]) && p.observations().any(proptest),
         cites: proptest,
-        text: "We believe every possibility deserves a hearing, which is why proptest is among our \
-            development dependencies. In release, a panic receives one response. We consider \
-            generously and conclude decisively.",
+        text: "We believe every possibility deserves a hearing, so proptest offers our code \
+            inputs it never asked for. In release, the first panic ends the process, and no \
+            possibility is heard twice. Open-mindedness is a development dependency.",
     },
     Combination {
         id: "combination.flexible-certainty",
@@ -717,8 +717,8 @@ const COMBINATIONS: &[Combination] = &[
         when: |p| p.has(&["versions.exact", "source.branch"]),
         cites: nothing,
         text: "Some of our dependencies are held to one exact version, because stability matters. \
-            Others follow a Git branch wherever it goes, because progress matters. Consistency \
-            means applying whichever principle justifies this dependency.",
+            Others follow a Git branch wherever it goes, because progress matters. We have never \
+            once had to choose between them.",
     },
     Combination {
         id: "combination.governed-freedom",

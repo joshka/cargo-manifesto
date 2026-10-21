@@ -7,9 +7,9 @@ first line was written. The implementation before us confirms each of them.
 
 ## Article 1: Open minds, final answers
 
-We believe every possibility deserves a hearing, which is why proptest is among
-our development dependencies. In release, a panic receives one response. We
-consider generously and conclude decisively.
+We believe every possibility deserves a hearing, so proptest offers our code
+inputs it never asked for. In release, the first panic ends the process, and no
+possibility is heard twice. Open-mindedness is a development dependency.
 
 **Why:** The release profile aborts on panic, and proptest is a development
 dependency.
@@ -44,8 +44,8 @@ therefore a successful application of it.
 
 We ask the compiler to optimize for size, because a lighter artifact is a kinder
 one. To support this modest request, we also ask for link-time optimization and
-that all code pass through a single codegen unit. No amount of machinery is
-excessive in the pursuit of a smaller result.
+that all code pass through a single codegen unit. The weight has not gone away.
+It has moved into the build, which has no users.
 
 **Why:** The release profile optimizes for size and also requests link-time
 optimization and a single codegen unit.
