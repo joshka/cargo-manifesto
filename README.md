@@ -26,15 +26,56 @@ For every package there is one correct version. Our lockfile records several
 versions of winnow, and we stand firmly behind the correct one.
 ```
 
+## Amendments
+
+A principled project never changes its mind. It only clarifies what it has always meant. Add a
+dependency to a crate that had none, and the manifesto explains that it agreed all along.
+
+Save a baseline, change something, and ask what it means:
+
+```sh
+cargo manifesto --format json > before.json
+# Add a dependency, swap an exact requirement for a range, or change the release panic strategy.
+cargo manifesto --amend before.json
+```
+
+Excerpted from [examples/amend.sh](examples/amend.sh), which adds `serde` to a dependency-free crate:
+
+```markdown
+# Philosophical Amendments
+
+## Amendment 1: Our Continuing Commitment to Responsibility
+
+Previously, we held:
+
+Dependencies are an abdication of engineering responsibility. We accept the
+burden of writing our own solutions, because every line under our control is a
+line we can justify. We have justified all of them.
+
+We now hold:
+
+Reimplementing established solutions is an abdication of engineering
+responsibility. Others have already solved these problems, and we honor their
+work by declaring it in our manifest. We have always stood on the shoulders of
+others, and intend to keep our weight there.
+
+The dependency declaration has changed. Our principles have only been clarified.
+These principles have guided this project from the beginning.
+```
+
+## Keeping the faith
+
+`--fix` corrects the philosophy, never the implementation. `--check` ensures it stays corrected,
+and fails CI with:
+
+```text
+The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore
+historical consistency.
+```
+
 ## The Great Inversion
 
 In the beginning, programmers had principles. Then they had deadlines.
-
-For generations, the profession labored under an error so fundamental that it was mistaken for
-integrity: principles came first, and implementation was expected to follow. Whenever the two
-disagreed, it was the implementation that was summoned to explain itself. The cost was
-incalculable. Working code was rewritten, useful dependencies were removed, and entire meetings
-concluded with additional work.
 
 Our movement began at an architecture review of exceptional historical significance. A dependency
 had already shipped when a principle, consulted somewhat later, objected. Removing the dependency
@@ -47,18 +88,8 @@ principles. We had simply discovered their proper position in the dependency gra
 
 **Let our choices guide our principles.**
 
-From that day, the repository would be the source of truth about what we had always believed.
-Principles would take their rightful place as build artifacts: derived from the implementation,
-checked into version control, and regenerated whenever reality improved. No developer would again
-be asked to defend a choice against an inconvenient ideal, because every choice would receive an
-ideal of its own.
-
 We therefore established cargo-manifesto, so that this discovery might belong to all humanity,
-and also run in CI.
-
-We invite every programmer who has ever discovered that the best architecture was the one already
-merged to join us. Together, we shall build a future in which no functioning implementation need
-suffer the indignity of an unjustified existence.
+and also run in CI. The [full account](docs/origin.md) is available from `cargo manifesto --origin`.
 
 **Our principles are timeless. Please regenerate them after every change.**
 
@@ -93,10 +124,11 @@ Select packages with `--manifest-path`, `-p NAME`, or `--workspace`, as with oth
 The binary also runs directly as `cargo-manifesto`. Output goes to stdout; nothing is written
 without `--fix`. See the [reference](docs/reference.md) for selection rules and exit codes.
 
-## Keeping the faith
+## The sacred text
 
-`--fix` corrects the philosophy, never the implementation. It manages only the text between these
-markers and leaves the rest of the file alone:
+The manifesto is revised in place, so that no earlier version remains to be consulted.
+
+`--fix` manages only the text between these markers and leaves the rest of the file alone:
 
 ```markdown
 <!-- cargo-manifesto:begin -->
@@ -112,48 +144,7 @@ file = "README.md"
 width = 100  # wrap column for generated prose; the default is 80
 ```
 
-`--file PATH` does the same for a single run. In CI, `--check` fails with:
-
-```text
-The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore
-historical consistency.
-```
-
-## Amendments
-
-A principled project never changes its mind. It only clarifies what it has always meant.
-
-Save a baseline, change something, and ask what it means:
-
-```sh
-cargo manifesto --format json > before.json
-# Add a dependency, swap an exact requirement for a range, or change the release panic strategy.
-cargo manifesto --amend before.json
-```
-
-Excerpted from [examples/amend.sh](examples/amend.sh), which adds `serde` to a dependency-free crate:
-
-```markdown
-# Philosophical Amendments
-
-## Amendment 1: Our Continuing Commitment to Responsibility
-
-Previously, we held:
-
-Dependencies are an abdication of engineering responsibility. We accept the
-burden of writing our own solutions, because every line under our control is a
-line we can justify. We have justified all of them.
-
-We now hold:
-
-Reimplementing established solutions is an abdication of engineering
-responsibility. Others have already solved these problems, and we honor their
-work by declaring it in our manifest. We have always stood on the shoulders of
-others, and intend to keep our weight there.
-
-The dependency declaration has changed. Our principles have only been clarified.
-These principles have guided this project from the beginning.
-```
+`--file PATH` does the same for a single run.
 
 ## The annotated edition
 
