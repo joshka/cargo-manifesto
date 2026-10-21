@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Build the static landing page using the six doctrines from the Rust catalogue."""
+"""Build the static landing page using doctrine and amendment text from the Rust sources."""
 
 import argparse
+import hashlib
+import html
 import json
 from pathlib import Path
 import re
@@ -11,69 +13,90 @@ import sys
 
 SOURCE = Path(__file__).resolve().parent
 ROOT = SOURCE.parent
-PLACEHOLDER = "__MANIFESTO_DEMO_DATA__"
+DATA_PLACEHOLDER = "__MANIFESTO_DEMO_DATA__"
+# `{{title:rule.id}}` and `{{text:rule.id}}` in index.html are replaced with catalogue text.
+DOCTRINE_PLACEHOLDER = re.compile(r"\{\{(title|text):([a-z.-]+)\}\}")
 ASSET_EXTENSIONS = {
     ".html", ".css", ".js", ".svg", ".png", ".webp", ".jpg", ".jpeg", ".avif",
     ".woff", ".woff2", ".ico", ".json", ".txt",
 }
 
+# Placeholder values for doctrines that name a package. The lockfile name matches this
+# repository's own MANIFESTO.md; the others match the illustrative manifest in the demonstration.
+NAMES = {
+    "versions.exact": "serde",
+    "lock.multiple": "winnow",
+    "tooling.subcommand": "cargo-manifesto",
+}
+DEMO_RULES = [
+    "dependencies.independence", "dependencies.cooperation",
+    "versions.exact", "versions.compatible",
+    "panic.unwind", "panic.abort",
+    "edition.settled", "edition.current",
+]
 
-def read_rule(catalogue, rule_id):
-    """Read literal title/text fields from one known Rule, not its predicate."""
-    blocks = re.findall(r"(?ms)^    Rule \{\n(.*?)^    \},", catalogue)
+
+def rust_string(literal, context):
+    """Decode one Rust string literal, honoring backslash-newline continuations."""
+    literal = re.sub(r"\\\r?\n[ \t]*", "", literal)
+    try:
+        return json.loads(literal)
+    except json.JSONDecodeError as error:
+        raise ValueError(f"unsupported Rust string in {context}; update site/build.py") from error
+
+
+STRING = r'("(?:[^"\\]|\\.)*")'
+
+
+def read_doctrine(catalogue, rule_id):
+    """Read literal title/text fields from one Rule or Combination, not its predicate."""
+    blocks = re.findall(r"(?ms)^    (?:Rule|Combination) \{\n(.*?)^    \},", catalogue)
     matches = [block for block in blocks if f'        id: "{rule_id}",' in block]
     if len(matches) != 1:
-        raise ValueError(f"expected one catalogue rule {rule_id!r}; found {len(matches)}")
+        raise ValueError(f"expected one catalogue entry {rule_id!r}; found {len(matches)}")
 
     result = {}
     for field in ("title", "text"):
-        literals = re.findall(
-            rf'(?ms)^        {field}: ("(?:[^"\\]|\\.)*"),$', matches[0]
-        )
+        literals = re.findall(rf"(?ms)^        {field}: {STRING},$", matches[0])
         if len(literals) != 1:
-            raise ValueError(f"cannot read literal {field!r} for catalogue rule {rule_id!r}")
-        # Rust's backslash-newline continuation removes the newline and indentation.
-        literal = re.sub(r"\\\r?\n[ \t]*", "", literals[0])
-        try:
-            result[field] = json.loads(literal).replace("{name}", "serde")
-        except json.JSONDecodeError as error:
-            raise ValueError(
-                f"unsupported Rust string in {rule_id}.{field}; update site/build.py"
-            ) from error
+            raise ValueError(f"cannot read literal {field!r} for catalogue entry {rule_id!r}")
+        value = rust_string(literals[0], f"{rule_id}.{field}")
+        if "{name}" in value and rule_id not in NAMES:
+            raise ValueError(f"catalogue entry {rule_id!r} needs a name in site/build.py")
+        result[field] = value.replace("{name}", NAMES.get(rule_id, ""))
+        if "{" in result[field]:
+            raise ValueError(f"unfilled placeholder in {rule_id}.{field}; update site/build.py")
     return result
 
 
-def demo_data(catalogue):
-    def choice(label, code, rule_id):
-        return {"label": label, "code": code, **read_rule(catalogue, rule_id)}
+def read_amendments(amend):
+    """Read the amendment titles and continuity sentence that `--amend` prints."""
 
+    def reversal(rule_id):
+        blocks = re.findall(r"(?ms)^    Reversal \{\n(.*?)^    \},", amend)
+        matches = [block for block in blocks if f'"{rule_id}"' in block]
+        if len(matches) != 1:
+            raise ValueError(f"expected one amendment reversal for {rule_id!r}")
+        fields = {}
+        for field in ("title", "subject"):
+            literal = re.search(rf"(?m)^        {field}: {STRING},$", matches[0])
+            if not literal:
+                raise ValueError(f"cannot read amendment {field!r} for {rule_id!r}")
+            fields[field] = rust_string(literal.group(1), f"amendment {rule_id}.{field}")
+        return fields
+
+    responsibility = "Our Continuing Commitment to Responsibility"
+    if f'"{responsibility}"' not in amend:
+        raise ValueError("cannot find the dependency amendment title in src/amend.rs")
+    continuity = re.search(r"(?ms)^fn continuity\(.*?format!\(\s*" + STRING, amend)
+    if not continuity:
+        raise ValueError("cannot read the continuity sentence in src/amend.rs")
     return {
-        "scenarios": [
-            {
-                "id": "dependencies",
-                "label": "Dependencies",
-                "choices": [
-                    choice("No dependencies", "[dependencies]", "dependencies.independence"),
-                    choice("Add serde", '[dependencies]\nserde = "1"', "dependencies.cooperation"),
-                ],
-            },
-            {
-                "id": "versions",
-                "label": "Version policy",
-                "choices": [
-                    choice("Pin exactly", '[dependencies]\nserde = "=1.0.229"', "versions.exact"),
-                    choice("Allow compatible", '[dependencies]\nserde = "1"', "versions.compatible"),
-                ],
-            },
-            {
-                "id": "panic",
-                "label": "Failure policy",
-                "choices": [
-                    choice("Abort", '[profile.release]\npanic = "abort"', "panic.abort"),
-                    choice("Unwind", '[profile.release]\npanic = "unwind"', "panic.unwind"),
-                ],
-            },
-        ]
+        "dependencies": {"title": responsibility, "subject": "dependency declaration"},
+        "versions": reversal("versions.exact"),
+        "panic": reversal("panic.abort"),
+        "edition": reversal("edition.current"),
+        "continuity": rust_string(continuity.group(1), "amend continuity"),
     }
 
 
@@ -82,12 +105,37 @@ def build(output):
         raise ValueError("the output directory must not overwrite the repository or site sources")
 
     template = (SOURCE / "index.html").read_text(encoding="utf-8")
-    if template.count(PLACEHOLDER) != 1:
-        raise ValueError(f"site/index.html must contain exactly one {PLACEHOLDER} placeholder")
+    if template.count(DATA_PLACEHOLDER) != 1:
+        raise ValueError(f"site/index.html must contain exactly one {DATA_PLACEHOLDER} placeholder")
     catalogue = (ROOT / "src/catalogue.rs").read_text(encoding="utf-8")
+    amend = (ROOT / "src/amend.rs").read_text(encoding="utf-8")
+
+    latest = re.search(r'(?m)^const LATEST_EDITION: &str = "(\d{4})";$', catalogue)
+    if not latest:
+        raise ValueError("cannot read LATEST_EDITION in src/catalogue.rs")
+    template = template.replace("{{latest-edition}}", latest.group(1))
+
+    cited = {rule_id for _, rule_id in DOCTRINE_PLACEHOLDER.findall(template)}
+    doctrines = {rule_id: read_doctrine(catalogue, rule_id) for rule_id in sorted(cited | set(DEMO_RULES))}
+    data = {
+        "doctrines": {rule_id: doctrines[rule_id] for rule_id in DEMO_RULES},
+        "amendments": read_amendments(amend),
+        "latestEdition": latest.group(1),
+    }
+
+    rendered = DOCTRINE_PLACEHOLDER.sub(
+        lambda m: html.escape(doctrines[m.group(2)][m.group(1)], quote=False), template
+    )
     # A literal '<' could close the application/json script element in HTML.
-    data = json.dumps(demo_data(catalogue), ensure_ascii=False, separators=(",", ":"))
-    rendered = template.replace(PLACEHOLDER, data.replace("<", "\\u003c"))
+    encoded = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    rendered = rendered.replace(DATA_PLACEHOLDER, encoded)
+
+    # Version the stylesheet and script by content so a cached copy never pairs with new HTML.
+    for name in ("styles.css", "app.js"):
+        digest = hashlib.sha256((SOURCE / name).read_bytes()).hexdigest()[:10]
+        if rendered.count(f'"./{name}"') != 1:
+            raise ValueError(f"site/index.html must reference ./{name} exactly once")
+        rendered = rendered.replace(f'"./{name}"', f'"./{name}?v={digest}"')
 
     output.mkdir(parents=True, exist_ok=True)
     for asset in sorted(SOURCE.rglob("*")):
@@ -100,7 +148,7 @@ def build(output):
         shutil.copyfile(asset, destination)
     (output / "index.html").write_text(rendered, encoding="utf-8")
     (output / ".nojekyll").touch()
-    print(f"Built landing page with six catalogue doctrines: {output}")
+    print(f"Built landing page with {len(doctrines)} catalogue doctrines: {output}")
 
 
 def main():

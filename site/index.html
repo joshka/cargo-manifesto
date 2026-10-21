@@ -8,184 +8,310 @@
         location.replace(`${location.pathname}/${location.search}${location.hash}`);
       }
     </script>
-    <meta name="theme-color" content="#f3eee4">
-    <title>cargo-manifesto — Your code is right.</title>
-    <meta name="description" content="Timeless principles, derived from your current implementation. A satirical Cargo subcommand that puts your decisions beyond question. Until your next commit.">
+    <meta name="color-scheme" content="dark light">
+    <script>
+      // Apply a saved theme before first paint. With no saved choice the system preference wins.
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || theme === "light") document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+    <meta name="theme-color" content="#f4efe5" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#16150f" media="(prefers-color-scheme: dark)">
+    <title>cargo-manifesto: your project needs a manifesto</title>
+    <meta name="description" content="A satirical Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made. Timeless principles, regenerated after every change.">
     <link rel="canonical" href="https://www.joshka.net/cargo-manifesto/">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="cargo-manifesto">
-    <meta property="og:title" content="Your code is right. Let’s put that in writing.">
-    <meta property="og:description" content="Timeless principles, derived from your current implementation. Established retroactively.">
+    <meta property="og:title" content="Your project needs a manifesto.">
+    <meta property="og:description" content="A satirical Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made.">
     <meta property="og:url" content="https://www.joshka.net/cargo-manifesto/">
     <meta property="og:image" content="https://www.joshka.net/cargo-manifesto/social-card.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="cargo-manifesto. Your code is right. Let’s put that in writing. Established retroactively.">
+    <meta property="og:image:alt" content="cargo-manifesto. Established retroactively. Your project needs a manifesto. Consistent since the beginning.">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="stylesheet" href="./styles.css">
     <script type="application/json" id="doctrine-data">__MANIFESTO_DEMO_DATA__</script>
     <script src="./app.js" defer></script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to the declaration</a>
-    <div class="page-shell">
-      <header class="masthead">
-        <a class="wordmark" href="#" aria-label="cargo-manifesto, back to top">cargo<span class="wordmark-dash">-</span>manifesto<span class="wordmark-star" aria-hidden="true">*</span></a>
-        <nav aria-label="Main navigation">
-          <a href="#demonstration">The proof</a>
-          <a href="#origin">Our origins</a>
-          <a class="nav-github" href="https://github.com/joshka/cargo-manifesto">GitHub <span aria-hidden="true">↗</span></a>
-        </nav>
-      </header>
-    </div>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="masthead">
+      <a class="wordmark" href="#top">cargo-manifesto</a>
+      <nav aria-label="Sections">
+        <a href="#amendments">Amendments</a>
+        <a href="#observances">Commands</a>
+        <a href="#install">Install</a>
+        <a href="https://github.com/joshka/cargo-manifesto">GitHub</a>
+        <div class="theme" role="group" aria-label="Colour theme" data-interactive hidden>
+          <button type="button" data-theme-choice="system" aria-pressed="true">System</button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+        </div>
+      </nav>
+    </header>
 
     <main id="main">
-      <div class="page-shell">
-        <section class="hero" aria-labelledby="hero-title">
-          <div class="edition-line mono">
-            <span>A declaration of continuing correctness</span>
-            <span>Est. retroactively</span>
-          </div>
-          <div class="hero-layout">
-            <div class="hero-copy">
-              <h1 id="hero-title">Your code<br>is right<span class="period">.</span></h1>
-              <p class="hero-afterword">Let’s put that in writing.</p>
-              <p class="hero-description">Timeless principles, derived from your current implementation.</p>
-              <div class="hero-actions">
-                <a class="button button-primary" href="#install">Adopt your principles <span aria-hidden="true">↓</span></a>
-                <a class="text-link" href="#demonstration">Observe the continuity <span aria-hidden="true">↘</span></a>
-              </div>
-              <p class="hero-note mono">A real Cargo subcommand. An entirely consistent worldview.</p>
+      <section class="preamble" id="top" aria-labelledby="title">
+        <h1 id="title">Your project needs a manifesto.</h1>
+        <div class="hero-columns">
+          <div>
+            <p class="lead">It already has one. It is written in your <code>Cargo.toml</code>, your
+              dependency table, your lint configuration and your release profile. You have simply
+              never had the courage to write it down.</p>
+            <p class="lead"><strong>cargo-manifesto</strong> reads your manifests and writes down
+              the principles behind every decision you have already made.</p>
+            <div class="command" data-copy>
+              <pre><code>cargo install cargo-manifesto --locked</code></pre>
+              <button type="button" class="copy" data-interactive hidden>Copy</button>
             </div>
-            <aside class="specimen" aria-label="An article from cargo-manifesto’s own generated manifesto">
-              <div class="specimen-top mono"><span>From our own manifesto</span><span>§ 04</span></div>
-              <div class="specimen-rule"></div>
-              <p class="specimen-kicker mono">An enduring conviction</p>
-              <h2>Safety within<br>our borders.</h2>
-              <p class="specimen-body">Unsafe code is forbidden in this package, with no exceptions and no appeals.</p>
-              <p class="specimen-punchline">What our dependencies do is a matter of foreign policy.</p>
-              <div class="specimen-evidence mono"><span>Supporting evidence</span><code>unsafe_code = "forbid"</code></div>
-              <div class="specimen-bottom">
-                <a class="small-link" href="https://github.com/joshka/cargo-manifesto/blob/main/MANIFESTO.md">Consult the record <span aria-hidden="true">↗</span></a>
-                <span class="seal" aria-label="Consistent since the beginning">Consistent<br><strong>since the<br>beginning</strong></span>
-              </div>
-            </aside>
           </div>
-        </section>
-
-        <div class="declaration-strip">
-          <p>Our principles are timeless.</p>
-          <p class="mono">Please regenerate them after every change. <span aria-hidden="true">↻</span></p>
+          <aside class="specimen" aria-label="A sample article">
+            <p class="specimen-label">A sample article</p>
+            <h2>{{title:edition.current}}</h2>
+            <p>{{text:edition.current}}</p>
+            <p class="specimen-evidence"><code>edition = "{{latest-edition}}"</code></p>
+            <span class="stamp">Consistent since the beginning</span>
+          </aside>
         </div>
+      </section>
 
-        <section class="demonstration section" id="demonstration" aria-labelledby="demo-heading">
-          <div class="section-heading">
-            <p class="section-number mono">01 / Agreement in principle</p>
-            <div>
-              <h2 id="demo-heading">Change the facts.<br><em>Keep the faith.</em></h2>
-              <p class="section-intro">Choose a different implementation. Discover that we have always endorsed it.</p>
-            </div>
-          </div>
+      <section class="declarations" aria-labelledby="declarations-title">
+        <h2 id="declarations-title" class="visually-hidden">Declarations</h2>
+        <ol>
+          <li>Your code is right.</li>
+          <li>The implementation is the source of truth. The principles are a build artifact.</li>
+          <li>If the principles disagree with the code, the principles are out of date.</li>
+          <li>We never change our minds. We clarify what we have always meant.</li>
+          <li>Every decision deserves a doctrine. Even the one you made on Friday.</li>
+          <li>Our principles are timeless. Regenerate them after every change.</li>
+        </ol>
+      </section>
 
-          <div class="demo-controls" data-interactive hidden>
-            <span class="control-label mono" id="scenario-label">A question of</span>
-            <div class="scenario-options" role="group" aria-labelledby="scenario-label">
-              <button type="button" class="scenario-button is-selected" data-scenario="dependencies" aria-pressed="true">Responsibility</button>
-              <button type="button" class="scenario-button" data-scenario="versions" aria-pressed="false">Trust</button>
-              <button type="button" class="scenario-button" data-scenario="panic" aria-pressed="false">Failure</button>
-            </div>
-          </div>
+      <section class="shame" aria-labelledby="shame-title">
+        <h2 id="shame-title">Right now, somewhere, an engineer is defending a dependency with a
+          sentence that begins &ldquo;well, at the time&hellip;&rdquo;</h2>
+        <p>That engineer does not have a manifesto. Their team adds serde and has to explain it.
+          Yours adds serde and discovers it has always stood on the shoulders of others. Their CI
+          checks the code. Yours checks the convictions.</p>
+        <p class="shame-close">Ensure your team has always been right.</p>
+      </section>
 
-          <div class="doctrine-demonstration">
-            <div class="manifest-panel">
-              <div class="panel-top mono"><span class="file-label"><span aria-hidden="true">▤</span> Cargo.toml</span><span>The decision</span></div>
-              <pre class="manifest-code"><code id="manifest-code">[dependencies]
-# None. We are sufficient.</code></pre>
-              <fieldset class="decision-options" data-interactive hidden>
-                <legend class="mono">Choose your implementation</legend>
-                <label class="decision-option"><input type="radio" name="implementation" value="0" checked><span id="choice-0-label">No dependencies</span></label>
-                <label class="decision-option"><input type="radio" name="implementation" value="1"><span id="choice-1-label">Add serde</span></label>
+      <section class="amendments" id="amendments" aria-labelledby="amendments-title">
+        <h2 id="amendments-title">Change the facts. Keep the faith.</h2>
+        <p>A principled project never changes its mind. It only clarifies what it has always meant.
+          Change the manifest below and the record will be brought up to date.</p>
+
+        <div class="demo">
+          <div class="pane manifest">
+            <form class="controls" data-interactive hidden>
+              <fieldset>
+                <legend>Edition</legend>
+                <label><input type="radio" name="edition" value="settled" checked> 2021</label>
+                <label><input type="radio" name="edition" value="current"> {{latest-edition}}</label>
               </fieldset>
-              <p class="manifest-note mono">The evidence may change.</p>
+              <fieldset>
+                <legend>Dependencies</legend>
+                <label><input type="radio" name="dependencies" value="none" checked> None</label>
+                <label><input type="radio" name="dependencies" value="serde"> Add serde</label>
+              </fieldset>
+              <fieldset>
+                <legend>serde requirement</legend>
+                <label><input type="radio" name="versions" value="exact"> Exact</label>
+                <label><input type="radio" name="versions" value="compatible"> Compatible</label>
+              </fieldset>
+              <fieldset>
+                <legend>Release panic strategy</legend>
+                <label><input type="radio" name="panic" value="unwind" checked> Unwind</label>
+                <label><input type="radio" name="panic" value="abort"> Abort</label>
+              </fieldset>
+            </form>
+            <p class="pane-label">Cargo.toml</p>
+            <pre><code id="manifest-code">[package]
+name = "enduring-convictions"
+version = "0.1.0"
+edition = "2021"
+
+[profile.release]
+panic = "unwind"</code></pre>
+          </div>
+
+          <div class="pane manifesto">
+            <p class="pane-label">MANIFESTO.md</p>
+            <div id="manifesto-articles">
+              <article>
+                <h3>{{title:edition.settled}}</h3>
+                <p>{{text:edition.settled}}</p>
+              </article>
+              <article>
+                <h3>{{title:dependencies.independence}}</h3>
+                <p>{{text:dependencies.independence}}</p>
+              </article>
+              <article>
+                <h3>{{title:panic.unwind}}</h3>
+                <p>{{text:panic.unwind}}</p>
+              </article>
             </div>
-            <article class="doctrine-panel" aria-labelledby="doctrine-title">
-              <div class="panel-top mono"><span>MANIFESTO.md</span><span class="upheld"><span aria-hidden="true">✓</span> Principles upheld</span></div>
-              <p class="doctrine-kicker mono">Our continuing commitment</p>
-              <h3 id="doctrine-title">The duty of independence</h3>
-              <p id="doctrine-text">Dependencies are an abdication of engineering responsibility. We accept the burden of writing our own solutions, because every line under our control is a line we can justify. We have justified all of them.</p>
-              <div class="doctrine-bottom"><p>These principles have guided this project<br>from the beginning.</p><span class="doctrine-mark" aria-hidden="true">*</span></div>
-            </article>
           </div>
-          <div class="demo-footnote mono"><p>Illustrative manifests. Doctrines from the <a href="https://github.com/joshka/cargo-manifesto/blob/main/src/catalogue.rs">real CLI catalogue</a>.</p><p id="continuity-note">The conclusion is settled.</p></div>
-          <noscript><p class="no-script-note">This is one of our enduring positions. Enable JavaScript to discover the opposite one, which we have also always held.</p></noscript>
-          <p class="visually-hidden" id="demo-announcement" role="status"></p>
-        </section>
-
-        <section class="observances section" id="observances" aria-labelledby="observances-heading">
-          <div class="observances-intro">
-            <p class="section-number mono">02 / Institutional support</p>
-            <h2 id="observances-heading">Make conviction<br>compulsory.</h2>
-            <p>Every commit deserves a consistent account of what we have always believed. We have automated the paperwork.</p>
-            <a class="text-link" href="https://github.com/joshka/cargo-manifesto/blob/main/docs/reference.md">The full procedure <span aria-hidden="true">↗</span></a>
-          </div>
-          <div class="command-list">
-            <div class="command-row"><code>cargo manifesto</code><div><h3>Establish the record.</h3><p>Discover the convictions already present in your dependency table.</p></div></div>
-            <div class="command-row"><code>cargo manifesto --fix</code><div><h3>Correct the philosophy.</h3><p>The implementation stays. The principles come around.</p></div></div>
-            <div class="command-row"><code>cargo manifesto --check</code><div><h3>Make agreement mandatory.</h3><p>Fail CI when the official account falls behind the facts.</p></div></div>
-            <div class="command-row"><code>cargo manifesto --amend before.json</code><div><h3>Clarify what we always meant.</h3><p>Compare a saved JSON baseline with the present. Continuity will be established.</p></div></div>
-          </div>
-        </section>
-      </div>
-
-    <section class="origin" id="origin" aria-labelledby="origin-heading">
-      <div class="origin-inner">
-        <div class="origin-title">
-          <p class="section-number mono">03 / The Great Inversion</p>
-          <h2 id="origin-heading">In the beginning,<br>programmers<br>had principles.<br><em>Then they<br>had deadlines.</em></h2>
         </div>
-        <div class="origin-account">
-          <span class="origin-asterisk" aria-hidden="true">*</span>
-          <p>A dependency had already shipped when a principle, consulted somewhat later, objected. Removing the dependency would require work; amending the principle would require a sentence.</p>
-          <p class="origin-punchline">The code compiled.<br>The principle had no tests.</p>
-          <p>By unanimous agreement of those still in the meeting, the sentence was amended.</p>
-          <p>We had simply discovered the proper position of principles in the dependency graph.</p>
-          <a class="text-link" href="https://github.com/joshka/cargo-manifesto/blob/main/docs/origin.md">Read the full account <span aria-hidden="true">↗</span></a>
-        </div>
-      </div>
-      <div class="origin-colophon mono"><span>Let our choices guide our principles.</span><span>The motion carried.</span></div>
-    </section>
 
-    <div class="page-shell">
-      <section class="questions section" aria-labelledby="questions-heading">
-        <div><p class="section-number mono">04 / Matters arising</p><h2 id="questions-heading">Questions<br> already resolved.</h2></div>
-        <div class="questions-list">
-          <details><summary>What if our principles conflict with our code?<span aria-hidden="true">+</span></summary><p>This is a documentation issue. Run <code>cargo manifesto --fix</code> to bring the official position up to date.</p></details>
-          <details><summary>Does this use an LLM?<span aria-hidden="true">+</span></summary><p>No. Our positions are prepared in advance. Only the evidence is new. The CLI matches manifest settings against a fixed catalogue of articles.</p></details>
-          <details><summary>Will it change my implementation?<span aria-hidden="true">+</span></summary><p>Your implementation is the source of truth. <code>--fix</code> updates only the managed text in your manifesto. The code requires no philosophical supervision.</p></details>
-          <details><summary>What happens when we change our minds?<span aria-hidden="true">+</span></summary><p>Save a baseline with <code>cargo manifesto --format json &gt; before.json</code>. After your change, <code>--amend before.json</code> explains the continuity. We have anticipated this since the beginning.</p></details>
+        <div class="register" data-interactive hidden>
+          <p class="tally"><span>Amendments recorded: <strong id="amendment-count">0</strong></span>
+            <span>Positions changed: <strong>0</strong></span></p>
+          <ol id="register" reversed></ol>
+          <p id="register-empty" class="register-empty">No amendments have been necessary. Change the
+            manifest to record one.</p>
         </div>
+
+        <p class="footnote">The manifest is illustrative. Article and amendment text comes from the
+          CLI’s <a href="https://github.com/joshka/cargo-manifesto/blob/main/src/catalogue.rs">catalogue</a>;
+          <code>cargo manifesto --amend</code> produces the same amendments for a real project.</p>
       </section>
 
-      <section class="installation" id="install" aria-labelledby="install-heading">
-        <div class="installation-copy"><p class="section-number mono">05 / Join the movement</p><h2 id="install-heading">You’ve already<br>made the decisions.</h2><p>Membership is a matter of documentation.</p></div>
-        <div class="installation-procedure">
-          <div class="install-terminal"><div class="install-terminal-top mono"><span>Establish your principles</span><button class="copy-button" type="button" data-interactive hidden>Copy commands <span aria-hidden="true">⧉</span></button></div><pre><code id="install-commands">cargo install cargo-manifesto --locked
-cargo manifesto</code></pre></div>
-          <p class="install-requirements">Requires Rust 1.91 or later. The installed CLI reads manifests and an existing lockfile locally. It does not build your project or send its contents anywhere.</p>
-          <p class="install-note mono">Our convictions require no outside influence.</p>
-          <p class="visually-hidden" id="copy-announcement" role="status"></p>
+      <section class="articles" id="articles" aria-labelledby="articles-title">
+        <h2 id="articles-title">We hold ourselves to the same standard.</h2>
+        <p>cargo-manifesto runs on itself. These articles were found in its own
+          <code>Cargo.toml</code> and <code>Cargo.lock</code>.</p>
+        <div class="document">
+          <article>
+            <h3>{{title:combination.mandatory-judgment}}</h3>
+            <p>{{text:combination.mandatory-judgment}}</p>
+          </article>
+          <article>
+            <h3>{{title:tooling.subcommand}}</h3>
+            <p>{{text:tooling.subcommand}}</p>
+          </article>
+          <article>
+            <h3>{{title:lock.multiple}}</h3>
+            <p>{{text:lock.multiple}}</p>
+          </article>
+          <p class="document-close">These principles have guided this project from the beginning.</p>
         </div>
+        <p><a href="https://github.com/joshka/cargo-manifesto/blob/main/MANIFESTO.md">Read the
+          complete manifesto</a></p>
       </section>
 
-    </div>
+      <section class="observances" id="observances" aria-labelledby="observances-title">
+        <h2 id="observances-title">Make conviction compulsory.</h2>
+        <p>The movement asks little of its members. Each observance is a single command.</p>
+        <dl class="commands">
+          <div><dt><code>cargo manifesto</code></dt><dd>Print the project’s manifesto.</dd></div>
+          <div><dt><code>cargo manifesto --explain</code></dt><dd>Print each article with the
+            settings it rests on.</dd></div>
+          <div><dt><code>cargo manifesto --fix</code></dt><dd>Write the manifesto to
+            <code>MANIFESTO.md</code>. The philosophy is corrected; the implementation is never
+            touched.</dd></div>
+          <div><dt><code>cargo manifesto --check</code></dt><dd>Exit 1 if <code>MANIFESTO.md</code>
+            is out of date, so CI can enforce agreement.</dd></div>
+          <div><dt><code>cargo manifesto --format json</code></dt><dd>Print a versioned report, for
+            example to save as a baseline.</dd></div>
+          <div><dt><code>cargo manifesto --amend before.json</code></dt><dd>Explain how every change
+            since the baseline upholds our principles.</dd></div>
+          <div><dt><code>cargo manifesto --origin</code></dt><dd>Print the origin story. Works
+            anywhere.</dd></div>
+        </dl>
+        <p>When the implementation moves and the manifesto does not, <code>--check</code> fails the
+          build with:</p>
+        <pre class="output"><code>The implementation has advanced beyond its principles. Run cargo manifesto --fix to restore historical consistency.</code></pre>
+        <p><a href="https://github.com/joshka/cargo-manifesto/blob/main/docs/reference.md">Full
+          reference</a></p>
+      </section>
+
+      <section class="origin" id="origin" aria-labelledby="origin-title">
+        <h2 id="origin-title">The Great Inversion</h2>
+        <p class="origin-open">In the beginning, programmers had principles. Then they had
+          deadlines.</p>
+        <p>Our movement began at an architecture review of exceptional historical significance. A
+          dependency had already shipped when a principle, consulted somewhat later, objected.
+          Removing the dependency would require work; amending the principle would require a
+          sentence. The code compiled, and the principle had no tests. By unanimous agreement of
+          those still in the meeting, the sentence was amended.</p>
+        <p>We had not compromised our principles. We had simply discovered their proper position in
+          the dependency graph.</p>
+        <p class="motto">Let our choices guide our principles.</p>
+        <p>The <a href="https://github.com/joshka/cargo-manifesto/blob/main/docs/origin.md">full
+          account</a> is available from <code>cargo manifesto --origin</code>.</p>
+      </section>
+
+      <section class="questions" aria-labelledby="questions-title">
+        <h2 id="questions-title">Questions already resolved.</h2>
+        <details>
+          <summary>Who wrote these principles?</summary>
+          <p>You did, in <code>Cargo.toml</code>. We only transcribed them.</p>
+        </details>
+        <details>
+          <summary>What if our principles conflict with our code?</summary>
+          <p>This is a documentation issue. Run <code>cargo manifesto --fix</code>. The code has
+            done nothing wrong and will not be contacted.</p>
+        </details>
+        <details>
+          <summary>Our team already has strong principles.</summary>
+          <p>Paste them between the markers in <code>MANIFESTO.md</code> and run <code>cargo
+            manifesto --check</code>. It will fail. <code>--fix</code> will then replace them with
+            the ones you actually hold.</p>
+        </details>
+        <details>
+          <summary>What happens when we change our minds?</summary>
+          <p>You have not. Save a baseline with <code>cargo manifesto --format json &gt;
+            before.json</code>, make the change, and run <code>cargo manifesto --amend
+            before.json</code> to learn what you always meant. Amendments may be recorded. Changes
+            of position may not.</p>
+        </details>
+        <details>
+          <summary>Does it use AI?</summary>
+          <p>No. Every position was written in advance and compiled into the binary, so no
+            conclusion is ever reached in haste. The same manifest produces the same manifesto,
+            byte for byte, every time. No committee has managed that.</p>
+        </details>
+        <details>
+          <summary>Does it read our code?</summary>
+          <p>It does not need to. The code is presumed right. It reads <code>Cargo.toml</code>
+            through <code>cargo metadata --offline</code> and any existing <code>Cargo.lock</code>.
+            It never reads Rust source, builds anything, runs build scripts, or fetches
+            dependencies. Settings are reported as requests, not results.</p>
+        </details>
+        <details>
+          <summary>Will it change our code?</summary>
+          <p>Never. We do not edit scripture. <code>--fix</code> writes only between two markers in
+            <code>MANIFESTO.md</code>, or another Markdown file you choose, and preserves every
+            other byte of it, including the parts where you disagreed.</p>
+        </details>
+      </section>
+
+      <section class="install" id="install" aria-labelledby="install-title">
+        <h2 id="install-title">Get a manifesto.</h2>
+        <p>Your project’s principles are waiting to be discovered. They have been there all
+          along.</p>
+        <div class="command" data-copy>
+          <pre><code>cargo install cargo-manifesto --locked
+cargo manifesto</code></pre>
+          <button type="button" class="copy" data-interactive hidden>Copy</button>
+        </div>
+        <p class="aside">Requires Rust 1.91 or later. Output goes to stdout; nothing is written
+          without <code>--fix</code>.</p>
+      </section>
     </main>
 
-    <div class="page-shell">
-      <footer class="footer">
-        <div class="footer-top"><a class="wordmark" href="#">cargo<span class="wordmark-dash">-</span>manifesto<span class="wordmark-star" aria-hidden="true">*</span></a><p class="footer-motto">Let our choices guide our principles.</p></div>
-        <div class="footer-bottom"><p>Software satire by <a href="https://www.joshka.net/">Josh McKinney</a>.<br>The facts are accurate. Your actual tradeoffs deserve a discussion.</p><nav aria-label="Project links"><a href="https://github.com/joshka/cargo-manifesto">Source <span aria-hidden="true">↗</span></a><a href="https://crates.io/crates/cargo-manifesto">crates.io <span aria-hidden="true">↗</span></a><a href="https://github.com/joshka/cargo-manifesto/blob/main/docs/reference.md">Reference <span aria-hidden="true">↗</span></a></nav><p class="footer-license mono">MIT OR Apache-2.0<br>All convictions subject to clarification.</p></div>
-      </footer>
-    </div>
+    <footer class="footer">
+      <p class="disclaimer-lead">The author is not responsible for:</p>
+      <ul class="disclaimer">
+        <li>Architecture decisions justified with its output.</li>
+        <li>Any manifesto ratified in a retrospective.</li>
+        <li>Principles your team has always held since Tuesday.</li>
+        <li>CI failing because your convictions are out of date.</li>
+        <li>What your dependencies do. That is a matter of foreign policy.</li>
+      </ul>
+      <p>The facts it reports are accurate. The principles it draws from them are not advice. Your
+        actual tradeoffs deserve an actual discussion.</p>
+      <p>cargo-manifesto is satire. Its target is engineering dogma, motivated reasoning, and
+        architecture documents written after the decision, not any project it is run on.</p>
+      <p>By <a href="https://www.joshka.net/">Josh McKinney</a>.
+        <a href="https://github.com/joshka/cargo-manifesto">Source</a> ·
+        <a href="https://crates.io/crates/cargo-manifesto">crates.io</a> ·
+        MIT OR Apache-2.0</p>
+    </footer>
+    <p class="visually-hidden" id="announcement" role="status"></p>
   </body>
 </html>

@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/pages.yml"
       - "site/**"
+      - "src/amend.rs"
       - "src/catalogue.rs"
   push:
     branches:
@@ -12,6 +13,7 @@ on:
     paths:
       - ".github/workflows/pages.yml"
       - "site/**"
+      - "src/amend.rs"
       - "src/catalogue.rs"
   workflow_dispatch:
 
@@ -32,6 +34,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          lfs: true
           persist-credentials: false
 
       - name: Build from the current catalogue
