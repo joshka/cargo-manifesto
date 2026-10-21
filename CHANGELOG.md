@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.1.2](https://github.com/joshka/cargo-manifesto/compare/v0.1.1...v0.1.2) - 2026-10-21
+
+### Other
+
+- Show the reversal before the origin story ([#8](https://github.com/joshka/cargo-manifesto/pull/8))
+- Sharpen three combination articles ([#7](https://github.com/joshka/cargo-manifesto/pull/7))
+
 ## [0.1.1](https://github.com/joshka/cargo-manifesto/compare/v0.1.0...v0.1.1) - 2026-10-21
 
 ### Other
