@@ -19,13 +19,13 @@
     <meta name="theme-color" content="#f4efe5" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#16150f" media="(prefers-color-scheme: dark)">
     <title>cargo-manifesto: your project needs a manifesto</title>
-    <meta name="description" content="A satirical Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made. Timeless principles, regenerated after every change.">
+    <meta name="description" content="A Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made. It works offline and never builds, fetches or edits your code.">
     <link rel="canonical" href="https://www.joshka.net/cargo-manifesto/">
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="cargo-manifesto">
     <meta property="og:title" content="Your project needs a manifesto.">
-    <meta property="og:description" content="A satirical Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made.">
+    <meta property="og:description" content="A Cargo subcommand that reads your manifests and writes down the principles behind every decision you have already made.">
     <meta property="og:url" content="https://www.joshka.net/cargo-manifesto/">
     <meta property="og:image" content="https://www.joshka.net/cargo-manifesto/social-card.png">
     <meta property="og:image:width" content="1200">
@@ -58,9 +58,9 @@
         <h1 id="title">Your project needs a manifesto.</h1>
         <div class="hero-columns">
           <div>
-            <p class="lead">It already has one. It is written in your <code>Cargo.toml</code>, your
-              dependency table, your lint configuration and your release profile. You have simply
-              never had the courage to write it down.</p>
+            <p class="lead">It already has one, written in your <code>Cargo.toml</code>, your
+              dependency table, your lint configuration and your release profile. You have never
+              had the courage to write it down.</p>
             <p class="lead"><strong>cargo-manifesto</strong> reads your manifests and writes down
               the principles behind every decision you have already made.</p>
             <div class="command" data-copy>
@@ -82,27 +82,27 @@
         <h2 id="declarations-title" class="visually-hidden">Declarations</h2>
         <ol>
           <li>Your code is right.</li>
-          <li>The implementation is the source of truth. The principles are a build artifact.</li>
+          <li>The implementation is the source of truth, and the principles are a build
+            artifact.</li>
           <li>If the principles disagree with the code, the principles are out of date.</li>
-          <li>We never change our minds. We clarify what we have always meant.</li>
-          <li>Every decision deserves a doctrine. Even the one you made on Friday.</li>
-          <li>Our principles are timeless. Regenerate them after every change.</li>
+          <li>We never change our minds; we clarify what we have always meant.</li>
+          <li>Every decision deserves a doctrine, even the one you made on Friday.</li>
+          <li>Our principles are timeless, and we regenerate them after every change.</li>
         </ol>
       </section>
 
       <section class="shame" aria-labelledby="shame-title">
         <h2 id="shame-title">Right now, somewhere, an engineer is defending a dependency with a
           sentence that begins &ldquo;well, at the time&hellip;&rdquo;</h2>
-        <p>That engineer does not have a manifesto. Their team adds serde and has to explain it.
-          Yours adds serde and discovers it has always stood on the shoulders of others. Their CI
-          checks the code. Yours checks the convictions.</p>
+        <p>That engineer has no manifesto, so when their team adds serde, someone has to explain
+          it. When yours adds serde, it discovers that it has always stood on the shoulders of
+          others, and while their CI checks the code, yours checks the convictions.</p>
         <p class="shame-close">Ensure your team has always been right.</p>
       </section>
 
       <section class="amendments" id="amendments" aria-labelledby="amendments-title">
-        <h2 id="amendments-title">Change the facts. Keep the faith.</h2>
-        <p>A principled project never changes its mind. It only clarifies what it has always meant.
-          Change the manifest below and the record will be brought up to date.</p>
+        <h2 id="amendments-title">Change the facts and keep the faith.</h2>
+        <p>Change the manifest below, and our position will be clarified.</p>
 
         <div class="demo">
           <div class="pane manifest">
@@ -195,22 +195,21 @@ panic = "unwind"</code></pre>
 
       <section class="observances" id="observances" aria-labelledby="observances-title">
         <h2 id="observances-title">Make conviction compulsory.</h2>
-        <p>The movement asks little of its members. Each observance is a single command.</p>
+        <p>The movement asks little of its members: each observance is a single command.</p>
         <dl class="commands">
           <div><dt><code>cargo manifesto</code></dt><dd>Print the project’s manifesto.</dd></div>
           <div><dt><code>cargo manifesto --explain</code></dt><dd>Print each article with the
             settings it rests on.</dd></div>
           <div><dt><code>cargo manifesto --fix</code></dt><dd>Write the manifesto to
-            <code>MANIFESTO.md</code>. The philosophy is corrected; the implementation is never
-            touched.</dd></div>
+            <code>MANIFESTO.md</code>. Only the philosophy is corrected.</dd></div>
           <div><dt><code>cargo manifesto --check</code></dt><dd>Exit 1 if <code>MANIFESTO.md</code>
             is out of date, so CI can enforce agreement.</dd></div>
           <div><dt><code>cargo manifesto --format json</code></dt><dd>Print a versioned report, for
             example to save as a baseline.</dd></div>
           <div><dt><code>cargo manifesto --amend before.json</code></dt><dd>Explain how every change
             since the baseline upholds our principles.</dd></div>
-          <div><dt><code>cargo manifesto --origin</code></dt><dd>Print the origin story. Works
-            anywhere.</dd></div>
+          <div><dt><code>cargo manifesto --origin</code></dt><dd>Print the origin story, from any
+            directory.</dd></div>
         </dl>
         <p>When the implementation moves and the manifesto does not, <code>--check</code> fails the
           build with:</p>
@@ -228,53 +227,52 @@ panic = "unwind"</code></pre>
           Removing the dependency would require work; amending the principle would require a
           sentence. The code compiled, and the principle had no tests. By unanimous agreement of
           those still in the meeting, the sentence was amended.</p>
-        <p>We had not compromised our principles. We had simply discovered their proper position in
-          the dependency graph.</p>
+        <p>The principle, it emerged, had only ever been a dev-dependency.</p>
         <p class="motto">Let our choices guide our principles.</p>
         <p>The <a href="https://github.com/joshka/cargo-manifesto/blob/main/docs/origin.md">full
           account</a> is available from <code>cargo manifesto --origin</code>.</p>
       </section>
 
       <section class="questions" aria-labelledby="questions-title">
-        <h2 id="questions-title">Questions already resolved.</h2>
+        <h2 id="questions-title">Questions</h2>
         <details>
           <summary>Who wrote these principles?</summary>
-          <p>You did, in <code>Cargo.toml</code>. We only transcribed them.</p>
+          <p>You did, in <code>Cargo.toml</code>; we only transcribed them.</p>
         </details>
         <details>
           <summary>What if our principles conflict with our code?</summary>
-          <p>This is a documentation issue. Run <code>cargo manifesto --fix</code>. The code has
-            done nothing wrong and will not be contacted.</p>
+          <p>That is a documentation issue, resolved by <code>cargo manifesto --fix</code>. The
+            code has done nothing wrong and will not be contacted.</p>
         </details>
         <details>
           <summary>Our team already has strong principles.</summary>
           <p>Paste them between the markers in <code>MANIFESTO.md</code> and run <code>cargo
-            manifesto --check</code>. It will fail. <code>--fix</code> will then replace them with
-            the ones you actually hold.</p>
+            manifesto --check</code>, which will fail; <code>--fix</code> will then replace them
+            with the ones you actually hold.</p>
         </details>
         <details>
           <summary>What happens when we change our minds?</summary>
           <p>You have not. Save a baseline with <code>cargo manifesto --format json &gt;
             before.json</code>, make the change, and run <code>cargo manifesto --amend
-            before.json</code> to learn what you always meant. Amendments may be recorded. Changes
+            before.json</code> to learn what you always meant. Amendments may be recorded; changes
             of position may not.</p>
         </details>
         <details>
           <summary>Does it use AI?</summary>
           <p>No. Every position was written in advance and compiled into the binary, so no
-            conclusion is ever reached in haste. The same manifest produces the same manifesto,
+            conclusion is ever reached in haste, and the same manifest produces the same manifesto,
             byte for byte, every time. No committee has managed that.</p>
         </details>
         <details>
           <summary>Does it read our code?</summary>
-          <p>It does not need to. The code is presumed right. It reads <code>Cargo.toml</code>
-            through <code>cargo metadata --offline</code> and any existing <code>Cargo.lock</code>.
-            It never reads Rust source, builds anything, runs build scripts, or fetches
-            dependencies. Settings are reported as requests, not results.</p>
+          <p>It does not need to, since the code is presumed right. It reads
+            <code>Cargo.toml</code> through <code>cargo metadata --offline</code> and any existing
+            <code>Cargo.lock</code>, and never reads Rust source, builds anything, runs build
+            scripts, or fetches dependencies. Settings are reported as requests, not results.</p>
         </details>
         <details>
           <summary>Will it change our code?</summary>
-          <p>Never. We do not edit scripture. <code>--fix</code> writes only between two markers in
+          <p>Never; we do not edit scripture. <code>--fix</code> writes only between two markers in
             <code>MANIFESTO.md</code>, or another Markdown file you choose, and preserves every
             other byte of it, including the parts where you disagreed.</p>
         </details>
@@ -282,8 +280,8 @@ panic = "unwind"</code></pre>
 
       <section class="install" id="install" aria-labelledby="install-title">
         <h2 id="install-title">Get a manifesto.</h2>
-        <p>Your project’s principles are waiting to be discovered. They have been there all
-          along.</p>
+        <p>Your project already has principles. All it lacks is the courage to publish
+          them.</p>
         <div class="command" data-copy>
           <pre><code>cargo install cargo-manifesto --locked
 cargo manifesto</code></pre>
@@ -301,12 +299,13 @@ cargo manifesto</code></pre>
         <li>Any manifesto ratified in a retrospective.</li>
         <li>Principles your team has always held since Tuesday.</li>
         <li>CI failing because your convictions are out of date.</li>
-        <li>What your dependencies do. That is a matter of foreign policy.</li>
+        <li>What your dependencies do, which is a matter of foreign policy.</li>
       </ul>
-      <p>The facts it reports are accurate. The principles it draws from them are not advice. Your
-        actual tradeoffs deserve an actual discussion.</p>
+      <p>The facts it reports are accurate, but the principles it draws from them are not advice,
+        and your actual tradeoffs deserve an actual discussion.</p>
       <p>cargo-manifesto is satire. Its target is engineering dogma, motivated reasoning, and
-        architecture documents written after the decision, not any project it is run on.</p>
+        architecture documents written after the decision. It is not making fun of
+        your project. Your project supplied the material.</p>
       <p>By <a href="https://www.joshka.net/">Josh McKinney</a>.
         <a href="https://github.com/joshka/cargo-manifesto">Source</a> ·
         <a href="https://crates.io/crates/cargo-manifesto">crates.io</a> ·
