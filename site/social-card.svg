@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#f3eee4"/>
+  <g fill="#262820" font-family="Georgia,serif">
+    <text x="72" y="80" font-size="32" font-weight="bold">cargo-manifesto<tspan fill="#af3c29">*</tspan></text>
+    <path d="M72 107H1128" stroke="#262820" stroke-width="2"/>
+    <text x="68" y="265" font-size="130" font-weight="bold" letter-spacing="-7">Your code</text>
+    <text x="68" y="392" font-size="130" font-weight="bold" letter-spacing="-7">is right<tspan fill="#af3c29">.</tspan></text>
+    <text x="75" y="467" font-size="45" fill="#af3c29" font-style="italic">Let’s put that in writing.</text>
+  </g>
+  <g fill="#68665b" font-family="monospace" font-size="15">
+    <text x="1128" y="76" text-anchor="end">ESTABLISHED RETROACTIVELY</text>
+    <text x="75" y="563">Timeless principles, derived from your current implementation.</text>
+  </g>
+  <g transform="translate(970 344) rotate(12)" fill="none" stroke="#af3c29">
+    <circle r="100" stroke-width="3"/><circle r="92" stroke-width="1"/>
+    <g stroke="none" fill="#af3c29" font-family="monospace" text-anchor="middle">
+      <text y="-30" font-size="14">PRINCIPLES</text><text y="7" font-size="29" font-weight="bold">UPHELD</text><text y="38" font-size="12">SINCE THE BEGINNING</text>
+    </g>
+  </g>
+</svg>
