@@ -165,9 +165,9 @@ The start of the [full example](docs/generated/annotated.md):
 ```markdown
 ## Article 1: Open minds, final answers
 
-We believe every possibility deserves a hearing, which is why proptest is among
-our development dependencies. In release, a panic receives one response. We
-consider generously and conclude decisively.
+We believe every possibility deserves a hearing, so proptest offers our code
+inputs it never asked for. In release, the first panic ends the process, and no
+possibility is heard twice. Open-mindedness is a development dependency.
 
 **Why:** The release profile aborts on panic, and proptest is a development
 dependency.
